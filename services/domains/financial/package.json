@@ -1,0 +1,22 @@
+{
+  "name": "@novaris/financial",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint domain infrastructure application src tests --ext .ts",
+    "test": "tsc -p tsconfig.json && cd dist && node --test"
+  },
+  "dependencies": {
+    "@novaris/shared-kernel": "workspace:*",
+    "@novaris/database": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "eslint": "^8.57.0",
+    "@types/node": "^20.0.0"
+  }
+}

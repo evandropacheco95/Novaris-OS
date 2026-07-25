@@ -1,0 +1,16 @@
+# Commercial — Map of Content
+
+> Índice de navegação de `knowledge/commercial/` — conhecimento institucional sobre clientes. Domínio hoje em scaffolding — ver [KNOWLEDGE_CONSTITUTION.md § Artigo 2](../KNOWLEDGE_CONSTITUTION.md) para o fluxo de captura.
+
+## Domínios
+
+- [[../commercial/clientes/README|Clientes]] — `decisoes.md` · `aprendizados.md` · `referencias.md`
+
+## Notas Atômicas
+
+_(nenhuma ainda)_
+
+## Ver Também
+
+- [[Operations-MOC]]
+- [[Brand-MOC]]

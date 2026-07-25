@@ -1,0 +1,230 @@
+{
+  "main": {
+    "id": "f91b94e9bb827719",
+    "type": "split",
+    "children": [
+      {
+        "id": "c8bc95b24c0a9613",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "287809c283d80d24",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Visualização em gráfico"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "77b50cc3fea4aebe",
+    "type": "split",
+    "children": [
+      {
+        "id": "186c7af216cf790c",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "f62191c92d22cdf1",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Explorador de arquivos"
+            }
+          },
+          {
+            "id": "a71baeede3b19403",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Procurar"
+            }
+          },
+          {
+            "id": "574adeaa52432060",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Marcadores"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "07cdd11eb4167d4c",
+    "type": "split",
+    "children": [
+      {
+        "id": "93eb55aed59f084d",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "bca918cdbebbc26f",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Links inversos"
+            }
+          },
+          {
+            "id": "a92ef78b56688cc2",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Links de saída"
+            }
+          },
+          {
+            "id": "e2ee2777b5159e78",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Etiquetas"
+            }
+          },
+          {
+            "id": "84c230b6e29aa4f8",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Todas as propriedades"
+            }
+          },
+          {
+            "id": "e8a9da794d462ec7",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Sumário"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "templater-obsidian:Templater": false,
+      "switcher:Abrir a troca rápida": false,
+      "graph:Abrir visualização em gráfico": false,
+      "canvas:Criar novo canvas": false,
+      "daily-notes:Abrir a nota de hoje": false,
+      "templates:Inserir modelo": false,
+      "command-palette:Abrir paleta de comandos": false,
+      "bases:Criar nova base": false,
+      "claude-code-mcp:Toggle Claude Terminal": false
+    }
+  },
+  "active": "287809c283d80d24",
+  "lastOpenFiles": [
+    "Sem título.canvas",
+    "railway.json.tmp.13552.ebaf808de28c",
+    "_tmp_24360_66fb010e5341b9055b1b7ea6cb9c9612",
+    "_tmp_7004_2b7e53c26fb130ab7633ae4f6ba0a67e",
+    "_tmp_1980_287ec916eb6e53b6434f31546de87b04",
+    "_tmp_25784_9211574603b5db3732e796cb42beb4ea",
+    "_tmp_14008_68057cf02517c6549afa3b239a27c4ba",
+    "_tmp_28052_1297c831fd7ec5eff204033be2a7ab2c",
+    "_tmp_17124_6c2c3ed7a7641df1844ddc200faec395",
+    "railway.json",
+    "railway.json.tmp.13552.cd3bfa2d35c2",
+    "apps/web/e2e-report/data/f606088a0b45298d4f8e4c0622be91966ad445e0.png",
+    "apps/web/test-results/adhoc-flow-verifica-render-148f0-d-já-convertido-fresh-load--chromium/test-finished-1.png",
+    "apps/web/e2e/screenshots/adhoc-flow-3-fresh-reload.png",
+    "apps/web/e2e-report/data/0cdc53c84d8e60d3e70732fad1f475fdbd678392.md",
+    "apps/web/e2e-report/data/5cd9cefb15e0299becfa47abc592f47092f46a4d.png",
+    "apps/web/test-results/adhoc-flow-fluxo-real-via--b0193-rter-design-system-elevado--chromium/error-context.md",
+    "apps/web/test-results/adhoc-flow-fluxo-real-via--b0193-rter-design-system-elevado--chromium/test-failed-1.png",
+    "apps/web/test-results/adhoc-flow-fluxo-real-via--e872a-Lead-mudar-status-converter-chromium/error-context.md",
+    "apps/web/test-results/adhoc-flow-fluxo-real-via--e872a-Lead-mudar-status-converter-chromium/test-failed-1.png",
+    "apps/web/e2e-report/data/a6ccc8584a60947583c6fc70edcd532b4a7c0dc9.md",
+    "apps/web/e2e-report/data/e2a5b8669dc6667a2d7f639180f5cfbdcb6d1f48.png",
+    "apps/web/e2e-report/data/edc1b788b8df3937f519295cd917f9ec6780c758.md",
+    "apps/web/e2e-report/data/02560bf56cf07ba874b445deafa5236fe64e3e97.png",
+    "apps/web/e2e/screenshots/adhoc-flow-1-created.png",
+    "apps/web/e2e-report/trace/playwright-logo.svg",
+    "apps/web/e2e-report/data/35f4683e2a53cf0968dc97859cbaba8d578db658.md",
+    "apps/web/e2e-report/data/a73fdb04796142e42426f70000744e87987e2d3c.md",
+    "apps/web/e2e-report/data/82f8fd5270e27a67b4595605f54b9dc1b27ff090.md",
+    "apps/web/e2e-report/data/729771a358933a013074d98ebe99d391e94df67c.md",
+    "apps/web/e2e-report/data/ba10e952a1190a5d988bf8324f4ec8a76f572885.md",
+    "apps/web/e2e-report/data/8706570ce852962f2ceb464159fed529966afd80.md",
+    "apps/web/e2e-report/data/e5327032a23feac3b424e623983d7a2073ad1a52.md",
+    "apps/web/e2e-report/data/37019e95c4c272c40d3345d93e09d45b6bc21680.md",
+    "apps/web/test-results/domains-NOVARIS-—-QA-visua-4c61b-stem-renderiza-corretamente-chromium/error-context.md",
+    "apps/web/test-results/domains-NOVARIS-—-QA-visua-1078c-team-renderiza-corretamente-chromium/error-context.md",
+    "apps/web/test-results/domains-NOVARIS-—-QA-visua-bbedf-ings-renderiza-corretamente-chromium/error-context.md",
+    "apps/web/test-results/domains-NOVARIS-—-QA-visua-392f4-tics-renderiza-corretamente-chromium/error-context.md",
+    "apps/web/test-results/domains-NOVARIS-—-QA-visua-4bb07-cial-renderiza-corretamente-chromium/error-context.md",
+    "apps/web/test-results/domains-NOVARIS-—-QA-visua-b5367-ting-renderiza-corretamente-chromium/error-context.md",
+    "apps/web/test-results/domains-NOVARIS-—-QA-visua-195c4-ects-renderiza-corretamente-chromium/error-context.md",
+    "apps/web/test-results/domains-NOVARIS-—-QA-visua-b461d-vity-renderiza-corretamente-chromium/error-context.md",
+    "apps/web/test-results/domains-NOVARIS-—-QA-visua-a3730-omer-renderiza-corretamente-chromium/error-context.md",
+    "apps/web/test-results/domains-NOVARIS-—-QA-visua-f3f96-ties-renderiza-corretamente-chromium/error-context.md",
+    "apps/web/node_modules/lucide-react/README.md",
+    "adr/ADR-0045-calendarevent-reminder-checklist-minimum-fields.md"
+  ]
+}

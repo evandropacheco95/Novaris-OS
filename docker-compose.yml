@@ -1,0 +1,17 @@
+# Ambiente local de desenvolvimento — apenas Postgres.
+# Nenhum outro serviço foi decidido como necessário localmente (ver PROJECT_RULES.md / ADR-0005).
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: novaris
+      POSTGRES_PASSWORD: novaris
+      POSTGRES_DB: novaris
+    ports:
+      - "5432:5432"
+    volumes:
+      - novaris_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  novaris_postgres_data:

@@ -1,0 +1,659 @@
+// Prisma Schema — NOVARIS
+// Convenções vinculantes: knowledge/core/DATABASE_ARCHITECTURE.md
+// RLS não é gerenciado por este schema (Prisma não gerencia RLS, ADR-0005) —
+// políticas de Row Level Security são aplicadas via SQL bruto na mesma
+// migration (ver packages/database/prisma/migrations/).
+//
+// Escopo original: Sales Domain (Opportunity, Pipeline, Stage, Proposal) — os
+// 4 objetos com Object Specification já escrita em knowledge/core/objects/.
+// Estendido (ENG-0122, Identity/Auth MVP) com Organization, User, Role
+// (Domain Layer já congelado em services/kernel/organizations e
+// services/kernel/identity) e Credential (conceito exclusivo de
+// Infrastructure — não existe no Domain Layer, ver ADR-0010: "o domínio nunca
+// conhece a senha em repouso"; correlacionado por email, nunca embutido em
+// User).
+// Estendido (ENG-0125, Customer Domain) com Party e Relationship (Domain
+// Layer em services/domains/customer) — ver ADR-0025 (campos mínimos de
+// Party: name/document).
+// Estendido (ENG-0129/0130, Project Domain) com Project e Task (Domain Layer
+// em services/domains/projects) — ver ADR-0026 (Task = Internal Entity) e
+// ADR-0030 (campos mínimos: name/title/status).
+// Estendido (ENG-0131, Financial Domain) com Invoice e Subscription (Domain
+// Layer em services/domains/financial) — ver ADR-0027 (2 Aggregate Roots
+// independentes) e ADR-0031 (campos mínimos: amount/currency/status/name).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // pooler (pgbouncer, transaction mode) — runtime queries
+  directUrl = env("DIRECT_URL")   // conexão direta — usada exclusivamente para migrations
+}
+
+/// Opportunity — Aggregate Root do Sales Domain.
+/// Fonte: knowledge/core/objects/Opportunity.md
+model Opportunity {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId  String    @map("organization_id") @db.Uuid
+  partyId         String    @map("party_id") @db.Uuid
+  pipelineId      String?   @map("pipeline_id") @db.Uuid
+  currentStageId  String?   @map("current_stage_id") @db.Uuid
+  status          String    @db.VarChar(10) // "open" | "won" | "lost" — CHECK constraint na migration
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz
+
+  proposals Proposal[]
+
+  @@map("opportunities")
+  @@index([organizationId])
+  @@index([partyId])
+  @@index([pipelineId])
+}
+
+/// Pipeline — Aggregate Root do Sales Domain (Configuration Aggregate).
+/// Fonte: knowledge/core/objects/Pipeline.md
+model Pipeline {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String    @map("organization_id") @db.Uuid
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz
+
+  stages Stage[]
+
+  @@map("pipelines")
+  @@index([organizationId])
+}
+
+/// Stage — Internal Entity do Aggregate Pipeline.
+/// Fonte: knowledge/core/objects/Stage.md
+/// Sem createdAt/updatedAt — nenhuma fonte confirma timestamps (ver Object Specification § 5).
+/// Nota: `pipelineId` existe aqui como FK física de persistência (necessária para
+/// o Mapper reconstituir a coleção de Stages de um Pipeline) — não contradiz
+/// `stage.ts`, que documenta a Entity de domínio nunca expor esse campo como
+/// getter/propriedade (Entity interna não guarda backreference). Modelo de
+/// persistência e modelo de domínio são camadas distintas; o Mapper nunca
+/// repassa `pipelineId` para o objeto de domínio reconstituído.
+model Stage {
+  id         String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pipelineId String @map("pipeline_id") @db.Uuid
+  name       String @db.VarChar(255)
+
+  pipeline Pipeline @relation(fields: [pipelineId], references: [id])
+
+  @@map("stages")
+  @@index([pipelineId])
+}
+
+/// Proposal — Internal Entity do Aggregate Opportunity.
+/// Fonte: knowledge/core/objects/Proposal.md
+/// Nota: `opportunityId` é FK física de persistência, mesma ressalva de `Stage`
+/// acima — `proposal.ts` documenta que a Entity de domínio nunca guarda essa
+/// referência como propriedade; o Mapper usa a FK apenas para reconstituir a
+/// coleção `proposals` do Aggregate `Opportunity`, nunca a repassa ao objeto
+/// de domínio `Proposal` em si.
+model Proposal {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  opportunityId String   @map("opportunity_id") @db.Uuid
+  status        String   @db.VarChar(10) // "pending" | "approved" — CHECK constraint na migration
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id])
+
+  @@map("proposals")
+  @@index([opportunityId])
+}
+
+/// Organization — Aggregate Root do Organization Domain (Kernel).
+/// Fonte: services/kernel/organizations/src/domain/aggregates/organization/organization.ts
+/// `address` embutido como JSON — Value Object candidato nunca congelado (ver comentário
+/// em organization.ts), sem validação própria a preservar na persistência.
+model Organization {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug       String    @unique @db.VarChar(255)
+  name       String    @db.VarChar(255)
+  legalName  String    @map("legal_name") @db.VarChar(255)
+  document   String    @db.VarChar(32)
+  address    Json
+  status     String    @db.VarChar(10) // "active" | "suspended" | "trial" | "blocked" | "archived" — CHECK constraint na migration
+  metadata   Json      @default("{}")
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz
+
+  users User[]
+  roles Role[]
+
+  @@map("organizations")
+}
+
+/// User — Aggregate Root do Identity Domain (Kernel).
+/// Fonte: services/kernel/identity/src/domain/aggregates/user/user.ts
+/// `roleIds` é array nativo de UUID — mesma forma de `UserProps.roleIds`
+/// (referências por id, nunca o objeto `Role` embutido, IDENTITY_AGGREGATE_DESIGN_FREEZE.md § 4).
+model User {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String    @map("organization_id") @db.Uuid
+  email          String    @unique @db.VarChar(255)
+  status         String    @db.VarChar(10) // "created" | "invited" | "active" | "disabled" — CHECK constraint na migration
+  roleIds        String[]  @map("role_ids") @db.Uuid
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  createdBy      String    @map("created_by") @db.Uuid
+  updatedBy      String    @map("updated_by") @db.Uuid
+  version        Int       @default(1)
+  metadata       Json      @default("{}")
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@map("users")
+  @@index([organizationId])
+}
+
+/// Role — Aggregate Root do Identity Domain (Kernel).
+/// Fonte: services/kernel/identity/src/domain/aggregates/role/role.ts
+/// `permissions` guarda só o `code` de cada Value Object `Permission`
+/// (formato `<domínio>.<recurso>.<ação>`) — embutido por valor, nunca por referência
+/// (mesmo princípio de `RoleProps.permissions`, Freeze §§ 4, 5, 8).
+model Role {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  name           String   @db.VarChar(255)
+  permissions    String[] @default([])
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+  createdBy      String   @map("created_by") @db.Uuid
+  updatedBy      String   @map("updated_by") @db.Uuid
+  version        Int      @default(1)
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@map("roles")
+  @@index([organizationId])
+}
+
+/// Credential — conceito exclusivo de Infrastructure, sem equivalente no Domain Layer.
+/// ADR-0010: "nenhuma Entity, Value Object ou Aggregate do Identity Domain armazena
+/// senha ou hash de senha"; correlacionado por `email` (não por FK para `Users`,
+/// mesma decisão do ADR: "o domínio não sabe, e não precisa saber, onde ou como é guardada").
+/// Algoritmo: bcrypt (decisão de Infrastructure, fora do escopo do ADR-0010 em si).
+model Credential {
+  email        String   @id @db.VarChar(255)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("credentials")
+}
+
+/// Party — Aggregate Root do Customer Domain.
+/// Fonte: services/domains/customer/domain/aggregates/party/party.ts
+/// `name`/`document` são campos mínimos extraídos por ADR-0025 — demais dados
+/// de contato (Contact/Address/Phone/Email/Social Profile) permanecem
+/// bloqueados, sem tabela própria.
+model Party {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  partyType      String   @map("party_type") @db.VarChar(30) // "person" | "external_organization" (21 chars) — CHECK constraint na migration
+  name           String   @db.VarChar(255)
+  document       String?  @db.VarChar(32)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("parties")
+  @@index([organizationId])
+}
+
+/// Relationship — Aggregate Root do Customer Domain (vínculo entre 2 Parties).
+/// Fonte: services/domains/customer/domain/aggregates/relationship/relationship.ts
+/// `partyIdA`/`partyIdB` sem FK para `parties` — mesma decisão já aplicada a
+/// `Sales.Opportunity.partyId` (referência por id, sem integridade referencial
+/// obrigatória entre domínios, `CUSTOMER_TECHNICAL_BLUEPRINT.md § 6`).
+model Relationship {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  partyIdA       String   @map("party_id_a") @db.Uuid
+  partyIdB       String   @map("party_id_b") @db.Uuid
+  type           String   @db.VarChar(20) // "cliente" | "fornecedor" | "parceiro" | "prospect" | "investidor" | "colaborador" — CHECK constraint na migration
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("relationships")
+  @@index([organizationId])
+  @@index([partyIdA])
+  @@index([partyIdB])
+}
+
+/// Project — Aggregate Root do Project Domain.
+/// Fonte: services/domains/projects/domain/aggregates/project/project.ts
+model Project {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String    @map("organization_id") @db.Uuid
+  name           String    @db.VarChar(255)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz
+
+  tasks Task[]
+
+  @@map("projects")
+  @@index([organizationId])
+}
+
+/// Task — Internal Entity do Aggregate Project.
+/// Fonte: services/domains/projects/domain/entities/task/task.ts
+/// `projectId` é FK física de persistência — mesma ressalva de `Stage`/`Proposal`
+/// (Sales): a Entity de domínio nunca guarda essa referência como propriedade.
+model Task {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId String   @map("project_id") @db.Uuid
+  title     String   @db.VarChar(255)
+  status    String   @db.VarChar(20) // "pending" | "in_progress" | "completed" | "cancelled" — CHECK constraint na migration
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@map("tasks")
+  @@index([projectId])
+}
+
+/// Invoice — Aggregate Root do Financial Domain.
+/// Fonte: services/domains/financial/domain/aggregates/invoice/invoice.ts
+/// `subscriptionId` sem FK — referência opcional por id, mesma decisão já
+/// aplicada a `Sales.Opportunity.partyId` (`ADR-0027`).
+model Invoice {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  amount         Decimal  @db.Decimal(12, 2)
+  currency       String   @db.VarChar(10)
+  status         String   @db.VarChar(10) // "pending" | "paid" — CHECK constraint na migration
+  subscriptionId String?  @map("subscription_id") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("invoices")
+  @@index([organizationId])
+  @@index([subscriptionId])
+}
+
+/// Subscription — Aggregate Root do Financial Domain, independente de Invoice.
+/// Fonte: services/domains/financial/domain/aggregates/subscription/subscription.ts
+model Subscription {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  name           String   @db.VarChar(255)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("subscriptions")
+  @@index([organizationId])
+}
+
+/// Activity — Aggregate Root do Activity Domain.
+/// Fonte: services/domains/activity/domain/aggregates/activity/activity.ts
+/// `partyId` sem FK — mesma decisão já aplicada a `Sales.Opportunity.partyId`
+/// e `Relationship.partyIdA/B` (`ADR-0032`).
+model Activity {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  partyId        String   @map("party_id") @db.Uuid
+  type           String   @db.VarChar(10) // "ligacao" | "whatsapp" | "email" | "reuniao" | "visita" | "nota" — CHECK constraint na migration
+  status         String   @db.VarChar(10) // "open" | "completed" — CHECK constraint na migration
+  notes          String?  @db.Text
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("activities")
+  @@index([organizationId])
+  @@index([partyId])
+}
+
+/// Campaign — Aggregate Root do Marketing Domain.
+/// Fonte: services/domains/marketing/domain/aggregates/campaign/campaign.ts
+/// `startDate`/`endDate` opcionais — campanha em rascunho pode não ter datas
+/// fechadas ainda (`ADR-0033`).
+model Campaign {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String    @map("organization_id") @db.Uuid
+  name           String    @db.VarChar(255)
+  startDate      DateTime? @map("start_date") @db.Timestamptz
+  endDate        DateTime? @map("end_date") @db.Timestamptz
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("campaigns")
+  @@index([organizationId])
+}
+
+/// Dashboard — Aggregate Root do Analytics Domain.
+/// Fonte: services/domains/analytics/domain/aggregates/dashboard/dashboard.ts
+/// `Widget` (Internal Entity, `ADR-0034`) não tem tabela própria — bloqueado
+/// até um caso de uso real definir seus campos de conteúdo.
+model Dashboard {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  name           String   @db.VarChar(255)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("dashboards")
+  @@index([organizationId])
+}
+
+/// AuditEntry — Aggregate Root do Audit Domain (System Domain's único
+/// fragmento real confirmado, `ADR-0029`).
+/// Fonte: services/kernel/audit/src/domain/aggregates/audit-entry/audit-entry.ts
+/// Write-once — imutável por design (`AUDIT_AGGREGATE_DESIGN_FREEZE.md §§ 7-8`),
+/// por isso sem `updatedAt`. Nenhum campo além dos 8 obrigatórios + 1 opcional
+/// já congelados (`AUDIT_PERSISTENCE_MAPPING_BLUEPRINT.md §§ 3-4` — § 12 proíbe
+/// campo novo sem nova decisão/ADR).
+model AuditEntry {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  actorId        String   @map("actor_id") @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  targetId       String   @map("target_id") @db.Uuid
+  targetType     String   @map("target_type") @db.VarChar(100)
+  action         String   @db.VarChar(255)
+  occurredAt     DateTime @map("occurred_at") @db.Timestamptz
+  origin         String   @db.VarChar(255)
+  changeSet      Json?    @map("change_set")
+
+  @@map("audit_entries")
+  @@index([organizationId])
+  @@index([targetId, targetType])
+}
+
+/// ConfigurationEntry — Aggregate Root do Kernel `configuration` (Fase C).
+/// Fonte: services/kernel/configuration/src/domain/aggregates/configuration-entry/configuration-entry.ts
+/// Par chave/valor genérico por organização — sem catálogo fechado de chaves
+/// (`ADR-0038`). `set()` é upsert: unicidade em (organizationId, key).
+model ConfigurationEntry {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  key            String   @db.VarChar(255)
+  value          String   @db.Text
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("configuration_entries")
+  @@unique([organizationId, key])
+}
+
+/// FeatureFlag — Aggregate Root do Kernel `feature-flags` (Fase C).
+/// Fonte: services/kernel/feature-flags/src/domain/aggregates/feature-flag/feature-flag.ts
+/// Par chave/booleano genérico por organização — sem catálogo fechado de
+/// chaves (`ADR-0038`). `set()` é upsert: unicidade em (organizationId, key).
+model FeatureFlag {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  key            String   @db.VarChar(255)
+  enabled        Boolean  @default(false)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("feature_flags")
+  @@unique([organizationId, key])
+}
+
+/// FileRecord — Aggregate Root do Kernel `files` (Fase D).
+/// Fonte: services/kernel/files/src/domain/aggregates/file-record/file-record.ts
+/// Metadado do arquivo (esta tabela) separado do conteúdo em si
+/// (`storagePath`, hoje disco local via `LocalFileStorage`, `ADR-0039`) —
+/// `storage/` (controle de cota por organização) deliberadamente adiado,
+/// nenhuma regra de plano/limite existe ainda (`Subscription` não tem campo
+/// de cota, `ADR-0031`).
+model FileRecord {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid
+  filename     String   @db.VarChar(255)
+  mimeType     String   @map("mime_type") @db.VarChar(255)
+  sizeBytes    Int      @map("size_bytes")
+  storagePath  String   @map("storage_path") @db.VarChar(500)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("file_records")
+  @@index([organizationId])
+}
+
+/// AutomationRule — Aggregate Root do Kernel `automation-runtime` (Fase F,
+/// `ADR-0041`, inspirado no Salesforce Flow).
+/// Fonte: services/kernel/automation-runtime/src/domain/aggregates/automation-rule/automation-rule.ts
+/// `actions` (Json) guarda o array de `AutomationAction` (union log/notify/webhook)
+/// — sem tabela própria por tipo de ação, mesmo padrão de `changeSet` em `AuditEntry`.
+/// Sem coluna de `conditions` — `DomainEvent` não tem payload de negócio para avaliar.
+model AutomationRule {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId   String   @map("organization_id") @db.Uuid
+  name             String   @db.VarChar(255)
+  triggerEventName String   @map("trigger_event_name") @db.VarChar(255)
+  actions          Json
+  enabled          Boolean  @default(true)
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("automation_rules")
+  @@index([organizationId])
+}
+
+/// Lead — Aggregate Root do Sales Domain (`ADR-0042`, adaptado do
+/// Lead-to-Convert do Salesforce).
+/// Fonte: services/domains/sales/domain/aggregates/lead/lead.ts
+/// `convertedPartyId`/`convertedOpportunityId` sem FK real (mesma decisão de
+/// desacoplamento cross-domínio já usada por toda tabela de Business Domain
+/// — `parties`/`relationships`/etc. também referenciam por id sem FK).
+model Lead {
+  id                     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId         String   @map("organization_id") @db.Uuid
+  name                   String   @db.VarChar(255)
+  email                  String?  @db.VarChar(255)
+  phone                  String?  @db.VarChar(50)
+  company                String?  @db.VarChar(255)
+  source                 String?  @db.VarChar(100)
+  status                 String   @db.VarChar(20) // "new" | "contacted" | "qualified" | "unqualified" | "converted" — CHECK constraint na migration
+  convertedPartyId       String?  @map("converted_party_id") @db.Uuid
+  convertedOpportunityId String?  @map("converted_opportunity_id") @db.Uuid
+  createdAt              DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt              DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("leads")
+  @@index([organizationId])
+}
+
+/// Product — Aggregate Root do Sales Domain (`ADR-0043`, catálogo, inspirado
+/// no Salesforce Product2).
+/// Fonte: services/domains/sales/domain/aggregates/product/product.ts
+/// Preço único por Product — sem múltiplos Price Books nomeados (Standard/
+/// Regional/etc.), sem evidência de necessidade (`ADR-0043`).
+model Product {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  name           String   @db.VarChar(255)
+  sku            String?  @db.VarChar(100)
+  unitPrice      Decimal  @map("unit_price") @db.Decimal(12, 2)
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("products")
+  @@index([organizationId])
+}
+
+/// Quotation — Aggregate Root do Sales Domain (`ADR-0043`), preenche a lacuna
+/// estrutural que `Quotation` já tinha reservada desde `ADR-0020` ("distinto
+/// de Proposal, não sinônimo", forma nunca definida) — adaptado do Salesforce
+/// Quote. Não é Internal Entity de `Opportunity`: uma Opportunity pode ter
+/// múltiplas Quotations (revisões de preço).
+/// Fonte: services/domains/sales/domain/aggregates/quotation/quotation.ts
+model Quotation {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  opportunityId  String   @map("opportunity_id") @db.Uuid
+  status         String   @db.VarChar(10) // "draft" | "sent" | "accepted" | "rejected" — CHECK constraint na migration
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  lineItems QuotationLineItem[]
+
+  @@map("quotations")
+  @@index([organizationId])
+  @@index([opportunityId])
+}
+
+/// QuotationLineItem — Internal Entity do Aggregate Quotation (`ADR-0043`).
+/// `unitPrice` é snapshot no momento da adição — mudança futura de preço do
+/// Product não altera retroativamente uma Quotation já criada (mesmo
+/// princípio de um preço de fatura nunca mudar depois de emitida).
+/// `quotationId` é FK física de persistência, mesma ressalva de `Stage`/
+/// `Proposal` (Sales) — Entity de domínio nunca guarda essa referência.
+model QuotationLineItem {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  quotationId String  @map("quotation_id") @db.Uuid
+  productId   String  @map("product_id") @db.Uuid
+  quantity    Int
+  unitPrice   Decimal @map("unit_price") @db.Decimal(12, 2)
+
+  quotation Quotation @relation(fields: [quotationId], references: [id])
+
+  @@map("quotation_line_items")
+  @@index([quotationId])
+}
+
+/// Case — Aggregate Root do Activity Domain (`ADR-0043`, inspirado no
+/// Salesforce Service Cloud). Owner de domínio decidido por analogia
+/// estrutural: Activity Domain já possui objetos "registro com ciclo de
+/// status referenciando um Party" (Activity em si).
+/// Fonte: services/domains/activity/domain/aggregates/case/case.ts
+/// `partyId` sem FK — mesmo padrão de `Activity.partyId`.
+model Case {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  partyId        String   @map("party_id") @db.Uuid
+  subject        String   @db.VarChar(255)
+  description    String?  @db.Text
+  status         String   @db.VarChar(15) // "new" | "in_progress" | "closed" — CHECK constraint na migration
+  priority       String   @db.VarChar(10) // "low" | "medium" | "high" — CHECK constraint na migration
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("cases")
+  @@index([organizationId])
+  @@index([partyId])
+}
+
+/// Comment — Aggregate Root do Activity Domain (`ADR-0043`, inspirado no
+/// Salesforce Chatter). Owner de domínio já decidido desde a modelagem
+/// original (`DOMAIN_MODEL.md § ACTIVITY DOMAIN`); `ENG-0132` já confirmara
+/// "polimórfico, fora de escopo" — esta é a implementação real.
+/// Fonte: services/domains/activity/domain/aggregates/comment/comment.ts
+/// `targetType` sem CHECK constraint — deliberadamente polimórfico, sem
+/// catálogo fechado (mesmo tratamento de `Lead.source`).
+model Comment {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  targetType     String   @map("target_type") @db.VarChar(50)
+  targetId       String   @map("target_id") @db.Uuid
+  authorUserId   String   @map("author_user_id") @db.Uuid
+  body           String   @db.Text
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("comments")
+  @@index([organizationId])
+  @@index([targetType, targetId])
+}
+
+/// Contract — Aggregate Root do Sales Domain (`ADR-0044`), gerado a partir de
+/// uma Quotation `accepted` (nunca automático — ação explícita via Handler).
+/// Fonte: services/domains/sales/domain/aggregates/contract/contract.ts
+/// `quotationId`/`opportunityId` sem FK — mesma decisão de desacoplamento já
+/// usada por toda tabela de Business Domain.
+model Contract {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String    @map("organization_id") @db.Uuid
+  opportunityId  String    @map("opportunity_id") @db.Uuid
+  quotationId    String    @map("quotation_id") @db.Uuid
+  status         String    @db.VarChar(10) // "draft" | "active" | "terminated" — CHECK constraint na migration
+  startDate      DateTime? @map("start_date") @db.Timestamptz
+  endDate        DateTime? @map("end_date") @db.Timestamptz
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("contracts")
+  @@index([organizationId])
+  @@index([opportunityId])
+  @@index([quotationId])
+}
+
+/// CalendarEvent — Aggregate Root do Activity Domain (`ADR-0045`), resolve o
+/// bloqueio registrado em `ACTIVITY_AGGREGATE_DESIGN.md § 9` (sem entrada em
+/// BOM.md até esta ADR). Adaptado do Salesforce Event.
+/// Fonte: services/domains/activity/domain/aggregates/calendar-event/calendar-event.ts
+model CalendarEvent {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  partyId        String   @map("party_id") @db.Uuid
+  subject        String   @db.VarChar(255)
+  startAt        DateTime @map("start_at") @db.Timestamptz
+  endAt          DateTime @map("end_at") @db.Timestamptz
+  location       String?  @db.VarChar(255)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("calendar_events")
+  @@index([organizationId])
+  @@index([partyId])
+}
+
+/// Reminder — Aggregate Root do Activity Domain (`ADR-0045`).
+/// Fonte: services/domains/activity/domain/aggregates/reminder/reminder.ts
+model Reminder {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  partyId        String   @map("party_id") @db.Uuid
+  message        String   @db.Text
+  remindAt       DateTime @map("remind_at") @db.Timestamptz
+  dismissed      Boolean  @default(false)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("reminders")
+  @@index([organizationId])
+  @@index([partyId])
+}
+
+/// Checklist — Aggregate Root do Activity Domain (`ADR-0045`).
+/// Fonte: services/domains/activity/domain/aggregates/checklist/checklist.ts
+model Checklist {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  partyId        String   @map("party_id") @db.Uuid
+  title          String   @db.VarChar(255)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  items ChecklistItem[]
+
+  @@map("checklists")
+  @@index([organizationId])
+  @@index([partyId])
+}
+
+/// ChecklistItem — Internal Entity do Aggregate Checklist (`ADR-0045`).
+/// `checklistId` é FK física de persistência, mesma ressalva de `Stage`/
+/// `Proposal`/`QuotationLineItem` — Entity de domínio nunca guarda essa referência.
+model ChecklistItem {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  checklistId String  @map("checklist_id") @db.Uuid
+  label       String  @db.VarChar(255)
+  completed   Boolean @default(false)
+
+  checklist Checklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+
+  @@map("checklist_items")
+  @@index([checklistId])
+}

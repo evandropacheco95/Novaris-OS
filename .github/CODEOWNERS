@@ -1,0 +1,23 @@
+# CODEOWNERS — estrutura de responsabilidade por pasta.
+# Donos reais ainda não atribuídos (TODO) — não inventados aqui, ver PROJECT_RULES.md/CONSTITUTION.md § Artigo 15.
+
+# Governança — requer revisão de quem tem autoridade constitucional
+/PROJECT_RULES.md               # TODO
+/knowledge/core/CONSTITUTION.md # TODO
+/knowledge/core/NOVARIS_CONSTITUTION.md # TODO
+/adr/                            # TODO
+
+# Kernel
+/services/                       # TODO
+
+# Frontend
+/apps/web/                       # TODO
+/apps/admin/                     # TODO
+
+# Dados
+/packages/database/              # TODO
+/knowledge/core/BOM.md           # TODO
+/knowledge/core/DATABASE_ARCHITECTURE.md # TODO
+
+# Infraestrutura
+/infrastructure/                 # TODO

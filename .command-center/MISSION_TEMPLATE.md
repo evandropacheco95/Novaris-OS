@@ -1,0 +1,77 @@
+# Mission Template
+
+## MISSÃO
+
+**TODO**
+
+## OBJETIVO
+
+**TODO**
+
+## CONTEXTO
+
+**TODO**
+
+## ESCOPO
+
+**TODO**
+
+## FORA DO ESCOPO
+
+**TODO**
+
+## DEPENDÊNCIAS
+
+**TODO**
+
+## ARQUIVOS ENVOLVIDOS
+
+**TODO**
+
+## BANCO DE DADOS
+
+**TODO**
+
+## APIs
+
+**TODO**
+
+## COMPONENTES
+
+**TODO**
+
+## RISCOS
+
+**TODO**
+
+## CRITÉRIOS DE ACEITE
+
+**TODO**
+
+## CHECKLIST
+
+**TODO**
+
+## ENTREGÁVEIS
+
+**TODO**
+
+## TESTES
+
+**TODO**
+
+## PLANO DE ROLLBACK
+
+**TODO**
+
+## STATUS
+
+**TODO**
+
+## RESPONSÁVEL
+
+**TODO**
+
+## PRIORIDADE
+
+**TODO**

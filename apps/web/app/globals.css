@@ -1,0 +1,149 @@
+/**
+ * Design tokens — extraídos do brandkit real da NOVARIS
+ * (`NOVARIS_Brand_Identity_v1.0.html`, fora deste repositório), namespace
+ * `--nov-*` preservado como no arquivo original. Única fonte de verdade
+ * visual até que um design system formal seja criado em
+ * `knowledge/engineering` — nenhuma cor/token aqui foi inventado.
+ */
+:root {
+  /* Fundo — escala escura "cosmic" */
+  --nov-bg: #050510;
+  --nov-bg2: #080818;
+  --nov-bg3: #0c0c1c;
+
+  /* Superfícies (cards, painéis) */
+  --nov-surface: #111120;
+  --nov-surface2: #18182a;
+
+  /* Bordas */
+  --nov-border: #22223a;
+  --nov-border2: #2a2a42;
+
+  /* Escala "silver" — texto e neutros */
+  --nov-s50: #fafafb;
+  --nov-s100: #f0f0f2;
+  --nov-s200: #e0e0e5;
+  --nov-s300: #c0c0cc;
+  --nov-s400: #9898a8;
+  --nov-s500: #6a6a7a;
+  --nov-s600: #44445a;
+
+  /* Escala azul — accent primário */
+  --nov-b300: #80bbff;
+  --nov-b400: #4da6ff;
+  --nov-b500: #00a3ff;
+  --nov-b600: #0066ff;
+  --nov-b700: #003db5;
+  --nov-b800: #002278;
+  --nov-bglow: #00a3ff40;
+  --nov-bsoft: #0066ff14;
+
+  /* Semânticas — inferidas do mesmo brandkit (won/lost) */
+  --nov-success: #00c87a;
+  --nov-success-soft: #00c87a14;
+  --nov-danger: #ff3b5c;
+  --nov-danger-soft: #ff3b5c14;
+  --nov-warning: #ffb020;
+  --nov-warning-soft: #ffb02014;
+
+  --ff-display: var(--font-orbitron), monospace;
+  --ff-body: var(--font-inter), sans-serif;
+
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+
+  /* Escala de espaçamento — ritmo consistente em toda a plataforma */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Elevação — sombras sutis em camadas (mesma linguagem "cosmic" escura) */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 16px -4px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+  --shadow-lg: 0 12px 32px -8px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+  --shadow-glow: 0 0 0 1px var(--nov-b700), 0 0 24px -4px var(--nov-bglow);
+
+  --transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background:
+    radial-gradient(ellipse 1200px 800px at 15% -10%, #0a1a3a55, transparent),
+    radial-gradient(ellipse 900px 600px at 100% 10%, #05123055, transparent),
+    var(--nov-bg);
+  background-attachment: fixed;
+  color: var(--nov-s100);
+  font-family: var(--ff-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--nov-b500);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--nov-border2);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--nov-b600);
+  background-clip: padding-box;
+}
+
+@keyframes nov-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.nov-animate-in {
+  animation: nov-fade-in var(--transition) both;
+}
+
+@keyframes nov-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

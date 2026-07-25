@@ -1,0 +1,25 @@
+{
+  "name": "@novaris/identity",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src tests --ext .ts",
+    "test": "tsc -p tsconfig.json && cd dist && node --test"
+  },
+  "dependencies": {
+    "@novaris/database": "workspace:^",
+    "@novaris/event-bus": "workspace:*",
+    "@novaris/shared-kernel": "workspace:*",
+    "bcryptjs": "^3.0.3"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^3.0.0",
+    "@types/node": "^20.0.0",
+    "eslint": "^8.57.0",
+    "typescript": "^5.5.0"
+  }
+}

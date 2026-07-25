@@ -1,0 +1,13 @@
+node_modules
+.turbo
+dist
+.next
+coverage
+*.log
+.env
+.env.*
+!.env.example
+.git
+.vercel
+test-results
+playwright-report
