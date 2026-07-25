@@ -6,6 +6,7 @@ import {
   createProductRepository,
   createQuotationRepository,
   createContractRepository,
+  createRevenueRepository,
   CreateOpportunityHandler,
   AdvanceOpportunityStageHandler,
   SubmitProposalHandler,
@@ -25,6 +26,7 @@ import {
   GenerateContractFromQuotationHandler,
   ActivateContractHandler,
   TerminateContractHandler,
+  GenerateRevenueFromContractHandler,
 } from "@novaris/sales";
 import { CreatePartyHandler } from "@novaris/customer";
 import { AuthModule } from "../auth/auth.module.js";
@@ -34,12 +36,14 @@ import { LeadController } from "./lead.controller.js";
 import { ProductController } from "./product.controller.js";
 import { QuotationController } from "./quotation.controller.js";
 import { ContractController } from "./contract.controller.js";
+import { RevenueController } from "./revenue.controller.js";
 
 const OPPORTUNITY_REPOSITORY = "OPPORTUNITY_REPOSITORY";
 const LEAD_REPOSITORY = "LEAD_REPOSITORY";
 const PRODUCT_REPOSITORY = "PRODUCT_REPOSITORY";
 const QUOTATION_REPOSITORY = "QUOTATION_REPOSITORY";
 const CONTRACT_REPOSITORY = "CONTRACT_REPOSITORY";
+const REVENUE_REPOSITORY = "REVENUE_REPOSITORY";
 
 /**
  * SalesModule — Composition Root do Sales Domain dentro da API. Único lugar
@@ -56,7 +60,7 @@ const CONTRACT_REPOSITORY = "CONTRACT_REPOSITORY";
  */
 @Module({
   imports: [AuthModule, CustomerModule],
-  controllers: [OpportunityController, LeadController, ProductController, QuotationController, ContractController],
+  controllers: [OpportunityController, LeadController, ProductController, QuotationController, ContractController, RevenueController],
   providers: [
     {
       provide: OPPORTUNITY_REPOSITORY,
@@ -216,6 +220,25 @@ const CONTRACT_REPOSITORY = "CONTRACT_REPOSITORY";
     {
       provide: "ContractRepository",
       useExisting: CONTRACT_REPOSITORY,
+    },
+    {
+      provide: REVENUE_REPOSITORY,
+      useFactory: () => createRevenueRepository(prisma),
+    },
+    {
+      // Composição intra-domínio (Sales→Sales, `ADR-0047`) — mesmo padrão de
+      // `GenerateContractFromQuotationHandler`, mas sem bloqueio de "já
+      // existe" (múltiplos Revenue podem nascer do mesmo Contract).
+      provide: GenerateRevenueFromContractHandler,
+      useFactory: (
+        revenueRepository: ReturnType<typeof createRevenueRepository>,
+        contractRepository: ReturnType<typeof createContractRepository>,
+      ) => new GenerateRevenueFromContractHandler(revenueRepository, contractRepository),
+      inject: [REVENUE_REPOSITORY, CONTRACT_REPOSITORY],
+    },
+    {
+      provide: "RevenueRepository",
+      useExisting: REVENUE_REPOSITORY,
     },
   ],
 })

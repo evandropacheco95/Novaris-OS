@@ -589,6 +589,27 @@ model Contract {
   @@index([quotationId])
 }
 
+/// Revenue — Aggregate Root do Sales Domain (`ADR-0047`), último objeto
+/// oficial sem forma definida desde `ADR-0044`. Gerado a partir de um
+/// Contract `active`, registro pontual e imutável (sem `status`) —
+/// `contractId` sem FK, mesma decisão de desacoplamento já usada por toda
+/// tabela de Business Domain. Múltiplos Revenue podem referenciar o mesmo
+/// Contract (reconhecimento incremental).
+model Revenue {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  contractId     String   @map("contract_id") @db.Uuid
+  amount         Decimal  @db.Decimal(12, 2)
+  currency       String   @db.VarChar(10)
+  recognizedAt   DateTime @map("recognized_at") @db.Timestamptz
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("revenues")
+  @@index([organizationId])
+  @@index([contractId])
+}
+
 /// CalendarEvent — Aggregate Root do Activity Domain (`ADR-0045`), resolve o
 /// bloqueio registrado em `ACTIVITY_AGGREGATE_DESIGN.md § 9` (sem entrada em
 /// BOM.md até esta ADR). Adaptado do Salesforce Event.

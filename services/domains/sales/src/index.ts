@@ -73,6 +73,10 @@ export { ContractActivated } from "../domain/events/contract-activated.js";
 export { ContractTerminated } from "../domain/events/contract-terminated.js";
 export type { ContractRepository } from "../domain/repositories/contract-repository.js";
 
+// Revenue (`ADR-0047`) — gerado a partir de um Contract `active`, sem estados.
+export { Revenue, type RevenueProps, type CreateRevenueInput } from "../domain/aggregates/revenue/revenue.js";
+export type { RevenueRepository } from "../domain/repositories/revenue-repository.js";
+
 // Application Layer (Commands + Handlers) — adicionado nesta fase ("Sales de
 // ponta a ponta") para permitir que uma Composition Root real (`apps/api`)
 // monte os casos de uso completos. Não exportado até agora porque nenhum
@@ -121,6 +125,8 @@ export { ActivateContractCommand } from "../application/commands/activate-contra
 export { ActivateContractHandler } from "../application/handlers/activate-contract/activate-contract.handler.js";
 export { TerminateContractCommand } from "../application/commands/terminate-contract/terminate-contract.command.js";
 export { TerminateContractHandler } from "../application/handlers/terminate-contract/terminate-contract.handler.js";
+export { GenerateRevenueFromContractCommand } from "../application/commands/generate-revenue-from-contract/generate-revenue-from-contract.command.js";
+export { GenerateRevenueFromContractHandler } from "../application/handlers/generate-revenue-from-contract/generate-revenue-from-contract.handler.js";
 
 // Contracts Layer — Root Barrel já congelado (SALES_CONTRACTS_FREEZE_V2.md),
 // reexportado aqui sem alteração.
@@ -138,4 +144,5 @@ export {
   createProductRepository,
   createQuotationRepository,
   createContractRepository,
+  createRevenueRepository,
 } from "../infrastructure/factories.js";

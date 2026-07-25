@@ -59,6 +59,7 @@ const FULL_PERMISSION_CATALOG = [
   "activity.cases.manage",
   "activity.comments.manage",
   "sales.contracts.manage",
+  "sales.revenues.manage",
   "activity.calendar-events.manage",
   "activity.reminders.manage",
   "activity.checklists.manage",

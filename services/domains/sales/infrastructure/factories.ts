@@ -5,12 +5,14 @@ import type { LeadRepository } from "../domain/repositories/lead-repository.js";
 import type { ProductRepository } from "../domain/repositories/product-repository.js";
 import type { QuotationRepository } from "../domain/repositories/quotation-repository.js";
 import type { ContractRepository } from "../domain/repositories/contract-repository.js";
+import type { RevenueRepository } from "../domain/repositories/revenue-repository.js";
 import { PrismaOpportunityRepository } from "./repositories/prisma-opportunity-repository.js";
 import { PrismaPipelineRepository } from "./repositories/prisma-pipeline-repository.js";
 import { PrismaLeadRepository } from "./repositories/prisma-lead-repository.js";
 import { PrismaProductRepository } from "./repositories/prisma-product-repository.js";
 import { PrismaQuotationRepository } from "./repositories/prisma-quotation-repository.js";
 import { PrismaContractRepository } from "./repositories/prisma-contract-repository.js";
+import { PrismaRevenueRepository } from "./repositories/prisma-revenue-repository.js";
 
 /**
  * Factories de Composition Root — único ponto público de acesso às
@@ -43,4 +45,8 @@ export function createQuotationRepository(client: PrismaClient): QuotationReposi
 
 export function createContractRepository(client: PrismaClient): ContractRepository {
   return new PrismaContractRepository(client);
+}
+
+export function createRevenueRepository(client: PrismaClient): RevenueRepository {
+  return new PrismaRevenueRepository(client);
 }

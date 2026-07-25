@@ -64,6 +64,7 @@ export type {
   Case,
   Comment,
   Contract,
+  Revenue,
   CalendarEvent,
   Reminder,
   Checklist,

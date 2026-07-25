@@ -1,4 +1,4 @@
-import { Controller, ForbiddenException, Get, HttpException, HttpStatus, Inject, Param, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, ForbiddenException, Get, HttpException, HttpStatus, Inject, Param, Post, Req, UseGuards } from "@nestjs/common";
 import type { Request } from "express";
 import { UniqueEntityId } from "@novaris/shared-kernel";
 import {
@@ -6,6 +6,8 @@ import {
   ActivateContractHandler,
   TerminateContractCommand,
   TerminateContractHandler,
+  GenerateRevenueFromContractCommand,
+  GenerateRevenueFromContractHandler,
   type ContractRepository,
   type ContractStatus,
 } from "@novaris/sales";
@@ -13,6 +15,7 @@ import { JwtAuthGuard, type AuthenticatedUser } from "../auth/jwt-auth.guard.js"
 import { PermissionGuard } from "../auth/permission.guard.js";
 import { RequirePermission } from "../auth/require-permission.decorator.js";
 import { throwHttpExceptionForDomainError } from "../shared/http-error-mapper.js";
+import type { RevenueResponse } from "./revenue.controller.js";
 
 type AuthenticatedRequest = Request & { user: AuthenticatedUser };
 
@@ -38,6 +41,7 @@ export class ContractController {
   constructor(
     private readonly activateHandler: ActivateContractHandler,
     private readonly terminateHandler: TerminateContractHandler,
+    private readonly generateRevenueHandler: GenerateRevenueFromContractHandler,
     @Inject("ContractRepository") private readonly repository: ContractRepository,
   ) {}
 
@@ -79,6 +83,28 @@ export class ContractController {
     return toResponse(result.getValue()!);
   }
 
+  /** Gera um `Revenue` real a partir deste Contract (`ADR-0047`) — falha com 409 se não `active`. */
+  @Post(":id/generate-revenue")
+  async generateRevenue(
+    @Param("id") id: string,
+    @Body() body: { amount: number; currency: string; recognizedAt?: string },
+    @Req() req: AuthenticatedRequest,
+  ): Promise<RevenueResponse> {
+    await this.loadAndAssertOwnership(id, req.user);
+    const result = await this.generateRevenueHandler.execute(
+      new GenerateRevenueFromContractCommand({
+        contractId: id,
+        amount: body.amount,
+        currency: body.currency,
+        recognizedAt: body.recognizedAt ? new Date(body.recognizedAt) : undefined,
+      }),
+    );
+    if (result.isFailure) {
+      throwHttpExceptionForDomainError(result.getError()!);
+    }
+    return toRevenueResponse(result.getValue()!);
+  }
+
   private async loadAndAssertOwnership(id: string, user: AuthenticatedUser) {
     const findResult = await this.repository.findById(new UniqueEntityId(id));
     if (findResult.isFailure) {
@@ -94,6 +120,26 @@ export class ContractController {
     }
     return contract;
   }
+}
+
+function toRevenueResponse(revenue: {
+  id: { toString(): string };
+  contractId: { toString(): string };
+  amount: number;
+  currency: string;
+  recognizedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}): RevenueResponse {
+  return {
+    id: revenue.id.toString(),
+    contractId: revenue.contractId.toString(),
+    amount: revenue.amount,
+    currency: revenue.currency,
+    recognizedAt: revenue.recognizedAt.toISOString(),
+    createdAt: revenue.createdAt.toISOString(),
+    updatedAt: revenue.updatedAt.toISOString(),
+  };
 }
 
 function toResponse(contract: {

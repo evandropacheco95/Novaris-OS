@@ -724,6 +724,32 @@ export async function terminateContract(id: string): Promise<Contract> {
   return parseOrThrow<Contract>(response, "Falha ao encerrar Contract");
 }
 
+// Revenue (`ADR-0047`) — gerado a partir de um Contract active, sem estados (registro pontual).
+
+export interface Revenue {
+  id: string;
+  contractId: string;
+  amount: number;
+  currency: string;
+  recognizedAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function listRevenues(): Promise<Revenue[]> {
+  const response = await authenticatedFetch("/revenues");
+  if (!response.ok) throw new Error("Falha ao listar Revenues");
+  return (await response.json()) as Revenue[];
+}
+
+export async function generateRevenueFromContract(contractId: string, amount: number, currency: string): Promise<Revenue> {
+  const response = await authenticatedFetch(`/contracts/${contractId}/generate-revenue`, {
+    method: "POST",
+    body: JSON.stringify({ amount, currency }),
+  });
+  return parseOrThrow<Revenue>(response, "Falha ao gerar Revenue");
+}
+
 // CalendarEvent (`ADR-0045`) — Activity Domain, adaptado do Salesforce Event.
 
 export interface CalendarEvent {

@@ -408,6 +408,8 @@ Pagamento.
 
 Receita.
 
+> **Nota de Extensão (`ADR-0047`, `ENG-0152`)**: implementado como Aggregate Root do `SALES DOMAIN`, gerado a partir de um `Contract` `active` (nunca criação manual avulsa). Campos mínimos: `contractId` (rastreabilidade), `amount`, `currency`, `recognizedAt`. Registro pontual e imutável, sem `status` — múltiplos Revenue podem existir para o mesmo Contract (reconhecimento incremental). Fecha o último objeto oficial do Sales Domain sem posição resolvida.
+
 ---
 
 ## Expense
