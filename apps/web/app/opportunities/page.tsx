@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowUpRight, Handshake } from "lucide-react";
-import { createOpportunity, getToken, getUser, listOpportunities, listParties, markLost, markWon, type Opportunity, type Party } from "@/lib/api";
+import { createOpportunity, getToken, useCurrentUser, listOpportunities, listParties, markLost, markWon, type Opportunity, type Party } from "@/lib/api";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Tag } from "@/components/tag";
 import { Button } from "@/components/button";
@@ -36,7 +36,7 @@ export default function OpportunitiesPage() {
   const [partyId, setPartyId] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const user = typeof window !== "undefined" ? getUser() : null;
+  const user = useCurrentUser();
 
   useEffect(() => {
     if (!getToken()) {
@@ -125,29 +125,44 @@ export default function OpportunitiesPage() {
       {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
       {!loading && opportunities.length === 0 && <EmptyState message="Nenhuma Opportunity ainda." />}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {opportunities.map((opportunity) => (
-          <Card key={opportunity.id} padding={18}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <div style={{ fontSize: 11, color: "var(--nov-s500)", fontFamily: "monospace" }}>{opportunity.id}</div>
-                <div style={{ fontSize: 14, color: "var(--nov-s100)", fontWeight: 600 }}>{partyName(opportunity.partyId)}</div>
-                <Tag tone={STATUS_TONE[opportunity.status]}>{STATUS_LABEL[opportunity.status]}</Tag>
-              </div>
-              {opportunity.status === "open" && (
-                <div style={{ display: "flex", gap: 8 }}>
-                  <Button size="sm" onClick={() => handleClose(opportunity.id, "won")}>
-                    Ganhar
-                  </Button>
-                  <Button size="sm" variant="secondary" onClick={() => handleClose(opportunity.id, "lost")}>
-                    Perder
-                  </Button>
+      {!loading && opportunities.length > 0 && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+          {(["open", "won", "lost"] as const).map((status) => {
+            const columnOpportunities = opportunities.filter((o) => o.status === status);
+            return (
+              <div key={status}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, padding: "0 2px" }}>
+                  <Tag tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Tag>
+                  <span style={{ fontSize: 12, color: "var(--nov-s500)" }}>{columnOpportunities.length}</span>
                 </div>
-              )}
-            </div>
-          </Card>
-        ))}
-      </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {columnOpportunities.map((opportunity) => (
+                    <Card key={opportunity.id} padding={16}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        <div style={{ fontSize: 11, color: "var(--nov-s500)", fontFamily: "monospace" }}>{opportunity.id.slice(0, 8)}</div>
+                        <div style={{ fontSize: 14, color: "var(--nov-s100)", fontWeight: 600 }}>{partyName(opportunity.partyId)}</div>
+                        {opportunity.status === "open" && (
+                          <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+                            <Button size="sm" onClick={() => handleClose(opportunity.id, "won")}>
+                              Ganhar
+                            </Button>
+                            <Button size="sm" variant="secondary" onClick={() => handleClose(opportunity.id, "lost")}>
+                              Perder
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  ))}
+                  {columnOpportunities.length === 0 && (
+                    <div style={{ fontSize: 12, color: "var(--nov-s600)", padding: "10px 2px" }}>Nenhuma aqui.</div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </DashboardShell>
   );
 }

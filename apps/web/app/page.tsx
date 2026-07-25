@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import {
   getToken,
-  getUser,
+  useCurrentUser,
   listOpportunities,
   listParties,
   listActivities,
@@ -30,6 +30,7 @@ import {
 import { DashboardShell } from "@/components/dashboard-shell";
 import { StatCard } from "@/components/stat-card";
 import { Card } from "@/components/card";
+import { StatusDonut } from "@/components/status-donut";
 
 /**
  * Home — painel real de visão geral (`ENG-0147`, elevação de UI/UX), primeira
@@ -46,7 +47,7 @@ export default function HomePage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
-  const user = typeof window !== "undefined" ? getUser() : null;
+  const user = useCurrentUser();
 
   useEffect(() => {
     if (!getToken()) {
@@ -83,6 +84,12 @@ export default function HomePage() {
   const newLeads = leads.filter((l) => l.status === "new" || l.status === "contacted" || l.status === "qualified").length;
   const firstName = user?.email.split("@")[0] ?? "";
 
+  const opportunitiesByStatus = [
+    { label: "Aberta", value: opportunities.filter((o) => o.status === "open").length, color: "var(--nov-b500)" },
+    { label: "Ganha", value: opportunities.filter((o) => o.status === "won").length, color: "var(--nov-success)" },
+    { label: "Perdida", value: opportunities.filter((o) => o.status === "lost").length, color: "var(--nov-danger)" },
+  ];
+
   return (
     <DashboardShell title="">
       <div style={{ marginBottom: 32 }}>
@@ -109,54 +116,58 @@ export default function HomePage() {
             <StatCard label="Faturas pendentes" value={pendingInvoices} icon={<Wallet size={18} />} href="/financial" tone={pendingInvoices > 0 ? "danger" : "success"} />
           </div>
 
-          <Card padding={24}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 700, margin: 0, color: "var(--nov-s100)" }}>Acessos rápidos</h3>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 10 }}>
-              {[
-                { label: "Leads", href: "/leads" },
-                { label: "Quotations", href: "/quotations" },
-                { label: "Products", href: "/products" },
-                { label: "Contracts", href: "/contracts" },
-                { label: "Cases", href: "/cases" },
-                { label: "Comments", href: "/comments" },
-                { label: "Calendário", href: "/calendar-events" },
-                { label: "Reminders", href: "/reminders" },
-                { label: "Checklists", href: "/checklists" },
-              ].map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "10px 14px",
-                    borderRadius: "var(--radius)",
-                    border: "1px solid var(--nov-border)",
-                    background: "var(--nov-bg2)",
-                    color: "var(--nov-s300)",
-                    fontSize: 13,
-                    fontWeight: 500,
-                    textDecoration: "none",
-                    transition: "border-color var(--transition-fast), color var(--transition-fast)",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "var(--nov-b700)";
-                    e.currentTarget.style.color = "var(--nov-s100)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "var(--nov-border)";
-                    e.currentTarget.style.color = "var(--nov-s300)";
-                  }}
-                >
-                  {link.label}
-                  <ArrowUpRight size={14} />
-                </a>
-              ))}
-            </div>
-          </Card>
+          <div style={{ display: "grid", gridTemplateColumns: "minmax(260px, 380px) 1fr", gap: 16 }}>
+            <StatusDonut title="Pipeline de Opportunities" data={opportunitiesByStatus} />
+
+            <Card padding={24}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                <h3 style={{ fontSize: 14, fontWeight: 700, margin: 0, color: "var(--nov-s100)" }}>Acessos rápidos</h3>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 10 }}>
+                {[
+                  { label: "Leads", href: "/leads" },
+                  { label: "Quotations", href: "/quotations" },
+                  { label: "Products", href: "/products" },
+                  { label: "Contracts", href: "/contracts" },
+                  { label: "Cases", href: "/cases" },
+                  { label: "Comments", href: "/comments" },
+                  { label: "Calendário", href: "/calendar-events" },
+                  { label: "Reminders", href: "/reminders" },
+                  { label: "Checklists", href: "/checklists" },
+                ].map((link) => (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "10px 14px",
+                      borderRadius: "var(--radius)",
+                      border: "1px solid var(--nov-border)",
+                      background: "var(--nov-bg2)",
+                      color: "var(--nov-s300)",
+                      fontSize: 13,
+                      fontWeight: 500,
+                      textDecoration: "none",
+                      transition: "border-color var(--transition-fast), color var(--transition-fast)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = "var(--nov-b700)";
+                      e.currentTarget.style.color = "var(--nov-s100)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = "var(--nov-border)";
+                      e.currentTarget.style.color = "var(--nov-s300)";
+                    }}
+                  >
+                    {link.label}
+                    <ArrowUpRight size={14} />
+                  </a>
+                ))}
+              </div>
+            </Card>
+          </div>
         </>
       )}
     </DashboardShell>

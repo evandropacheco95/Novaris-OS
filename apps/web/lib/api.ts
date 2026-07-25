@@ -6,6 +6,8 @@
  * conceito, ver `apps/web/README.md`).
  */
 
+import { useEffect, useState } from "react";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 const TOKEN_KEY = "novaris_access_token";
 const USER_KEY = "novaris_user";
@@ -44,6 +46,23 @@ export function getToken(): string | null {
 export function getUser(): AuthenticatedUser | null {
   const raw = localStorage.getItem(USER_KEY);
   return raw ? (JSON.parse(raw) as AuthenticatedUser) : null;
+}
+
+/**
+ * Lê `getUser()` só depois do mount (`useEffect`, nunca no corpo do
+ * componente) — `getUser()` chamado direto no corpo (`typeof window !==
+ * "undefined" ? getUser() : null`) fazia o SSR renderizar `null` e o cliente
+ * já hidratar com o usuário real, gerando "Hydration failed" em toda tela que
+ * usa `DashboardShell` (achado real de `ENG-0148`, nunca causava erro visível
+ * mas poluía o console/overlay de dev). `null` no primeiro render client-side
+ * garante que bata com o SSR; o valor real chega no re-render seguinte.
+ */
+export function useCurrentUser(): AuthenticatedUser | null {
+  const [user, setUser] = useState<AuthenticatedUser | null>(null);
+  useEffect(() => {
+    setUser(getUser());
+  }, []);
+  return user;
 }
 
 export async function login(email: string, password: string): Promise<LoginResponse> {

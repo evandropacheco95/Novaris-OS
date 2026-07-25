@@ -15,7 +15,7 @@ import {
   FileClock,
   LogOut,
 } from "lucide-react";
-import { clearSession, getUser } from "@/lib/api";
+import { clearSession, useCurrentUser } from "@/lib/api";
 import { Tag } from "./tag";
 
 /**
@@ -44,7 +44,7 @@ const DOMAINS = [
 
 export function DashboardShell({ title, children }: { title: string; children: ReactNode }) {
   const router = useRouter();
-  const user = typeof window !== "undefined" ? getUser() : null;
+  const user = useCurrentUser();
 
   function handleLogout(): void {
     clearSession();
