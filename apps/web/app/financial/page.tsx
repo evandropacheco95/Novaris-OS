@@ -20,6 +20,7 @@ import { Input, Select } from "@/components/input";
 import { Card } from "@/components/card";
 import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/empty-state";
+import { StatusDonut } from "@/components/status-donut";
 
 /**
  * Tela de Financial — Financial Domain (`ENG-0131`), elevada em `ENG-0147`.
@@ -126,6 +127,19 @@ export default function FinancialPage() {
 
       <section>
         <h2 style={sectionTitleStyle}>Invoices</h2>
+
+        {!loading && invoices.length > 0 && (
+          <div style={{ maxWidth: 380, marginBottom: 20 }}>
+            <StatusDonut
+              title="Invoices por status"
+              data={[
+                { label: "Pendente", value: invoices.filter((i) => i.status === "pending").length, color: "var(--nov-warning)" },
+                { label: "Paga", value: invoices.filter((i) => i.status === "paid").length, color: "var(--nov-success)" },
+              ]}
+            />
+          </div>
+        )}
+
         <form onSubmit={handleCreateInvoice} style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
           <Input placeholder="Valor" type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} required style={{ width: 120 }} />
           <Input placeholder="Moeda" value={currency} onChange={(e) => setCurrency(e.target.value)} required style={{ width: 90 }} />

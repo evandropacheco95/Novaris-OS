@@ -71,23 +71,42 @@ export default function ContractsPage() {
       {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
       {!loading && contracts.length === 0 && <EmptyState message="Nenhum Contract ainda — gere um a partir de uma Quotation aceita." />}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {contracts.map((contract) => (
-          <Card key={contract.id} padding={18}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <div style={{ fontSize: 12, color: "var(--nov-s500)" }}>Opportunity: {contract.opportunityId}</div>
-                <div style={{ fontSize: 12, color: "var(--nov-s500)" }}>Quotation: {contract.quotationId}</div>
-                <Tag tone={STATUS_TONE[contract.status]}>{STATUS_LABEL[contract.status]}</Tag>
+      {!loading && contracts.length > 0 && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+          {(["draft", "active", "terminated"] as const).map((status) => {
+            const columnContracts = contracts.filter((c) => c.status === status);
+            return (
+              <div key={status}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, padding: "0 2px" }}>
+                  <Tag tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Tag>
+                  <span style={{ fontSize: 12, color: "var(--nov-s500)" }}>{columnContracts.length}</span>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {columnContracts.map((contract) => (
+                    <Card key={contract.id} padding={16}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        <div style={{ fontSize: 11, color: "var(--nov-s500)" }}>Opp: {contract.opportunityId.slice(0, 8)}</div>
+                        <div style={{ fontSize: 11, color: "var(--nov-s500)" }}>Quotation: {contract.quotationId.slice(0, 8)}</div>
+                        {contract.status === "draft" && (
+                          <Button size="sm" onClick={() => handleTransition(contract.id, "activate")}>
+                            Ativar
+                          </Button>
+                        )}
+                        {contract.status === "active" && (
+                          <Button size="sm" variant="secondary" onClick={() => handleTransition(contract.id, "terminate")}>
+                            Encerrar
+                          </Button>
+                        )}
+                      </div>
+                    </Card>
+                  ))}
+                  {columnContracts.length === 0 && <div style={{ fontSize: 12, color: "var(--nov-s600)", padding: "10px 2px" }}>Nenhum aqui.</div>}
+                </div>
               </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                {contract.status === "draft" && <Button size="sm" onClick={() => handleTransition(contract.id, "activate")}>Ativar</Button>}
-                {contract.status === "active" && <Button size="sm" variant="secondary" onClick={() => handleTransition(contract.id, "terminate")}>Encerrar</Button>}
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </DashboardShell>
   );
 }

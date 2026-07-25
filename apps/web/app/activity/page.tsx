@@ -20,6 +20,7 @@ import { Input, Select } from "@/components/input";
 import { Card } from "@/components/card";
 import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/empty-state";
+import { StatusDonut } from "@/components/status-donut";
 
 const ACTIVITY_TYPES: ActivityType[] = ["ligacao", "whatsapp", "email", "reuniao", "visita", "nota"];
 
@@ -103,6 +104,18 @@ export default function ActivityPage() {
 
       {error && <p style={{ color: "var(--nov-danger)", fontSize: 13 }}>{error}</p>}
       {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
+
+      {!loading && activities.length > 0 && (
+        <div style={{ maxWidth: 380, marginBottom: 24 }}>
+          <StatusDonut
+            title="Activities por status"
+            data={[
+              { label: "Aberta", value: activities.filter((a) => a.status === "open").length, color: "var(--nov-b500)" },
+              { label: "Concluída", value: activities.filter((a) => a.status === "completed").length, color: "var(--nov-success)" },
+            ]}
+          />
+        </div>
+      )}
 
       <form onSubmit={handleCreate} style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
         <Select value={partyId} onChange={(e) => setPartyId(e.target.value)} required>

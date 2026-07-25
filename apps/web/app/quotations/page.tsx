@@ -169,61 +169,77 @@ export default function QuotationsPage() {
       {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
       {!loading && quotations.length === 0 && <EmptyState message="Nenhuma Quotation ainda." />}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {quotations.map((quotation) => (
-          <Card key={quotation.id} padding={18}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <div style={{ fontSize: 12, color: "var(--nov-s500)" }}>Opportunity: {quotation.opportunityId}</div>
-                <div style={{ fontSize: 14, color: "var(--nov-s100)", fontWeight: 600 }}>Total: R$ {quotation.total.toFixed(2)}</div>
-                <Tag tone={STATUS_TONE[quotation.status]}>{STATUS_LABEL[quotation.status]}</Tag>
-              </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                {quotation.status === "draft" && (
-                  <>
-                    <Button size="sm" onClick={() => setAddingToId(addingToId === quotation.id ? null : quotation.id)}>+ Item</Button>
-                    <Button size="sm" onClick={() => handleTransition(quotation.id, "send")}>Enviar</Button>
-                  </>
-                )}
-                {quotation.status === "sent" && (
-                  <>
-                    <Button size="sm" onClick={() => handleTransition(quotation.id, "accept")}>Aceitar</Button>
-                    <Button size="sm" variant="secondary" onClick={() => handleTransition(quotation.id, "reject")}>Rejeitar</Button>
-                  </>
-                )}
-                {quotation.status === "accepted" && (
-                  <Button size="sm" onClick={() => handleGenerateContract(quotation.id)}>Gerar Contract</Button>
-                )}
-              </div>
-            </div>
+      {!loading && quotations.length > 0 && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16 }}>
+          {(["draft", "sent", "accepted", "rejected"] as const).map((status) => {
+            const columnQuotations = quotations.filter((q) => q.status === status);
+            return (
+              <div key={status}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, padding: "0 2px" }}>
+                  <Tag tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Tag>
+                  <span style={{ fontSize: 12, color: "var(--nov-s500)" }}>{columnQuotations.length}</span>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {columnQuotations.map((quotation) => (
+                    <Card key={quotation.id} padding={16}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        <div style={{ fontSize: 11, color: "var(--nov-s500)" }}>Opp: {quotation.opportunityId.slice(0, 8)}</div>
+                        <div style={{ fontSize: 14, color: "var(--nov-s100)", fontWeight: 600 }}>R$ {quotation.total.toFixed(2)}</div>
 
-            {quotation.lineItems.length > 0 && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 4, borderTop: "1px solid var(--nov-border)", paddingTop: 12, marginTop: 12 }}>
-                {quotation.lineItems.map((item) => (
-                  <div key={item.id} style={{ fontSize: 13, color: "var(--nov-s300)" }}>
-                    {productName(item.productId)} · {item.quantity} × R$ {item.unitPrice.toFixed(2)} = R$ {item.lineTotal.toFixed(2)}
-                  </div>
-                ))}
-              </div>
-            )}
+                        {quotation.lineItems.length > 0 && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 3, borderTop: "1px solid var(--nov-border)", paddingTop: 8, marginTop: 2 }}>
+                            {quotation.lineItems.map((item) => (
+                              <div key={item.id} style={{ fontSize: 11.5, color: "var(--nov-s400)" }}>
+                                {productName(item.productId)} · {item.quantity}× = R$ {item.lineTotal.toFixed(2)}
+                              </div>
+                            ))}
+                          </div>
+                        )}
 
-            {addingToId === quotation.id && (
-              <div style={{ display: "flex", gap: 8, alignItems: "center", borderTop: "1px solid var(--nov-border)", paddingTop: 12, marginTop: 12 }}>
-                <Select value={lineProductId} onChange={(e) => setLineProductId(e.target.value)}>
-                  <option value="">Product</option>
-                  {products.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} (R$ {p.unitPrice.toFixed(2)})
-                    </option>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
+                          {quotation.status === "draft" && (
+                            <>
+                              <Button size="sm" variant="secondary" onClick={() => setAddingToId(addingToId === quotation.id ? null : quotation.id)}>+ Item</Button>
+                              <Button size="sm" onClick={() => handleTransition(quotation.id, "send")}>Enviar</Button>
+                            </>
+                          )}
+                          {quotation.status === "sent" && (
+                            <>
+                              <Button size="sm" onClick={() => handleTransition(quotation.id, "accept")}>Aceitar</Button>
+                              <Button size="sm" variant="secondary" onClick={() => handleTransition(quotation.id, "reject")}>Rejeitar</Button>
+                            </>
+                          )}
+                          {quotation.status === "accepted" && (
+                            <Button size="sm" onClick={() => handleGenerateContract(quotation.id)}>Gerar Contract</Button>
+                          )}
+                        </div>
+
+                        {addingToId === quotation.id && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 6, borderTop: "1px solid var(--nov-border)", paddingTop: 8, marginTop: 2 }}>
+                            <Select value={lineProductId} onChange={(e) => setLineProductId(e.target.value)}>
+                              <option value="">Product</option>
+                              {products.map((p) => (
+                                <option key={p.id} value={p.id}>
+                                  {p.name} (R$ {p.unitPrice.toFixed(2)})
+                                </option>
+                              ))}
+                            </Select>
+                            <div style={{ display: "flex", gap: 6 }}>
+                              <Input type="number" min="1" value={lineQuantity} onChange={(e) => setLineQuantity(e.target.value)} style={{ width: 70 }} />
+                              <Button size="sm" onClick={() => handleAddLineItem(quotation.id)}>Adicionar</Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
                   ))}
-                </Select>
-                <Input type="number" min="1" value={lineQuantity} onChange={(e) => setLineQuantity(e.target.value)} style={{ width: 80 }} />
-                <Button size="sm" onClick={() => handleAddLineItem(quotation.id)}>Adicionar</Button>
+                  {columnQuotations.length === 0 && <div style={{ fontSize: 12, color: "var(--nov-s600)", padding: "10px 2px" }}>Nenhuma aqui.</div>}
+                </div>
               </div>
-            )}
-          </Card>
-        ))}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </DashboardShell>
   );
 }
