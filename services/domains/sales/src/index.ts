@@ -107,6 +107,10 @@ export { CreateProductCommand } from "../application/commands/create-product/cre
 export { CreateProductHandler } from "../application/handlers/create-product/create-product.handler.js";
 export { UpdateProductPriceCommand } from "../application/commands/update-product-price/update-product-price.command.js";
 export { UpdateProductPriceHandler } from "../application/handlers/update-product-price/update-product-price.handler.js";
+export { DeactivateProductCommand } from "../application/commands/deactivate-product/deactivate-product.command.js";
+export { DeactivateProductHandler } from "../application/handlers/deactivate-product/deactivate-product.handler.js";
+export { ActivateProductCommand } from "../application/commands/activate-product/activate-product.command.js";
+export { ActivateProductHandler } from "../application/handlers/activate-product/activate-product.handler.js";
 
 export { CreateQuotationCommand } from "../application/commands/create-quotation/create-quotation.command.js";
 export { CreateQuotationHandler } from "../application/handlers/create-quotation/create-quotation.handler.js";

@@ -11,6 +11,7 @@ import { Input, Select } from "@/components/input";
 import { Card } from "@/components/card";
 import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/empty-state";
+import { StatusDonut } from "@/components/status-donut";
 
 /** Tela de Reminders (`ADR-0045`, `ENG-0146`) — adaptada do Salesforce Reminder, elevada em `ENG-0147`. */
 export default function RemindersPage() {
@@ -74,6 +75,18 @@ export default function RemindersPage() {
   return (
     <DashboardShell title="Activity">
       <PageHeader title="Reminders" description="Lembretes vinculados a Parties, adaptado do Salesforce Reminder." actions={<Button variant="secondary" size="sm" onClick={() => router.push("/activity")}>← Activity</Button>} />
+
+      {!loading && reminders.length > 0 && (
+        <div style={{ maxWidth: 380, marginBottom: 24 }}>
+          <StatusDonut
+            title="Reminders por status"
+            data={[
+              { label: "Ativo", value: reminders.filter((r) => !r.dismissed).length, color: "var(--nov-b500)" },
+              { label: "Dispensado", value: reminders.filter((r) => r.dismissed).length, color: "var(--nov-s500)" },
+            ]}
+          />
+        </div>
+      )}
 
       <form onSubmit={handleCreate} style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
         <Select value={partyId} onChange={(e) => setPartyId(e.target.value)} required>

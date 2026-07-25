@@ -23,6 +23,7 @@ import { Button } from "@/components/button";
 import { Input, Select } from "@/components/input";
 import { Card } from "@/components/card";
 import { PageHeader } from "@/components/page-header";
+import { StatusDonut } from "@/components/status-donut";
 
 const STATUS_TONE: Record<IdentityUser["status"], "accent" | "success" | "neutral" | "danger"> = {
   created: "neutral",
@@ -143,6 +144,21 @@ export default function TeamPage() {
 
       <section style={{ marginBottom: 36 }}>
         <h2 style={sectionTitleStyle}>Usuários</h2>
+
+        {!loading && users.length > 0 && (
+          <div style={{ maxWidth: 380, marginBottom: 20 }}>
+            <StatusDonut
+              title="Usuários por status"
+              data={[
+                { label: "Criado", value: users.filter((u) => u.status === "created").length, color: "var(--nov-s500)" },
+                { label: "Convidado", value: users.filter((u) => u.status === "invited").length, color: "var(--nov-b500)" },
+                { label: "Ativo", value: users.filter((u) => u.status === "active").length, color: "var(--nov-success)" },
+                { label: "Desativado", value: users.filter((u) => u.status === "disabled").length, color: "var(--nov-danger)" },
+              ]}
+            />
+          </div>
+        )}
+
         <form onSubmit={handleCreateUser} style={{ display: "flex", gap: 8, marginBottom: 16 }}>
           <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ flex: 1 }} />
           <Button type="submit" icon={<UserPlus size={15} />}>

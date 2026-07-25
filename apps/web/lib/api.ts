@@ -636,6 +636,16 @@ export async function updateProductPrice(id: string, unitPrice: number): Promise
   return parseOrThrow<Product>(response, "Falha ao atualizar preço do Product");
 }
 
+export async function deactivateProduct(id: string): Promise<Product> {
+  const response = await authenticatedFetch(`/products/${id}/deactivate`, { method: "POST" });
+  return parseOrThrow<Product>(response, "Falha ao desativar Product");
+}
+
+export async function activateProduct(id: string): Promise<Product> {
+  const response = await authenticatedFetch(`/products/${id}/activate`, { method: "POST" });
+  return parseOrThrow<Product>(response, "Falha ao reativar Product");
+}
+
 // Quotation (`ADR-0043`) — preenche a lacuna reservada desde `ADR-0020`, adaptado do Salesforce Quote.
 
 export type QuotationStatus = "draft" | "sent" | "accepted" | "rejected";

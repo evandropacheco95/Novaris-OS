@@ -18,6 +18,8 @@ import {
   ConvertLeadHandler,
   CreateProductHandler,
   UpdateProductPriceHandler,
+  DeactivateProductHandler,
+  ActivateProductHandler,
   CreateQuotationHandler,
   AddQuotationLineItemHandler,
   SendQuotationHandler,
@@ -147,6 +149,16 @@ const REVENUE_REPOSITORY = "REVENUE_REPOSITORY";
     {
       provide: UpdateProductPriceHandler,
       useFactory: (repository: ReturnType<typeof createProductRepository>) => new UpdateProductPriceHandler(repository),
+      inject: [PRODUCT_REPOSITORY],
+    },
+    {
+      provide: DeactivateProductHandler,
+      useFactory: (repository: ReturnType<typeof createProductRepository>) => new DeactivateProductHandler(repository),
+      inject: [PRODUCT_REPOSITORY],
+    },
+    {
+      provide: ActivateProductHandler,
+      useFactory: (repository: ReturnType<typeof createProductRepository>) => new ActivateProductHandler(repository),
       inject: [PRODUCT_REPOSITORY],
     },
     {

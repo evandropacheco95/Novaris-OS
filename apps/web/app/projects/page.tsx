@@ -11,6 +11,7 @@ import { Input, Select } from "@/components/input";
 import { Card } from "@/components/card";
 import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/empty-state";
+import { StatusDonut } from "@/components/status-donut";
 
 const STATUS_LABEL: Record<ProjectTask["status"], string> = {
   pending: "Pendente",
@@ -110,6 +111,19 @@ export default function ProjectsPage() {
       </form>
 
       {!loading && projects.length === 0 && <EmptyState message="Nenhum Project ainda." />}
+
+      {!loading && projects.some((p) => p.tasks.length > 0) && (
+        <div style={{ maxWidth: 380, marginBottom: 24 }}>
+          <StatusDonut
+            title="Tasks por status (todos os Projects)"
+            data={STATUS_ORDER.map((status) => ({
+              label: STATUS_LABEL[status],
+              value: projects.reduce((sum, p) => sum + p.tasks.filter((t) => t.status === status).length, 0),
+              color: { pending: "var(--nov-s500)", in_progress: "var(--nov-b500)", completed: "var(--nov-success)", cancelled: "var(--nov-danger)" }[status],
+            }))}
+          />
+        </div>
+      )}
 
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         {projects.map((project) => (

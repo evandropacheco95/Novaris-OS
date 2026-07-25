@@ -19,6 +19,7 @@ import { Input, Select } from "@/components/input";
 import { Card } from "@/components/card";
 import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/empty-state";
+import { StatusDonut } from "@/components/status-donut";
 
 const RELATIONSHIP_TYPES: Relationship["type"][] = ["cliente", "fornecedor", "parceiro", "prospect", "investidor", "colaborador"];
 
@@ -100,6 +101,19 @@ export default function CustomerPage() {
 
       <section style={{ marginBottom: 36 }}>
         <h2 style={sectionTitleStyle}>Parties</h2>
+
+        {!loading && parties.length > 0 && (
+          <div style={{ maxWidth: 380, marginBottom: 20 }}>
+            <StatusDonut
+              title="Parties por tipo"
+              data={[
+                { label: "Pessoa", value: parties.filter((p) => p.partyType === "person").length, color: "var(--nov-b500)" },
+                { label: "Organização Externa", value: parties.filter((p) => p.partyType === "external_organization").length, color: "var(--nov-s400)" },
+              ]}
+            />
+          </div>
+        )}
+
         <form onSubmit={handleCreateParty} style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
           <Select value={partyType} onChange={(e) => setPartyType(e.target.value as Party["partyType"])}>
             <option value="person">Pessoa</option>
