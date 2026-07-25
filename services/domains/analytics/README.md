@@ -8,7 +8,9 @@ Domínio Analytics — métricas, dashboards, relatórios e projeções.
 
 **Sétimo e último domínio de negócio implementado de ponta a ponta (`ENG-0133`)**, seguindo a receita provada em Sales/Customer/Project/Financial/Activity/Marketing: `Dashboard` (Aggregate Root, [ANALYTICS_AGGREGATE_DESIGN.md](../../../knowledge/architecture/analysis/ANALYTICS_AGGREGATE_DESIGN.md)) → Application → Infrastructure (Prisma real) → API (`apps/api`, `AnalyticsModule`) → Frontend (`apps/web`, `/analytics`).
 
-Campo mínimo via [ADR-0034](../../../adr/ADR-0034-analytics-dashboard-minimum-fields.md): `name` (obrigatório). Sem Domain Event, sem mutador. `Widget` — confirmado Internal Entity de `Dashboard` — **permanece bloqueado**: nenhum campo de conteúdo (tipo de visualização, layout) tem evidência documental; decisão explícita do CTO de não inventar esse enum sem um caso de uso real. Um `Dashboard` é hoje criável e nomeável, mas sem nenhum Widget funcional.
+Campo mínimo via [ADR-0034](../../../adr/ADR-0034-analytics-dashboard-minimum-fields.md): `name` (obrigatório). Sem Domain Event, sem mutador confirmado do próprio Dashboard.
+
+**`Widget` (`ADR-0049`, `ENG-0154`)**: desbloqueado — 4 tipos de visualização confirmados pelo CTO (`kpi`/`list`/`donut`/`bar`). Internal Entity de `Dashboard` (`type`/`title`/`metricKey`) — `metricKey` é uma string opaca que só o Frontend interpreta (contra dados já buscados de outros domínios), o Backend nunca a resolve, preservando o Analytics Domain desacoplado de Sales/Activity/etc.
 
 ## Objetos Relacionados (BOM)
 
@@ -23,4 +25,4 @@ Dashboard, Widget, Metric, Report, Forecast, Snapshot, Benchmark — ver [UBIQUI
 
 ## Status
 
-🟢 Domain/Application/Infrastructure/API/Frontend completos e testados contra Postgres real (Supabase). `Widget` deliberadamente fora de escopo.
+🟢 Domain/Application/Infrastructure/API/Frontend completos e testados contra Postgres real (Supabase), incluindo `Widget` (`ADR-0049`).

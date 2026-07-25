@@ -39,4 +39,19 @@ describe("PrismaDashboardRepository — integração real (Supabase)", () => {
     await repository.delete(dashboard.id);
     assert.equal((await repository.exists(dashboard.id)).getValue(), false);
   });
+
+  it("persiste widgets reais, via a coleção do Dashboard (`ADR-0049`)", async () => {
+    const dashboard = Dashboard.create({ organizationId: new UniqueEntityId(), name: "Com Widgets" }).getValue()!;
+    createdIds.push(dashboard.id.toString());
+    dashboard.addWidget({ type: "kpi", title: "Oportunidades abertas", metricKey: "opportunities.open" });
+    dashboard.addWidget({ type: "donut", title: "Pipeline", metricKey: "opportunities.byStatus" });
+
+    const saveResult = await repository.save(dashboard);
+    assert.equal(saveResult.isSuccess, true, JSON.stringify(saveResult.isFailure ? saveResult.getError() : null));
+
+    const fetched = (await repository.findById(dashboard.id)).getValue()!.getOrElse(null as never);
+    assert.equal(fetched.getWidgets().length, 2);
+    assert.equal(fetched.getWidgets().some((w) => w.type === "kpi"), true);
+    assert.equal(fetched.getWidgets().some((w) => w.type === "donut"), true);
+  });
 });

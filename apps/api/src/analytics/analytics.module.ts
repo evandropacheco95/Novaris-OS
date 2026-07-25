@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
 import { prisma } from "@novaris/database";
-import { createDashboardRepository, CreateDashboardHandler } from "@novaris/analytics";
+import { createDashboardRepository, CreateDashboardHandler, AddWidgetToDashboardHandler } from "@novaris/analytics";
 import { AuthModule } from "../auth/auth.module.js";
 import { DashboardController } from "./dashboard.controller.js";
 
@@ -15,6 +15,11 @@ const DASHBOARD_REPOSITORY = "DASHBOARD_REPOSITORY";
     {
       provide: CreateDashboardHandler,
       useFactory: (repository: ReturnType<typeof createDashboardRepository>) => new CreateDashboardHandler(repository),
+      inject: [DASHBOARD_REPOSITORY],
+    },
+    {
+      provide: AddWidgetToDashboardHandler,
+      useFactory: (repository: ReturnType<typeof createDashboardRepository>) => new AddWidgetToDashboardHandler(repository),
       inject: [DASHBOARD_REPOSITORY],
     },
     { provide: "DashboardRepository", useExisting: DASHBOARD_REPOSITORY },

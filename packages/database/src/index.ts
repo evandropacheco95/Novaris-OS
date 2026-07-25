@@ -53,6 +53,7 @@ export type {
   Campaign,
   CampaignAsset,
   Dashboard,
+  Widget,
   AuditEntry,
   ConfigurationEntry,
   FeatureFlag,

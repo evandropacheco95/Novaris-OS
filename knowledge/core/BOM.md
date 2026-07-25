@@ -561,12 +561,16 @@ Métrica individual.
 Painel.
 
 > **Nota de Extensão (`ADR-0034`)**: campo mínimo — `name` (obrigatório). `Widget` permanece bloqueado — sem tipos de visualização definidos, decisão de produto adiada até caso de uso real.
+>
+> **Nota de Extensão (`ADR-0049`, `ENG-0154`)**: `Widget` desbloqueado — 4 tipos de visualização (`kpi`/`list`/`donut`/`bar`), confirmados pelo CTO. Ver `BOM.md § Widget` abaixo.
 
 ---
 
 ## Widget
 
 Componente visual.
+
+> **Nota de Extensão (`ADR-0049`, `ENG-0154`)**: Internal Entity do Aggregate `Dashboard`. Campos: `type` (`"kpi" | "list" | "donut" | "bar"`), `title` (obrigatório), `metricKey` (string opaca — só o Frontend a interpreta contra dados já buscados, o Backend nunca a resolve contra dado real de outro domínio). Sem Domain Event.
 
 ---
 

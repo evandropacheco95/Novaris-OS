@@ -94,3 +94,5 @@ Entity criada? **NÃO.** Aggregate criado? **NÃO.** Value Object criado? **NÃO
 ## Status
 
 🟢 Design tático concluído. Pergunta estrutural resolvida (`Widget` = Internal Entity). Implementação real requer decisões de campo ainda mais especulativas que os domínios anteriores — recomendado aguardar caso de uso concreto.
+
+> **Nota de Resolução (`ADR-0049`, `ENG-0154`)**: o caso de uso concreto chegou — o CTO confirmou 4 tipos de visualização (`kpi`/`list`/`donut`/`bar`). `Metric` (§ 3, "Value Object embutido vs. referência a catálogo próprio, não resolvido") foi resolvido de forma diferente do que este documento antecipava: em vez de um Value Object `Metric` estruturado, `Widget` guarda uma string opaca (`metricKey`) que só o Frontend interpreta — evita que o Analytics Domain precise conhecer/validar dados de Sales/Activity/outros domínios, mantendo a regra de dependência entre Business Domains intacta. `Report` (linha 67) segue sem relação documentada — não resolvido por esta missão.

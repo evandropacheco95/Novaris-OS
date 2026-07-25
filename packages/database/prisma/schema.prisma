@@ -359,8 +359,26 @@ model Dashboard {
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
+  widgets Widget[]
+
   @@map("dashboards")
   @@index([organizationId])
+}
+
+/// Widget — Internal Entity do Aggregate Dashboard (`ADR-0049`). `metricKey`
+/// é string opaca — só o Frontend a interpreta, o Backend nunca a resolve
+/// contra dado real de outro domínio (mantém Analytics desacoplado).
+model Widget {
+  id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  dashboardId String @map("dashboard_id") @db.Uuid
+  type        String @db.VarChar(10) // "kpi" | "list" | "donut" | "bar" — CHECK constraint na migration
+  title       String @db.VarChar(255)
+  metricKey   String @map("metric_key") @db.VarChar(100)
+
+  dashboard Dashboard @relation(fields: [dashboardId], references: [id])
+
+  @@map("widgets")
+  @@index([dashboardId])
 }
 
 /// AuditEntry — Aggregate Root do Audit Domain (System Domain's único

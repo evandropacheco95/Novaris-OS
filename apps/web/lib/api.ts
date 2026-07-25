@@ -512,10 +512,20 @@ export async function downloadFile(fileRecordId: string): Promise<void> {
 
 // Analytics Domain (`ENG-0133`)
 
+export type WidgetType = "kpi" | "list" | "donut" | "bar";
+
+export interface Widget {
+  id: string;
+  type: WidgetType;
+  title: string;
+  metricKey: string;
+}
+
 export interface Dashboard {
   id: string;
   organizationId: string;
   name: string;
+  widgets: Widget[];
   createdAt: string;
   updatedAt: string;
 }
@@ -529,6 +539,14 @@ export async function listDashboards(): Promise<Dashboard[]> {
 export async function createDashboard(name: string): Promise<Dashboard> {
   const response = await authenticatedFetch("/dashboards", { method: "POST", body: JSON.stringify({ name }) });
   return parseOrThrow<Dashboard>(response, "Falha ao criar Dashboard");
+}
+
+export async function addWidgetToDashboard(dashboardId: string, type: WidgetType, title: string, metricKey: string): Promise<Dashboard> {
+  const response = await authenticatedFetch(`/dashboards/${dashboardId}/widgets`, {
+    method: "POST",
+    body: JSON.stringify({ type, title, metricKey }),
+  });
+  return parseOrThrow<Dashboard>(response, "Falha ao adicionar Widget");
 }
 
 // System / Audit Domain (`ADR-0035`, `ENG-0135`) — somente leitura, sem create: entradas nascem só do enriquecimento automático (ver ADR-0035).
