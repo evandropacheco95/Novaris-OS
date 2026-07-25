@@ -126,58 +126,71 @@ export default function LeadsPage() {
       {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
       {!loading && leads.length === 0 && <EmptyState message="Nenhum Lead ainda." />}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {leads.map((lead) => (
-          <Card key={lead.id} padding={18}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <div style={{ fontSize: 14, color: "var(--nov-s100)", fontWeight: 600 }}>{lead.name}</div>
-                <div style={{ fontSize: 12, color: "var(--nov-s500)" }}>
-                  {[lead.company, lead.email, lead.phone].filter(Boolean).join(" · ") || "—"}
+      {!loading && leads.length > 0 && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
+          {(["new", "contacted", "qualified", "unqualified", "converted"] as const).map((status) => {
+            const columnLeads = leads.filter((l) => l.status === status);
+            return (
+              <div key={status}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, padding: "0 2px" }}>
+                  <Tag tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Tag>
+                  <span style={{ fontSize: 12, color: "var(--nov-s500)" }}>{columnLeads.length}</span>
                 </div>
-                <Tag tone={STATUS_TONE[lead.status]}>{STATUS_LABEL[lead.status]}</Tag>
-              </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {columnLeads.map((lead) => (
+                    <Card key={lead.id} padding={16}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        <div style={{ fontSize: 14, color: "var(--nov-s100)", fontWeight: 600 }}>{lead.name}</div>
+                        <div style={{ fontSize: 11.5, color: "var(--nov-s500)" }}>
+                          {[lead.company, lead.email, lead.phone].filter(Boolean).join(" · ") || "—"}
+                        </div>
 
-              {lead.status !== "converted" && (
-                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                  <Select value={lead.status} onChange={(e) => handleStatusChange(lead.id, e.target.value as Exclude<LeadStatus, "converted">)}>
-                    {UPDATABLE_STATUSES.map((status) => (
-                      <option key={status} value={status}>
-                        {STATUS_LABEL[status]}
-                      </option>
-                    ))}
-                  </Select>
-                  <Button size="sm" onClick={() => setConvertingId(convertingId === lead.id ? null : lead.id)}>
-                    Converter
-                  </Button>
-                </div>
-              )}
-              {lead.status === "converted" && (
-                <div style={{ fontSize: 12, color: "var(--nov-s500)" }}>
-                  Party: {lead.convertedPartyId}
-                  {lead.convertedOpportunityId && <> · Opportunity: {lead.convertedOpportunityId}</>}
-                </div>
-              )}
-            </div>
+                        {lead.status !== "converted" && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 6 }}>
+                            <Select value={lead.status} onChange={(e) => handleStatusChange(lead.id, e.target.value as Exclude<LeadStatus, "converted">)}>
+                              {UPDATABLE_STATUSES.map((s) => (
+                                <option key={s} value={s}>
+                                  {STATUS_LABEL[s]}
+                                </option>
+                              ))}
+                            </Select>
+                            <Button size="sm" onClick={() => setConvertingId(convertingId === lead.id ? null : lead.id)}>
+                              Converter
+                            </Button>
+                          </div>
+                        )}
+                        {lead.status === "converted" && (
+                          <div style={{ fontSize: 11, color: "var(--nov-s500)" }}>
+                            Party: {lead.convertedPartyId?.slice(0, 8)}
+                            {lead.convertedOpportunityId && <> · Opp: {lead.convertedOpportunityId.slice(0, 8)}</>}
+                          </div>
+                        )}
 
-            {convertingId === lead.id && (
-              <div style={{ display: "flex", gap: 12, alignItems: "center", borderTop: "1px solid var(--nov-border)", paddingTop: 12, marginTop: 12 }}>
-                <Select value={partyType} onChange={(e) => setPartyType(e.target.value)}>
-                  <option value="person">Pessoa</option>
-                  <option value="external_organization">Organização</option>
-                </Select>
-                <label style={{ fontSize: 13, color: "var(--nov-s300)", display: "flex", alignItems: "center", gap: 6 }}>
-                  <input type="checkbox" checked={createOpportunityToo} onChange={(e) => setCreateOpportunityToo(e.target.checked)} />
-                  Criar Opportunity também
-                </label>
-                <Button size="sm" onClick={() => handleConvert(lead.id)}>
-                  Confirmar conversão
-                </Button>
+                        {convertingId === lead.id && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 8, borderTop: "1px solid var(--nov-border)", paddingTop: 10, marginTop: 4 }}>
+                            <Select value={partyType} onChange={(e) => setPartyType(e.target.value)}>
+                              <option value="person">Pessoa</option>
+                              <option value="external_organization">Organização</option>
+                            </Select>
+                            <label style={{ fontSize: 12, color: "var(--nov-s300)", display: "flex", alignItems: "center", gap: 6 }}>
+                              <input type="checkbox" checked={createOpportunityToo} onChange={(e) => setCreateOpportunityToo(e.target.checked)} />
+                              Criar Opportunity também
+                            </label>
+                            <Button size="sm" onClick={() => handleConvert(lead.id)}>
+                              Confirmar conversão
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  ))}
+                  {columnLeads.length === 0 && <div style={{ fontSize: 12, color: "var(--nov-s600)", padding: "10px 2px" }}>Nenhum aqui.</div>}
+                </div>
               </div>
-            )}
-          </Card>
-        ))}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </DashboardShell>
   );
 }

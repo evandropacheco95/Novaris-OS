@@ -128,29 +128,48 @@ export default function CasesPage() {
       {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
       {!loading && cases.length === 0 && <EmptyState message="Nenhum Case ainda." />}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {cases.map((caseInstance) => (
-          <Card key={caseInstance.id} padding={18} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              <div style={{ fontSize: 14, color: "var(--nov-s100)", fontWeight: 600 }}>{caseInstance.subject}</div>
-              <div style={{ fontSize: 12, color: "var(--nov-s500)" }}>
-                {partyName(caseInstance.partyId)}
-                {caseInstance.description ? ` · ${caseInstance.description}` : ""}
+      {!loading && cases.length > 0 && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+          {(["new", "in_progress", "closed"] as const).map((status) => {
+            const columnCases = cases.filter((c) => c.status === status);
+            return (
+              <div key={status}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, padding: "0 2px" }}>
+                  <Tag tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Tag>
+                  <span style={{ fontSize: 12, color: "var(--nov-s500)" }}>{columnCases.length}</span>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {columnCases.map((caseInstance) => (
+                    <Card key={caseInstance.id} padding={16}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        <div style={{ fontSize: 14, color: "var(--nov-s100)", fontWeight: 600 }}>{caseInstance.subject}</div>
+                        <div style={{ fontSize: 11.5, color: "var(--nov-s500)" }}>
+                          {partyName(caseInstance.partyId)}
+                          {caseInstance.description ? ` · ${caseInstance.description}` : ""}
+                        </div>
+                        <Tag tone={PRIORITY_TONE[caseInstance.priority]}>{caseInstance.priority}</Tag>
+                        {caseInstance.status !== "closed" && (
+                          <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+                            {caseInstance.status === "new" && (
+                              <Button size="sm" onClick={() => handleTransition(caseInstance.id, "start")}>
+                                Iniciar
+                              </Button>
+                            )}
+                            <Button size="sm" variant="secondary" onClick={() => handleTransition(caseInstance.id, "close")}>
+                              Fechar
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  ))}
+                  {columnCases.length === 0 && <div style={{ fontSize: 12, color: "var(--nov-s600)", padding: "10px 2px" }}>Nenhum aqui.</div>}
+                </div>
               </div>
-              <div style={{ display: "flex", gap: 6 }}>
-                <Tag tone={STATUS_TONE[caseInstance.status]}>{STATUS_LABEL[caseInstance.status]}</Tag>
-                <Tag tone={PRIORITY_TONE[caseInstance.priority]}>{caseInstance.priority}</Tag>
-              </div>
-            </div>
-            {caseInstance.status !== "closed" && (
-              <div style={{ display: "flex", gap: 8 }}>
-                {caseInstance.status === "new" && <Button size="sm" onClick={() => handleTransition(caseInstance.id, "start")}>Iniciar atendimento</Button>}
-                <Button size="sm" variant="secondary" onClick={() => handleTransition(caseInstance.id, "close")}>Fechar</Button>
-              </div>
-            )}
-          </Card>
-        ))}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </DashboardShell>
   );
 }
