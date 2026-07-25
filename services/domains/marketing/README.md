@@ -8,7 +8,9 @@ Domínio Marketing — campanhas, ativos de marketing e canais de aquisição.
 
 **Sexto domínio de negócio implementado de ponta a ponta (`ENG-0133`)**, seguindo a receita provada em Sales/Customer/Project/Financial/Activity: `Campaign` (Aggregate Root único, [MARKETING_AGGREGATE_DESIGN.md](../../../knowledge/architecture/analysis/MARKETING_AGGREGATE_DESIGN.md)) → Application → Infrastructure (Prisma real) → API (`apps/api`, `MarketingModule`) → Frontend (`apps/web`, `/marketing`).
 
-Campos mínimos via [ADR-0033](../../../adr/ADR-0033-marketing-campaign-minimum-fields.md): `name` (obrigatório), `startDate`/`endDate` (opcionais — campanha em rascunho pode não ter datas fechadas ainda). Sem Domain Event, sem mutador — nenhuma fonte confirma estados ou transições. `Asset` **não** é resolvido por esta missão — sua posse (Marketing vs. conceito transversal) permanece bloqueada.
+Campos mínimos via [ADR-0033](../../../adr/ADR-0033-marketing-campaign-minimum-fields.md): `name` (obrigatório), `startDate`/`endDate` (opcionais — campanha em rascunho pode não ter datas fechadas ainda). Sem Domain Event, sem mutador confirmado — nenhuma fonte confirma estados ou transições da própria Campaign.
+
+**`Asset` (`ADR-0048`, `ENG-0153`)**: posse resolvida — reaproveita `FileRecord` (Kernel, `@novaris/files`, já implementado e funcional) em vez de duplicar o conceito de armazenamento de arquivo. Modelado como Internal Entity de `Campaign` (`fileRecordId`/`addedAt`), associado via `AddAssetToCampaignHandler` (primeira composição Business Domain→Kernel desta natureza). Upload do arquivo em si continua via `POST /files` já existente — Marketing nunca reimplementa upload/storage.
 
 ## Objetos Relacionados (BOM)
 

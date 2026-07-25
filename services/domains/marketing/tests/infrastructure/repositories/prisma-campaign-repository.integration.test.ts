@@ -53,4 +53,17 @@ describe("PrismaCampaignRepository — integração real (Supabase)", () => {
     await repository.delete(campaign.id);
     assert.equal((await repository.exists(campaign.id)).getValue(), false);
   });
+
+  it("persiste assets reais, via a coleção da Campaign (`ADR-0048`)", async () => {
+    const campaign = Campaign.create({ organizationId: new UniqueEntityId(), name: "Com Assets" }).getValue()!;
+    createdIds.push(campaign.id.toString());
+    campaign.addAsset(new UniqueEntityId());
+    campaign.addAsset(new UniqueEntityId());
+
+    const saveResult = await repository.save(campaign);
+    assert.equal(saveResult.isSuccess, true, JSON.stringify(saveResult.isFailure ? saveResult.getError() : null));
+
+    const fetched = (await repository.findById(campaign.id)).getValue()!.getOrElse(null as never);
+    assert.equal(fetched.getAssets().length, 2);
+  });
 });

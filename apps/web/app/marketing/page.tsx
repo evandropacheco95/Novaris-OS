@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Megaphone } from "lucide-react";
-import { createCampaign, getToken, listCampaigns, type Campaign } from "@/lib/api";
+import { Megaphone, Paperclip } from "lucide-react";
+import { addAssetToCampaign, createCampaign, downloadFile, getToken, listCampaigns, uploadFile, type Campaign } from "@/lib/api";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
@@ -24,6 +24,8 @@ export default function MarketingPage() {
   const [name, setName] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [uploadingToId, setUploadingToId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (!getToken()) {
@@ -67,6 +69,28 @@ export default function MarketingPage() {
     return new Date(iso).toLocaleDateString("pt-BR");
   }
 
+  function handlePickFile(campaignId: string): void {
+    setUploadingToId(campaignId);
+    fileInputRef.current?.click();
+  }
+
+  async function handleFileSelected(event: ChangeEvent<HTMLInputElement>): Promise<void> {
+    const file = event.target.files?.[0];
+    const campaignId = uploadingToId;
+    event.target.value = "";
+    if (!file || !campaignId) return;
+    setError(null);
+    try {
+      const fileRecord = await uploadFile(file);
+      await addAssetToCampaign(campaignId, fileRecord.id);
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Falha ao enviar Asset");
+    } finally {
+      setUploadingToId(null);
+    }
+  }
+
   return (
     <DashboardShell title="Marketing">
       <PageHeader title="Marketing" description="Campanhas de marketing." />
@@ -85,13 +109,42 @@ export default function MarketingPage() {
 
       {!loading && campaigns.length === 0 && <EmptyState message="Nenhuma Campaign ainda." />}
 
+      <input ref={fileInputRef} type="file" style={{ display: "none" }} onChange={handleFileSelected} />
+
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {campaigns.map((campaign) => (
           <Card key={campaign.id} padding={18}>
-            <div style={{ fontSize: 14, color: "var(--nov-s200)" }}>{campaign.name}</div>
-            {(campaign.startDate || campaign.endDate) && (
-              <div style={{ fontSize: 12, color: "var(--nov-s500)", marginTop: 6 }}>
-                {formatDate(campaign.startDate) ?? "—"} até {formatDate(campaign.endDate) ?? "—"}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <div>
+                <div style={{ fontSize: 14, color: "var(--nov-s200)" }}>{campaign.name}</div>
+                {(campaign.startDate || campaign.endDate) && (
+                  <div style={{ fontSize: 12, color: "var(--nov-s500)", marginTop: 6 }}>
+                    {formatDate(campaign.startDate) ?? "—"} até {formatDate(campaign.endDate) ?? "—"}
+                  </div>
+                )}
+              </div>
+              <Button
+                size="sm"
+                variant="secondary"
+                icon={<Paperclip size={14} />}
+                loading={uploadingToId === campaign.id}
+                onClick={() => handlePickFile(campaign.id)}
+              >
+                Adicionar Asset
+              </Button>
+            </div>
+
+            {campaign.assets.length > 0 && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, borderTop: "1px solid var(--nov-border)", paddingTop: 10, marginTop: 12 }}>
+                {campaign.assets.map((asset) => (
+                  <button
+                    key={asset.id}
+                    onClick={() => downloadFile(asset.fileRecordId)}
+                    style={{ fontSize: 12, color: "var(--nov-b400)", background: "none", border: "none", padding: 0, textAlign: "left", cursor: "pointer" }}
+                  >
+                    Asset {asset.fileRecordId.slice(0, 8)} · adicionado em {formatDate(asset.addedAt)}
+                  </button>
+                ))}
               </div>
             )}
           </Card>

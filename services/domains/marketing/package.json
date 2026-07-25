@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "@novaris/shared-kernel": "workspace:*",
-    "@novaris/database": "workspace:*"
+    "@novaris/database": "workspace:*",
+    "@novaris/files": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.5.0",

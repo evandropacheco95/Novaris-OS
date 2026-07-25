@@ -434,12 +434,19 @@ export async function completeActivity(id: string): Promise<Activity> {
 
 // Marketing Domain (`ENG-0133`)
 
+export interface Asset {
+  id: string;
+  fileRecordId: string;
+  addedAt: string;
+}
+
 export interface Campaign {
   id: string;
   organizationId: string;
   name: string;
   startDate?: string;
   endDate?: string;
+  assets: Asset[];
   createdAt: string;
   updatedAt: string;
 }
@@ -453,6 +460,54 @@ export async function listCampaigns(): Promise<Campaign[]> {
 export async function createCampaign(name: string, startDate?: string, endDate?: string): Promise<Campaign> {
   const response = await authenticatedFetch("/campaigns", { method: "POST", body: JSON.stringify({ name, startDate, endDate }) });
   return parseOrThrow<Campaign>(response, "Falha ao criar Campaign");
+}
+
+export async function addAssetToCampaign(campaignId: string, fileRecordId: string): Promise<Campaign> {
+  const response = await authenticatedFetch(`/campaigns/${campaignId}/assets`, { method: "POST", body: JSON.stringify({ fileRecordId }) });
+  return parseOrThrow<Campaign>(response, "Falha ao associar Asset");
+}
+
+// FileRecord (`ADR-0039`, Kernel) — upload multipart real, reaproveitado por Marketing (`ADR-0048`).
+
+export interface FileRecord {
+  id: string;
+  filename: string;
+  mimeType: string;
+  sizeBytes: number;
+  createdAt: string;
+}
+
+/** Upload multipart — não usa `authenticatedFetch` (que fixa `Content-Type: application/json`); o navegador define o boundary correto sozinho. */
+export async function uploadFile(file: File): Promise<FileRecord> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const token = getToken();
+  const response = await fetch(`${API_URL}/files`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  return parseOrThrow<FileRecord>(response, "Falha ao enviar arquivo");
+}
+
+/**
+ * `GET /files/:id` exige `Authorization: Bearer` — um `<a href>` puro não
+ * envia o header, por isso baixa via `fetch` + Blob temporário. Nome do
+ * arquivo lido do `Content-Disposition` que a API já envia (`filename="..."`)
+ * — sem isso, o navegador usa o UUID interno de armazenamento como nome.
+ */
+export async function downloadFile(fileRecordId: string): Promise<void> {
+  const response = await authenticatedFetch(`/files/${fileRecordId}`);
+  if (!response.ok) throw new Error("Falha ao baixar arquivo");
+  const disposition = response.headers.get("Content-Disposition") ?? "";
+  const match = /filename="([^"]+)"/.exec(disposition);
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = match?.[1] ?? "";
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 // Analytics Domain (`ENG-0133`)

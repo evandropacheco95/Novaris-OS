@@ -215,6 +215,8 @@ Arquivo armazenado.
 
 Recurso digital.
 
+> **Nota de Extensão (`ADR-0048`, `ENG-0153`)**: posse resolvida — Internal Entity do Aggregate `Campaign` (Marketing Domain), referenciando um `FileRecord` (Kernel, `@novaris/files`) por id. Não duplica o conceito de armazenamento de arquivo — só associa um `FileRecord` já enviado a uma Campaign. Campos: `fileRecordId`, `addedAt`. Sem Domain Event.
+
 ---
 
 ## Tag

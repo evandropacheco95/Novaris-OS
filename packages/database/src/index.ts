@@ -51,6 +51,7 @@ export type {
   Subscription,
   Activity,
   Campaign,
+  CampaignAsset,
   Dashboard,
   AuditEntry,
   ConfigurationEntry,

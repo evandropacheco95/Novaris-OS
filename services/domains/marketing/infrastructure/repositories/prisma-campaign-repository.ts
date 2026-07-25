@@ -11,7 +11,7 @@ export class PrismaCampaignRepository implements CampaignRepository {
 
   async findById(id: UniqueEntityId): Promise<Result<Option<Campaign>, InfrastructureError>> {
     try {
-      const record = await this.client.campaign.findUnique({ where: { id: id.toString() } });
+      const record = await this.client.campaign.findUnique({ where: { id: id.toString() }, include: { assets: true } });
       if (!record) {
         return Result.ok(Option.none<Campaign>());
       }
@@ -23,7 +23,7 @@ export class PrismaCampaignRepository implements CampaignRepository {
 
   async findAll(): Promise<Result<Campaign[], InfrastructureError>> {
     try {
-      const records = await this.client.campaign.findMany();
+      const records = await this.client.campaign.findMany({ include: { assets: true } });
       return Result.ok(records.map((record) => PrismaCampaignMapper.toDomain(record)));
     } catch (error) {
       return Result.fail(new InfrastructureError("Falha ao listar Campaigns", { cause: error }));
@@ -39,14 +39,29 @@ export class PrismaCampaignRepository implements CampaignRepository {
     }
   }
 
+  /** Sincroniza `assets` transacionalmente — mesmo padrão de `PrismaQuotationRepository` para `lineItems` (`ADR-0048`). */
   async save(entity: Campaign): Promise<Result<void, InfrastructureError>> {
     try {
       const data = PrismaCampaignMapper.toPersistenceCreate(entity);
-      await this.client.campaign.upsert({
-        where: { id: data.id },
-        create: data,
-        update: { name: data.name, startDate: data.startDate, endDate: data.endDate },
-      });
+      await this.client.$transaction([
+        this.client.campaign.upsert({
+          where: { id: data.id },
+          create: data,
+          update: { name: data.name, startDate: data.startDate, endDate: data.endDate },
+        }),
+        ...entity.getAssets().map((asset) =>
+          this.client.campaignAsset.upsert({
+            where: { id: asset.id.toString() },
+            create: {
+              id: asset.id.toString(),
+              campaignId: entity.id.toString(),
+              fileRecordId: asset.fileRecordId.toString(),
+              addedAt: asset.addedAt,
+            },
+            update: {},
+          }),
+        ),
+      ]);
       return Result.ok(undefined);
     } catch (error) {
       return Result.fail(new InfrastructureError(`Falha ao salvar Campaign "${entity.id.toString()}"`, { cause: error }));

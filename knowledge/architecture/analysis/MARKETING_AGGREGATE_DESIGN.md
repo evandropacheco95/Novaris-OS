@@ -81,3 +81,5 @@ Entity criada? **NÃO.** Aggregate criado? **NÃO.** Value Object criado? **NÃO
 ## Status
 
 🟢 Design tático concluído. Requer decisão do CTO sobre campos mínimos de `Campaign` e posse de `Asset` antes de implementação real.
+
+> **Nota de Resolução (`ADR-0048`, `ENG-0153`)**: posse de `Asset` resolvida pelo CTO — investigação prévia encontrou `FileRecord` (Kernel, `@novaris/files`, `ADR-0039`) já implementado como Aggregate Root genérico e funcional, sem relação com `Campaign`. O CTO decidiu reaproveitar `FileRecord` (não duplicar o conceito de armazenamento de arquivo), modelando `Asset` como Internal Entity de `Campaign` que referencia `FileRecord` por id — **diverge da conclusão preliminar deste documento** (§ 3, que apontava para um Aggregate Root independente, pelo critério de "reuso" de `ADR-0021`) porque a evidência do `FileRecord` já existente não estava disponível/considerada nesta análise original. Registrado aqui como fato, não reconciliado retroativamente — a decisão do CTO é a fonte de verdade vigente.

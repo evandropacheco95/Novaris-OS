@@ -60,4 +60,38 @@ describe("Campaign.reconstitute", () => {
     assert.equal(campaign.name, "Restaurada");
     assert.equal(campaign.domainEvents.length, 0);
   });
+
+  it("restaura assets quando fornecidos", () => {
+    const id = new UniqueEntityId();
+    const now = new Date();
+    const campaign = Campaign.reconstitute({ organizationId: new UniqueEntityId(), name: "Restaurada", createdAt: now, updatedAt: now }, id);
+    assert.equal(campaign.getAssets().length, 0);
+  });
+});
+
+describe("Campaign.addAsset", () => {
+  it("adiciona um Asset referenciando o fileRecordId (`ADR-0048`)", () => {
+    const campaign = Campaign.create(buildCreateInput()).getValue()!;
+    const fileRecordId = new UniqueEntityId();
+    const asset = campaign.addAsset(fileRecordId);
+
+    assert.equal(asset.fileRecordId.equals(fileRecordId), true);
+    assert.equal(campaign.getAssets().length, 1);
+    assert.equal(campaign.getAssets()[0]!.id.equals(asset.id), true);
+  });
+
+  it("permite múltiplos assets na mesma Campaign", () => {
+    const campaign = Campaign.create(buildCreateInput()).getValue()!;
+    campaign.addAsset(new UniqueEntityId());
+    campaign.addAsset(new UniqueEntityId());
+    assert.equal(campaign.getAssets().length, 2);
+  });
+
+  it("getAssets() devolve uma cópia defensiva", () => {
+    const campaign = Campaign.create(buildCreateInput()).getValue()!;
+    campaign.addAsset(new UniqueEntityId());
+    const assets = campaign.getAssets() as unknown as Array<unknown>;
+    assets.push({});
+    assert.equal(campaign.getAssets().length, 1);
+  });
 });

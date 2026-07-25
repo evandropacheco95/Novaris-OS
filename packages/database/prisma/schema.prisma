@@ -326,8 +326,26 @@ model Campaign {
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz
 
+  assets CampaignAsset[]
+
   @@map("campaigns")
   @@index([organizationId])
+}
+
+/// CampaignAsset — Internal Entity do Aggregate Campaign (`ADR-0048`).
+/// `fileRecordId` referencia `FileRecord` (Kernel, `@novaris/files`) sem FK —
+/// Kernel e Business Domain nunca compartilham FK física, mesma decisão de
+/// desacoplamento já usada entre `Quotation`/`Product` (`productId`).
+model CampaignAsset {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campaignId   String   @map("campaign_id") @db.Uuid
+  fileRecordId String   @map("file_record_id") @db.Uuid
+  addedAt      DateTime @map("added_at") @db.Timestamptz
+
+  campaign Campaign @relation(fields: [campaignId], references: [id])
+
+  @@map("campaign_assets")
+  @@index([campaignId])
 }
 
 /// Dashboard — Aggregate Root do Analytics Domain.

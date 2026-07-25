@@ -69,7 +69,11 @@ async function bootstrap(): Promise<void> {
   // CORS habilitado para o Frontend (`apps/web`, porta própria) chamar esta
   // API a partir do navegador — sem isso, todo `fetch()` do lado do cliente
   // falharia por política de mesma origem (`ENG-0123`, Frontend Web #1).
-  app.enableCors();
+  // `exposedHeaders` inclui `Content-Disposition` — sem isso, o navegador não
+  // deixa JS ler esse header em resposta cross-origin (Vercel↔Railway,
+  // `ADR-0046`), quebrando a leitura do filename real em `downloadFile()`
+  // (`ADR-0048`).
+  app.enableCors({ exposedHeaders: ["Content-Disposition"] });
   // `ws` puro, não `socket.io` (padrão do NestJS) — `RealtimeGateway`
   // (`ADR-0039`) não precisa de "rooms", `ws` já basta.
   app.useWebSocketAdapter(new WsAdapter(app));
