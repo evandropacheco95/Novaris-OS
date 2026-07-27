@@ -55,6 +55,7 @@ PROGRAM
 | `ADM-` | Índice/consolidação de decisões já tomadas | `ADM-0001` |
 | `ENS-` | Padrão de engenharia (Engineering Standard) — como implementar um tipo de componente | `ENS-0001` |
 | `ENG-` | Implementação técnica (código ou modelagem de domínio) | `ENG-0001.x`, `ENG-0002.x` |
+| `NEP-` | NOVARIS Engineering Playbook — documento-guia operacional de leitura linear, documentação pura (não produz código; par funcional de `DOC-`, formalizado por `ADM-0002`) | `NEP-0001` |
 
 `ACR` (Architecture Compliance Report) e `DMV` (Domain Model Validation) **não são prefixos de Mission ID própria** — são relatórios obrigatórios entregues dentro de qualquer Mission dos 4 tipos acima (§ Regra), não uma quinta sequência numerada.
 

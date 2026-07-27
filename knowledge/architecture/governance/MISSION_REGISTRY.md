@@ -66,8 +66,9 @@ Registrar **todo** Mission-ID já usado no repositório NOVARIS, para que qualqu
 | ID | Título |
 |---|---|
 | ADM-0001 | Architecture Decision Matrix Integration |
+| ADM-0002 | Formalização do prefixo `NEP-` na taxonomia de Mission ID (`NEF/PLANNING_MODEL.md`) — significa "NOVARIS Engineering Playbook" |
 
-**Próximo livre: `ADM-0002`.**
+**Próximo livre: `ADM-0003`.**
 
 ### `ENS-` — Engineering Standard
 
@@ -210,13 +211,15 @@ Registrar **todo** Mission-ID já usado no repositório NOVARIS, para que qualqu
 
 **Próximo livre: `EPIC-008`.**
 
-### `NEP-` — Não formalizado na taxonomia oficial (`NEF/PLANNING_MODEL.md`)
+### `NEP-` — NOVARIS Engineering Playbook (formalizado por `ADM-0002`)
 
 | ID | Título |
 |---|---|
 | NEP-0001 | NOVARIS Engineering Handbook |
 
-**Gap conhecido, não resolvido por este Registry**: o prefixo `NEP-` segue fora da taxonomia oficial (`ADR-`/`ADM-`/`ENS-`/`ENG-`) — requer decisão do CTO para ser formalizado ou descontinuado.
+**Resolvido por `ADM-0002`**: `NEP-` significa "NOVARIS Engineering Playbook" — documento-guia operacional de leitura linear, documentação pura, par funcional de `DOC-` — e entrou formalmente na taxonomia oficial (`NEF/PLANNING_MODEL.md`). Decisão do CTO.
+
+**Próximo livre: `NEP-0002`.**
 
 ### `DOC-` — Governança Documental
 

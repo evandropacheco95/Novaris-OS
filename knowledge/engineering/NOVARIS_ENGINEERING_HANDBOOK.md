@@ -23,7 +23,7 @@ Este documento chegou a coexistir com outros dois que também se autodeclaravam 
 
 [ADR-0009](../../adr/ADR-0009-engineering-entry-point-authority.md) (Missão DOC-0001) resolveu a ambiguidade atribuindo papéis distintos, não sobrepostos: **este Handbook é a fonte canônica de onboarding em leitura linear** (um único arquivo, do início ao fim, "como tudo se encaixa"); **NEF é a fonte canônica de referência estrutural** ("onde está a regra vigente de X", 10 pastas, não leitura corrida); **NES é histórico**, redirecionado para ambos. `PROJECT_RULES.md` / `CONSTITUTION.md` seguem como autoridade normativa vigente (Artigo 1), papel que nenhum dos três nunca disputou. Onde este Handbook divergir em detalhe de NEF ou de qualquer fonte primária, a fonte primária prevalece — este documento deve ser corrigido para bater com ela, nunca o contrário.
 
-**Prefixo de Mission ID `NEP-`**: esta missão usou `NEP-0001`. A taxonomia formalizada em `NEF/PLANNING_MODEL.md` (Missão ENS-0001) cobre `ADR-`/`ADM-`/`ENS-`/`ENG-`. `NEP` segue não definido formalmente — ainda requer confirmação do CTO para ser adicionado à taxonomia; não resolvido por DOC-0001 (fora do seu escopo, que trata de governança documental, não de nomenclatura de missão).
+**Prefixo de Mission ID `NEP-`**: esta missão usou `NEP-0001`. **Resolvido por `ADM-0002`**: `NEP-` significa "NOVARIS Engineering Playbook" — documento-guia operacional de leitura linear, documentação pura (par funcional de `DOC-`) — e entrou formalmente na taxonomia de `NEF/PLANNING_MODEL.md`. Decisão do CTO, confirmando o que já era usado operacionalmente (`ARCHITECTURE_REVIEW_GATE_STANDARD.md` já tratava `NEP-` como documentação pura antes mesmo da formalização).
 
 ---
 
@@ -49,7 +49,7 @@ Hierarquia de planejamento: `PROGRAM → EPIC → MISSION → TASK → CHECKLIST
 | `ADM-` | Índice/consolidação de decisões já tomadas |
 | `ENS-` | Padrão de engenharia (como implementar um tipo de componente ou executar um processo de engenharia) |
 | `ENG-` | Implementação técnica (código ou modelagem de domínio) |
-| `NEP-` | ⚠️ Não definido formalmente ainda na taxonomia (ver Nota de Sobreposição acima) |
+| `NEP-` | NOVARIS Engineering Playbook — documento-guia operacional de leitura linear, documentação pura (par funcional de `DOC-`, formalizado por `ADM-0002`) |
 
 `ACR`/`DMV`/`ARG` não são prefixos de missão — são relatórios obrigatórios dentro de uma missão (ACR: sempre; DMV: quando há modelagem de domínio; ARG: quando a missão é `ENG-`, [ARCHITECTURE_REVIEW_GATE_STANDARD.md](standards/ARCHITECTURE_REVIEW_GATE_STANDARD.md), Missão ENS-0002). Fonte completa: [NEF/PLANNING_MODEL.md](../../NEF/PLANNING_MODEL.md).
 
