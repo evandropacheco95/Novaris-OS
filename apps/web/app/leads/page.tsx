@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { UserPlus } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { convertLead, createLead, getToken, listLeads, updateLeadStatus, type Lead, type LeadStatus } from "@/lib/api";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Tag } from "@/components/tag";
@@ -11,6 +12,8 @@ import { Input, Select } from "@/components/input";
 import { Card } from "@/components/card";
 import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/empty-state";
+import { Reveal } from "@/components/reveal";
+import { SkeletonCard } from "@/components/skeleton";
 
 const STATUS_LABEL: Record<LeadStatus, string> = {
   new: "Novo",
@@ -26,6 +29,14 @@ const STATUS_TONE: Record<LeadStatus, "accent" | "success" | "danger" | "neutral
   qualified: "success",
   unqualified: "danger",
   converted: "success",
+};
+
+const STATUS_COLUMN_BORDER: Record<LeadStatus, string> = {
+  new: "border-t-nov-b500",
+  contacted: "border-t-nov-b500",
+  qualified: "border-t-nov-success",
+  unqualified: "border-t-nov-danger",
+  converted: "border-t-nov-success",
 };
 
 const UPDATABLE_STATUSES: Exclude<LeadStatus, "converted">[] = ["new", "contacted", "qualified", "unqualified"];
@@ -112,7 +123,7 @@ export default function LeadsPage() {
       <PageHeader title="Leads" description="Contatos em qualificação, adaptado do Lead-to-Convert do Salesforce." actions={<Button variant="secondary" size="sm" onClick={() => router.push("/opportunities")}>← Opportunities</Button>} />
 
       <form onSubmit={handleCreate} className="mb-6 flex flex-wrap gap-2">
-        <Input placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} required />
+        <Input id="lead-name-input" placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} required />
         <Input placeholder="E-mail (opcional)" value={email} onChange={(e) => setEmail(e.target.value)} />
         <Input placeholder="Telefone (opcional)" value={phone} onChange={(e) => setPhone(e.target.value)} />
         <Input placeholder="Empresa (opcional)" value={company} onChange={(e) => setCompany(e.target.value)} />
@@ -123,8 +134,26 @@ export default function LeadsPage() {
       </form>
 
       {error && <p className="text-[13px] text-nov-danger">{error}</p>}
-      {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
-      {!loading && leads.length === 0 && <EmptyState message="Nenhum Lead ainda." />}
+
+      {loading && (
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
+          <span className="sr-only">Carregando...</span>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      )}
+
+      {!loading && leads.length === 0 && (
+        <EmptyState
+          message="Nenhum Lead ainda."
+          action={
+            <Button size="sm" icon={<UserPlus size={14} />} onClick={() => document.getElementById("lead-name-input")?.focus()}>
+              Criar o primeiro Lead
+            </Button>
+          }
+        />
+      )}
 
       {!loading && leads.length > 0 && (
         <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
@@ -132,13 +161,14 @@ export default function LeadsPage() {
             const columnLeads = leads.filter((l) => l.status === status);
             return (
               <div key={status}>
-                <div className="mb-3 flex items-center gap-2 px-0.5">
+                <div className={cn("mb-3 flex items-center gap-2 border-t-2 px-0.5 pt-2.5", STATUS_COLUMN_BORDER[status])}>
                   <Tag tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Tag>
                   <span className="text-xs text-nov-s500">{columnLeads.length}</span>
                 </div>
                 <div className="flex flex-col gap-2.5">
-                  {columnLeads.map((lead) => (
-                    <Card key={lead.id} padding={16}>
+                  {columnLeads.map((lead, i) => (
+                    <Reveal key={lead.id} index={i}>
+                    <Card padding={16} glow>
                       <div className="flex flex-col gap-1.5">
                         <div className="text-sm font-semibold text-nov-s100">{lead.name}</div>
                         <div className="text-[11.5px] text-nov-s500">{[lead.company, lead.email, lead.phone].filter(Boolean).join(" · ") || "—"}</div>
@@ -181,6 +211,7 @@ export default function LeadsPage() {
                         )}
                       </div>
                     </Card>
+                    </Reveal>
                   ))}
                   {columnLeads.length === 0 && <div className="px-0.5 py-2.5 text-xs text-nov-s600">Nenhum aqui.</div>}
                 </div>

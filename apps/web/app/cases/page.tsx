@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { LifeBuoy } from "lucide-react";
 import { closeCase, createCase, getToken, listCases, listParties, startCase, type Case, type CasePriority, type CaseStatus, type Party } from "@/lib/api";
+import { cn } from "@/lib/utils";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Tag } from "@/components/tag";
 import { Button } from "@/components/button";
@@ -11,6 +12,8 @@ import { Input, Select } from "@/components/input";
 import { Card } from "@/components/card";
 import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/empty-state";
+import { Reveal } from "@/components/reveal";
+import { SkeletonCard } from "@/components/skeleton";
 
 const STATUS_LABEL: Record<CaseStatus, string> = {
   new: "Novo",
@@ -22,6 +25,12 @@ const STATUS_TONE: Record<CaseStatus, "accent" | "success" | "danger"> = {
   new: "accent",
   in_progress: "accent",
   closed: "success",
+};
+
+const STATUS_COLUMN_BORDER: Record<CaseStatus, string> = {
+  new: "border-t-nov-b500",
+  in_progress: "border-t-nov-b500",
+  closed: "border-t-nov-success",
 };
 
 const PRIORITY_TONE: Record<CasePriority, "neutral" | "accent" | "danger"> = {
@@ -108,7 +117,7 @@ export default function CasesPage() {
             </option>
           ))}
         </Select>
-        <Input placeholder="Assunto" value={subject} onChange={(e) => setSubject(e.target.value)} required className="flex-1" />
+        <Input id="case-subject-input" placeholder="Assunto" value={subject} onChange={(e) => setSubject(e.target.value)} required className="flex-1" />
         <Input placeholder="Descrição (opcional)" value={description} onChange={(e) => setDescription(e.target.value)} className="flex-1" />
         <Select value={priority} onChange={(e) => setPriority(e.target.value as CasePriority)}>
           <option value="low">Baixa</option>
@@ -123,8 +132,26 @@ export default function CasesPage() {
       {!loading && parties.length === 0 && <p className="mb-4 text-[13px] text-nov-s500">Cadastre uma Party em Relationship antes de criar um Case.</p>}
 
       {error && <p className="text-[13px] text-nov-danger">{error}</p>}
-      {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
-      {!loading && cases.length === 0 && <EmptyState message="Nenhum Case ainda." />}
+
+      {loading && (
+        <div className="grid grid-cols-3 gap-4">
+          <span className="sr-only">Carregando...</span>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      )}
+
+      {!loading && cases.length === 0 && (
+        <EmptyState
+          message="Nenhum Case ainda."
+          action={
+            <Button size="sm" icon={<LifeBuoy size={14} />} onClick={() => document.getElementById("case-subject-input")?.focus()}>
+              Criar o primeiro Case
+            </Button>
+          }
+        />
+      )}
 
       {!loading && cases.length > 0 && (
         <div className="grid grid-cols-3 gap-4">
@@ -132,13 +159,14 @@ export default function CasesPage() {
             const columnCases = cases.filter((c) => c.status === status);
             return (
               <div key={status}>
-                <div className="mb-3 flex items-center gap-2 px-0.5">
+                <div className={cn("mb-3 flex items-center gap-2 border-t-2 px-0.5 pt-2.5", STATUS_COLUMN_BORDER[status])}>
                   <Tag tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Tag>
                   <span className="text-xs text-nov-s500">{columnCases.length}</span>
                 </div>
                 <div className="flex flex-col gap-2.5">
-                  {columnCases.map((caseInstance) => (
-                    <Card key={caseInstance.id} padding={16}>
+                  {columnCases.map((caseInstance, i) => (
+                    <Reveal key={caseInstance.id} index={i}>
+                    <Card padding={16} glow>
                       <div className="flex flex-col gap-1.5">
                         <div className="text-sm font-semibold text-nov-s100">{caseInstance.subject}</div>
                         <div className="text-[11.5px] text-nov-s500">
@@ -160,6 +188,7 @@ export default function CasesPage() {
                         )}
                       </div>
                     </Card>
+                    </Reveal>
                   ))}
                   {columnCases.length === 0 && <div className="px-0.5 py-2.5 text-xs text-nov-s600">Nenhum aqui.</div>}
                 </div>

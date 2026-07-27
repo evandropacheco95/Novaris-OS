@@ -19,6 +19,7 @@ import {
   type Quotation,
   type QuotationStatus,
 } from "@/lib/api";
+import { cn } from "@/lib/utils";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Tag } from "@/components/tag";
 import { Button } from "@/components/button";
@@ -26,6 +27,8 @@ import { Input, Select } from "@/components/input";
 import { Card } from "@/components/card";
 import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/empty-state";
+import { Reveal } from "@/components/reveal";
+import { SkeletonCard } from "@/components/skeleton";
 
 const STATUS_LABEL: Record<QuotationStatus, string> = {
   draft: "Rascunho",
@@ -39,6 +42,13 @@ const STATUS_TONE: Record<QuotationStatus, "accent" | "success" | "danger" | "ne
   sent: "accent",
   accepted: "success",
   rejected: "danger",
+};
+
+const STATUS_COLUMN_BORDER: Record<QuotationStatus, string> = {
+  draft: "border-t-nov-s500",
+  sent: "border-t-nov-b500",
+  accepted: "border-t-nov-success",
+  rejected: "border-t-nov-danger",
 };
 
 /**
@@ -145,7 +155,7 @@ export default function QuotationsPage() {
       />
 
       <form onSubmit={handleCreate} className="mb-6 flex gap-2">
-        <Select value={opportunityId} onChange={(e) => setOpportunityId(e.target.value)} required className="flex-1">
+        <Select id="quotation-opportunity-select" value={opportunityId} onChange={(e) => setOpportunityId(e.target.value)} required className="flex-1">
           <option value="">Opportunity</option>
           {opportunities.map((o) => (
             <option key={o.id} value={o.id}>
@@ -162,8 +172,26 @@ export default function QuotationsPage() {
       {!loading && products.length === 0 && <p className="mb-4 text-[13px] text-nov-s500">Cadastre um Product antes de adicionar itens a uma Quotation.</p>}
 
       {error && <p className="text-[13px] text-nov-danger">{error}</p>}
-      {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
-      {!loading && quotations.length === 0 && <EmptyState message="Nenhuma Quotation ainda." />}
+
+      {loading && (
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-4">
+          <span className="sr-only">Carregando...</span>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      )}
+
+      {!loading && quotations.length === 0 && (
+        <EmptyState
+          message="Nenhuma Quotation ainda."
+          action={
+            <Button size="sm" icon={<FileText size={14} />} onClick={() => document.getElementById("quotation-opportunity-select")?.focus()}>
+              Criar a primeira Quotation
+            </Button>
+          }
+        />
+      )}
 
       {!loading && quotations.length > 0 && (
         <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-4">
@@ -171,13 +199,14 @@ export default function QuotationsPage() {
             const columnQuotations = quotations.filter((q) => q.status === status);
             return (
               <div key={status}>
-                <div className="mb-3 flex items-center gap-2 px-0.5">
+                <div className={cn("mb-3 flex items-center gap-2 border-t-2 px-0.5 pt-2.5", STATUS_COLUMN_BORDER[status])}>
                   <Tag tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Tag>
                   <span className="text-xs text-nov-s500">{columnQuotations.length}</span>
                 </div>
                 <div className="flex flex-col gap-2.5">
-                  {columnQuotations.map((quotation) => (
-                    <Card key={quotation.id} padding={16}>
+                  {columnQuotations.map((quotation, i) => (
+                    <Reveal key={quotation.id} index={i}>
+                    <Card padding={16} glow>
                       <div className="flex flex-col gap-1.5">
                         <div className="text-[11px] text-nov-s500">Opp: {quotation.opportunityId.slice(0, 8)}</div>
                         <div className="text-sm font-semibold text-nov-s100">R$ {quotation.total.toFixed(2)}</div>
@@ -228,6 +257,7 @@ export default function QuotationsPage() {
                         )}
                       </div>
                     </Card>
+                    </Reveal>
                   ))}
                   {columnQuotations.length === 0 && <div className="px-0.5 py-2.5 text-xs text-nov-s600">Nenhuma aqui.</div>}
                 </div>
