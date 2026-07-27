@@ -12,25 +12,22 @@ import { Stage } from "../../../../domain/entities/stage/stage.js";
  * `getValue()!`/`getError()`, checagem de `domainEvents` diretamente sobre a
  * instância. Nenhum padrão novo introduzido.
  *
- * Objetivo desta missão: **congelar o comportamento atual** do Aggregate
- * `Pipeline` e da Entity `Stage` que ele possui — não expandir o domínio.
- * `Pipeline` não dispara nenhum Domain Event (nenhuma fonte nomeia
- * `PipelineCreated`, `pipeline.ts` linha ~76-81) — esta suíte verifica essa
- * ausência, não a inventa. `Stage` não tem método de mutação além de
- * `create()`/`reconstitute()` (`stage.ts`) — não testado além disso, por não
- * existir comportamento a testar.
+ * Objetivo original: **congelar o comportamento** do Aggregate `Pipeline` e
+ * da Entity `Stage` que ele possui. `Pipeline` não dispara nenhum Domain
+ * Event (nenhuma fonte nomeia `PipelineCreated`) — esta suíte verifica essa
+ * ausência, não a inventa.
  *
- * Nenhum método, regra, evento, campo, Aggregate, Entity ou Value Object novo
- * foi criado. `opportunity.ts`, `proposal.ts`, `stage.ts`, Repositories,
- * Mappers, Infrastructure e Contracts não foram alterados.
+ * **`name`/`rename()`/`reorderStages()` adicionados por `ADR-0051`** (decisão
+ * do CTO: múltiplos Pipelines nomeados + reorder de Stage via
+ * drag-and-drop) — cobertos abaixo, únicos comportamentos novos desde então.
  */
 
 function buildCreateInput() {
-  return { organizationId: new UniqueEntityId() };
+  return { organizationId: new UniqueEntityId(), name: "Pipeline Padrão" };
 }
 
 function buildStage(name = "Qualificação"): Stage {
-  return Stage.create({ name }).getValue()!;
+  return Stage.create({ name, order: 0 }).getValue()!;
 }
 
 describe("Pipeline.create", () => {
@@ -62,6 +59,7 @@ describe("Pipeline.reconstitute", () => {
     const reconstituted = Pipeline.reconstitute(
       {
         organizationId: created.organizationId,
+        name: created.name,
         createdAt: created.createdAt,
         updatedAt: created.updatedAt,
       },
@@ -81,6 +79,7 @@ describe("Pipeline.reconstitute", () => {
     const reconstituted = Pipeline.reconstitute(
       {
         organizationId: created.organizationId,
+        name: created.name,
         createdAt: created.createdAt,
         updatedAt: created.updatedAt,
       },
@@ -97,6 +96,7 @@ describe("Pipeline.reconstitute", () => {
     const reconstituted = Pipeline.reconstitute(
       {
         organizationId: created.organizationId,
+        name: created.name,
         createdAt: created.createdAt,
         updatedAt: created.updatedAt,
       },
@@ -131,6 +131,18 @@ describe("Pipeline.addStage", () => {
     assert.equal(pipeline.findStage(first.id)?.name, "Qualificação");
     assert.equal(pipeline.findStage(second.id)?.name, "Proposta");
     assert.equal(pipeline.findStage(third.id)?.name, "Fechamento");
+  });
+
+  it("atribui order sequencialmente (0, 1, 2...) conforme cada Stage é adicionada", () => {
+    const pipeline = Pipeline.create(buildCreateInput()).getValue()!;
+    const first = buildStage("Qualificação");
+    const second = buildStage("Proposta");
+
+    pipeline.addStage(first);
+    pipeline.addStage(second);
+
+    assert.equal(pipeline.findStage(first.id)?.order, 0);
+    assert.equal(pipeline.findStage(second.id)?.order, 1);
   });
 
   it("rejeita adicionar uma Stage com id já existente na coleção", () => {
@@ -190,6 +202,84 @@ describe("Pipeline.getStages", () => {
     pipeline.addStage(buildStage());
 
     assert.notEqual(pipeline.getStages(), pipeline.getStages());
+  });
+});
+
+describe("Pipeline.name — adicionado por ADR-0051", () => {
+  it("getter name reflete o valor fornecido na criação", () => {
+    const pipeline = Pipeline.create({ organizationId: new UniqueEntityId(), name: "Vendas Diretas" }).getValue()!;
+    assert.equal(pipeline.name, "Vendas Diretas");
+  });
+
+  it("Pipeline.create rejeita name vazio", () => {
+    const result = Pipeline.create({ organizationId: new UniqueEntityId(), name: "" });
+    assert.equal(result.isFailure, true);
+  });
+});
+
+describe("Pipeline.rename — adicionado por ADR-0051", () => {
+  it("renomeia a Pipeline com sucesso e atualiza updatedAt", () => {
+    const pipeline = Pipeline.create(buildCreateInput()).getValue()!;
+    const before = pipeline.updatedAt;
+
+    const result = pipeline.rename("Vendas Parceiros");
+    assert.equal(result.isSuccess, true);
+    assert.equal(pipeline.name, "Vendas Parceiros");
+    assert.equal(pipeline.updatedAt >= before, true);
+  });
+
+  it("rejeita rename com name vazio, preservando o name anterior", () => {
+    const pipeline = Pipeline.create(buildCreateInput()).getValue()!;
+    const result = pipeline.rename("");
+    assert.equal(result.isFailure, true);
+    assert.equal(pipeline.name, "Pipeline Padrão");
+  });
+});
+
+describe("Pipeline.reorderStages — adicionado por ADR-0051", () => {
+  it("reatribui order sequencialmente conforme a ordem fornecida", () => {
+    const pipeline = Pipeline.create(buildCreateInput()).getValue()!;
+    const first = buildStage("Qualificação");
+    const second = buildStage("Proposta");
+    const third = buildStage("Fechamento");
+    pipeline.addStage(first);
+    pipeline.addStage(second);
+    pipeline.addStage(third);
+
+    const result = pipeline.reorderStages([third.id, first.id, second.id]);
+    assert.equal(result.isSuccess, true);
+    assert.equal(pipeline.findStage(third.id)?.order, 0);
+    assert.equal(pipeline.findStage(first.id)?.order, 1);
+    assert.equal(pipeline.findStage(second.id)?.order, 2);
+  });
+
+  it("rejeita lista com quantidade diferente de Stages existentes", () => {
+    const pipeline = Pipeline.create(buildCreateInput()).getValue()!;
+    const stage = buildStage();
+    pipeline.addStage(stage);
+
+    const result = pipeline.reorderStages([stage.id, new UniqueEntityId()]);
+    assert.equal(result.isFailure, true);
+  });
+
+  it("rejeita lista com um id que não pertence a esta Pipeline", () => {
+    const pipeline = Pipeline.create(buildCreateInput()).getValue()!;
+    const stage = buildStage();
+    pipeline.addStage(stage);
+
+    const result = pipeline.reorderStages([new UniqueEntityId()]);
+    assert.equal(result.isFailure, true);
+  });
+
+  it("rejeita lista com id duplicado", () => {
+    const pipeline = Pipeline.create(buildCreateInput()).getValue()!;
+    const first = buildStage("Qualificação");
+    const second = buildStage("Proposta");
+    pipeline.addStage(first);
+    pipeline.addStage(second);
+
+    const result = pipeline.reorderStages([first.id, first.id]);
+    assert.equal(result.isFailure, true);
   });
 });
 

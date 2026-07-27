@@ -23,7 +23,7 @@ describe("PrismaPipelineRepository — integração real (Supabase)", () => {
 
   it("cria, persiste e recupera uma Pipeline real do Postgres", async () => {
     const organizationId = new UniqueEntityId();
-    const pipeline = Pipeline.create({ organizationId }).getValue()!;
+    const pipeline = Pipeline.create({ organizationId, name: "Pipeline Padrão" }).getValue()!;
     createdIds.push(pipeline.id.toString());
 
     const saveResult = await repository.save(pipeline);
@@ -39,10 +39,10 @@ describe("PrismaPipelineRepository — integração real (Supabase)", () => {
   });
 
   it("persiste Stage como Internal Entity, via a coleção da Pipeline", async () => {
-    const pipeline = Pipeline.create({ organizationId: new UniqueEntityId() }).getValue()!;
+    const pipeline = Pipeline.create({ organizationId: new UniqueEntityId(), name: "Pipeline Padrão" }).getValue()!;
     createdIds.push(pipeline.id.toString());
 
-    const stage = Stage.create({ name: "Qualificação" }).getValue()!;
+    const stage = Stage.create({ name: "Qualificação", order: 0 }).getValue()!;
     const addResult = pipeline.addStage(stage);
     assert.equal(addResult.isSuccess, true);
 
@@ -54,7 +54,7 @@ describe("PrismaPipelineRepository — integração real (Supabase)", () => {
   });
 
   it("exists() e delete() (soft delete) funcionam contra o banco real", async () => {
-    const pipeline = Pipeline.create({ organizationId: new UniqueEntityId() }).getValue()!;
+    const pipeline = Pipeline.create({ organizationId: new UniqueEntityId(), name: "Pipeline Padrão" }).getValue()!;
     createdIds.push(pipeline.id.toString());
     await repository.save(pipeline);
 

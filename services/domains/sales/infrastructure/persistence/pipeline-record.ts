@@ -3,12 +3,13 @@
  * `Pipeline` — nunca uma linha/coleção própria fora dela.
  *
  * Traceability: [SALES_PERSISTENCE_MAPPING_BLUEPRINT.md § 7, § 12](../../../../../knowledge/architecture/blueprints/SALES_PERSISTENCE_MAPPING_BLUEPRINT.md).
- * Campos idênticos a `StageProps` (`stage.ts`) + `id` — nenhum campo novo
- * inventado (ordem/posição permanece `Needs Evidence`, não incluída).
+ * Campos idênticos a `StageProps` (`stage.ts`) + `id` — `order` adicionado
+ * por `ADR-0051`.
  */
 export interface StageRecord {
   id: string;
   name: string;
+  order: number;
 }
 
 /**
@@ -17,11 +18,12 @@ export interface StageRecord {
  *
  * Traceability: [SALES_PERSISTENCE_MAPPING_BLUEPRINT.md § 6, § 12](../../../../../knowledge/architecture/blueprints/SALES_PERSISTENCE_MAPPING_BLUEPRINT.md).
  * Campos idênticos a `PipelineProps` (`pipeline.ts`) + `id` + `stages` —
- * nenhum campo novo inventado.
+ * `name` adicionado por `ADR-0051`.
  */
 export interface PipelineRecord {
   id: string;
   organizationId: string;
+  name: string;
   createdAt: Date;
   updatedAt: Date;
   stages: StageRecord[];

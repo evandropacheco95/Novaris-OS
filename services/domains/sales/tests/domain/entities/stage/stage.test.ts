@@ -11,26 +11,22 @@ import { Stage } from "../../../../domain/entities/stage/stage.js";
  * `describe`/`it` por método, `getValue()!`/`getError()` — nenhum padrão novo
  * introduzido.
  *
- * Objetivo desta missão: **congelar o comportamento atual** de `Stage` — não
- * expandir o domínio. `Stage` estende `Entity<T>`, não `AggregateRoot<T>`
- * (`stage.ts`, linha 53) — não possui `domainEvents` nem `addDomainEvent`.
- * Diferente de `Proposal`, `Stage` **não implementa `Timestamped`** — sem
- * `createdAt`/`updatedAt` (`stage.ts`, comentário "Estado deliberadamente
- * mínimo", linhas 36-40) — esta suíte não testa esses campos, por não
- * existirem. `Stage` não tem nenhum método de mutação além de
- * `create()`/`reconstitute()` (`stage.ts`, linhas 79-84) — nenhum teste de
- * transição de estado é possível ou inventado aqui. `create()` já valida que
- * `name` não é vazio (`stage.ts`, linhas 66-69) — comportamento existente,
- * testado como tal, não uma regra nova.
+ * Objetivo original desta missão: **congelar o comportamento atual** de
+ * `Stage` — não expandir o domínio. `Stage` estende `Entity<T>`, não
+ * `AggregateRoot<T>` (`stage.ts`) — não possui `domainEvents` nem
+ * `addDomainEvent`. Diferente de `Proposal`, `Stage` **não implementa
+ * `Timestamped`** — sem `createdAt`/`updatedAt` — esta suíte não testa esses
+ * campos, por não existirem. `create()` já valida que `name` não é vazio —
+ * comportamento existente, testado como tal, não uma regra nova.
  *
- * Nenhum método, regra, evento, estado ou Value Object novo foi criado.
- * `opportunity.ts`, `pipeline.ts`, `proposal.ts`, Repositories, Mappers,
- * Infrastructure e Contracts não foram alterados.
+ * **`order`/`rename()`/`setOrder()` adicionados por `ADR-0051`** (decisão do
+ * CTO: reorder de Stage via drag-and-drop) — cobertos abaixo, únicos
+ * comportamentos novos desta suíte desde então.
  */
 
 describe("Stage.create", () => {
   it("cria uma Stage válida com o name fornecido", () => {
-    const result = Stage.create({ name: "Qualificação" });
+    const result = Stage.create({ name: "Qualificação", order: 0 });
     assert.equal(result.isSuccess, true);
 
     const stage = result.getValue()!;
@@ -38,65 +34,65 @@ describe("Stage.create", () => {
   });
 
   it("rejeita name vazio — comportamento existente, não regra nova", () => {
-    const result = Stage.create({ name: "" });
+    const result = Stage.create({ name: "", order: 0 });
     assert.equal(result.isFailure, true);
     assert.equal(result.getError() instanceof ValidationError, true);
   });
 
   it("rejeita name composto só de espaços", () => {
-    const result = Stage.create({ name: "   " });
+    const result = Stage.create({ name: "   ", order: 0 });
     assert.equal(result.isFailure, true);
     assert.equal(result.getError() instanceof ValidationError, true);
   });
 
   it("nunca lança exceção", () => {
-    assert.doesNotThrow(() => Stage.create({ name: "" }));
+    assert.doesNotThrow(() => Stage.create({ name: "", order: 0 }));
   });
 });
 
 describe("Stage.reconstitute", () => {
   it("restaura uma Stage preservando o id fornecido", () => {
     const id = new UniqueEntityId();
-    const reconstituted = Stage.reconstitute({ name: "Proposta" }, id);
+    const reconstituted = Stage.reconstitute({ name: "Proposta", order: 0 }, id);
     assert.equal(reconstituted.id.equals(id), true);
   });
 
   it("restaura uma Stage preservando o estado (name) fornecido, sem validar", () => {
-    const reconstituted = Stage.reconstitute({ name: "" }, new UniqueEntityId());
+    const reconstituted = Stage.reconstitute({ name: "", order: 0 }, new UniqueEntityId());
     assert.equal(reconstituted.name, "");
   });
 
   it("não possui domainEvents — Entity<T> não implementa coleção de eventos", () => {
-    const reconstituted = Stage.reconstitute({ name: "Fechamento" }, new UniqueEntityId());
+    const reconstituted = Stage.reconstitute({ name: "Fechamento", order: 0 }, new UniqueEntityId());
     assert.equal((reconstituted as unknown as { domainEvents?: unknown }).domainEvents, undefined);
   });
 });
 
 describe("Stage.name", () => {
   it("getter name reflete exatamente o valor fornecido na criação", () => {
-    const stage = Stage.create({ name: "Negociação" }).getValue()!;
+    const stage = Stage.create({ name: "Negociação", order: 0 }).getValue()!;
     assert.equal(stage.name, "Negociação");
   });
 
   it("getter name reflete exatamente o valor fornecido na reconstituição", () => {
-    const stage = Stage.reconstitute({ name: "Fechamento" }, new UniqueEntityId());
+    const stage = Stage.reconstitute({ name: "Fechamento", order: 0 }, new UniqueEntityId());
     assert.equal(stage.name, "Fechamento");
   });
 });
 
 describe("Stage — estrutura (Entity, não AggregateRoot, sem eventos, sem setters)", () => {
   it("Stage continua sendo Entity — estende Entity<StageProps>", () => {
-    const stage = Stage.create({ name: "Qualificação" }).getValue()!;
+    const stage = Stage.create({ name: "Qualificação", order: 0 }).getValue()!;
     assert.equal(stage instanceof Entity, true);
   });
 
   it("Stage NÃO é AggregateRoot", () => {
-    const stage = Stage.create({ name: "Qualificação" }).getValue()!;
+    const stage = Stage.create({ name: "Qualificação", order: 0 }).getValue()!;
     assert.equal(stage instanceof AggregateRoot, false);
   });
 
   it("Stage não publica Domain Events — sem domainEvents/addDomainEvent", () => {
-    const stage = Stage.create({ name: "Qualificação" }).getValue()!;
+    const stage = Stage.create({ name: "Qualificação", order: 0 }).getValue()!;
     const asAny = stage as unknown as { domainEvents?: unknown; addDomainEvent?: unknown };
     assert.equal(asAny.domainEvents, undefined);
     assert.equal(asAny.addDomainEvent, undefined);
@@ -110,13 +106,48 @@ describe("Stage — estrutura (Entity, não AggregateRoot, sem eventos, sem sett
   });
 
   it("integridade do getter — não muda entre chamadas sucessivas", () => {
-    const stage = Stage.create({ name: "Qualificação" }).getValue()!;
+    const stage = Stage.create({ name: "Qualificação", order: 0 }).getValue()!;
     assert.equal(stage.name, stage.name);
   });
 
-  it("encapsulamento do estado — não há forma pública de mutar name", () => {
-    const stage = Stage.create({ name: "Qualificação" }).getValue()!;
+  it("encapsulamento do estado — não há forma pública de mutar name diretamente (só via rename())", () => {
+    const stage = Stage.create({ name: "Qualificação", order: 0 }).getValue()!;
     assert.equal(Object.keys(stage).includes("name"), false);
     assert.equal((stage as unknown as Record<string, unknown>)["setName"], undefined);
+  });
+});
+
+describe("Stage.order — adicionado por ADR-0051", () => {
+  it("getter order reflete o valor fornecido na criação", () => {
+    const stage = Stage.create({ name: "Qualificação", order: 2 }).getValue()!;
+    assert.equal(stage.order, 2);
+  });
+
+  it("getter order reflete o valor fornecido na reconstituição", () => {
+    const stage = Stage.reconstitute({ name: "Fechamento", order: 5 }, new UniqueEntityId());
+    assert.equal(stage.order, 5);
+  });
+
+  it("setOrder reatribui a ordem — usado exclusivamente por Pipeline", () => {
+    const stage = Stage.create({ name: "Qualificação", order: 0 }).getValue()!;
+    stage.setOrder(3);
+    assert.equal(stage.order, 3);
+  });
+});
+
+describe("Stage.rename — adicionado por ADR-0051", () => {
+  it("renomeia a Stage com sucesso", () => {
+    const stage = Stage.create({ name: "Qualificação", order: 0 }).getValue()!;
+    const result = stage.rename("Negociação");
+    assert.equal(result.isSuccess, true);
+    assert.equal(stage.name, "Negociação");
+  });
+
+  it("rejeita rename com name vazio, preservando o name anterior", () => {
+    const stage = Stage.create({ name: "Qualificação", order: 0 }).getValue()!;
+    const result = stage.rename("");
+    assert.equal(result.isFailure, true);
+    assert.equal(result.getError() instanceof ValidationError, true);
+    assert.equal(stage.name, "Qualificação");
   });
 });

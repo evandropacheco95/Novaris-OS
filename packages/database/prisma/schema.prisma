@@ -55,9 +55,11 @@ model Opportunity {
 
 /// Pipeline — Aggregate Root do Sales Domain (Configuration Aggregate).
 /// Fonte: knowledge/core/objects/Pipeline.md
+/// `name` adicionado por ADR-0051 (multi-pipeline nomeado por Organização).
 model Pipeline {
   id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   organizationId String    @map("organization_id") @db.Uuid
+  name           String    @db.VarChar(255)
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz
   deletedAt      DateTime? @map("deleted_at") @db.Timestamptz
@@ -71,6 +73,7 @@ model Pipeline {
 /// Stage — Internal Entity do Aggregate Pipeline.
 /// Fonte: knowledge/core/objects/Stage.md
 /// Sem createdAt/updatedAt — nenhuma fonte confirma timestamps (ver Object Specification § 5).
+/// `order` adicionado por ADR-0051 (reorder de Stage via drag-and-drop).
 /// Nota: `pipelineId` existe aqui como FK física de persistência (necessária para
 /// o Mapper reconstituir a coleção de Stages de um Pipeline) — não contradiz
 /// `stage.ts`, que documenta a Entity de domínio nunca expor esse campo como
@@ -81,6 +84,7 @@ model Stage {
   id         String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   pipelineId String @map("pipeline_id") @db.Uuid
   name       String @db.VarChar(255)
+  order      Int    @default(0)
 
   pipeline Pipeline @relation(fields: [pipelineId], references: [id])
 

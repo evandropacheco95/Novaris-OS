@@ -2,6 +2,16 @@ import { Entity, Result, ValidationError } from "@novaris/shared-kernel";
 import type { UniqueEntityId, DomainError } from "@novaris/shared-kernel";
 
 /**
+ * **`order`/`rename` adicionados por `ADR-0051`** (decisão direta do CTO:
+ * reorder de `Stage` via drag-and-drop na UI) — supera a nota original abaixo
+ * de que ordem "não é campo próprio de `Stage`" e de que renomear "não é
+ * comportamento confirmado". `order` é atribuído por `Pipeline.addStage()`/
+ * `Pipeline.reorderStages()` (nunca escolhido livremente por quem chama
+ * `Stage.create()`), preservando a mesma regra de "`Stage` não tem
+ * comportamento próprio de reordenação" — quem reordena é o `Pipeline`.
+ */
+
+/**
  * Stage — Internal Entity do Aggregate `Pipeline`.
  *
  * **Owner Aggregate**: `Pipeline`.
@@ -44,10 +54,12 @@ import type { UniqueEntityId, DomainError } from "@novaris/shared-kernel";
  */
 export interface StageProps {
   name: string;
+  order: number;
 }
 
 export interface CreateStageInput {
   name: string;
+  order: number;
 }
 
 export class Stage extends Entity<StageProps> {
@@ -60,30 +72,46 @@ export class Stage extends Entity<StageProps> {
    * **nomeada**" (`UBIQUITOUS_LANGUAGE.md`) implica um nome não-vazio como
    * condição definicional, não uma regra de negócio inventada. Não dispara
    * nenhum Domain Event — `Stage` nunca publica evento diretamente
-   * (restrição explícita desta missão), e nenhuma fonte nomeia um evento de
+   * (restrição explícita de `ENG-0043`), e nenhuma fonte nomeia um evento de
    * criação de `Stage`.
    */
   static create(input: CreateStageInput): Result<Stage, DomainError> {
     if (input.name.trim().length === 0) {
       return Result.fail(new ValidationError('"name" é obrigatório para uma Stage'));
     }
-    const props: StageProps = { name: input.name };
+    const props: StageProps = { name: input.name, order: input.order };
     return Result.ok(new Stage(props));
   }
 
-  /** Usado exclusivamente por `Pipeline` ao reconstituir seu próprio estado a partir de persistência futura (ENS-0001 § 8, adaptado). */
+  /** Usado exclusivamente por `Pipeline` ao reconstituir seu próprio estado a partir de persistência (ENS-0001 § 8, adaptado). */
   static reconstitute(props: StageProps, id: UniqueEntityId): Stage {
     return new Stage(props, id);
   }
 
+  /** Renomeia a Stage — único método de mutação, adicionado por `ADR-0051`. */
+  rename(name: string): Result<void, DomainError> {
+    if (name.trim().length === 0) {
+      return Result.fail(new ValidationError('"name" é obrigatório para uma Stage'));
+    }
+    this.props.name = name;
+    return Result.ok(undefined);
+  }
+
   /**
-   * Nenhum método de mutação é implementado — renomear ou reordenar uma
-   * `Stage` não é comportamento confirmado por nenhuma fonte
-   * (`SALES_AGGREGATE_DESIGN.md § 7`, "Allowed State Transitions — Não
-   * coberto"). Implementá-lo agora seria assumir uma regra de negócio.
+   * Reatribuição de `order` — usada exclusivamente por
+   * `Pipeline.reorderStages()`/`Pipeline.addStage()`; `Stage` não expõe
+   * nenhuma lógica própria de reordenação (quem decide a ordem relativa entre
+   * Stages é sempre o `Pipeline` que as contém).
    */
+  setOrder(order: number): void {
+    this.props.order = order;
+  }
 
   get name(): string {
     return this.props.name;
+  }
+
+  get order(): number {
+    return this.props.order;
   }
 }

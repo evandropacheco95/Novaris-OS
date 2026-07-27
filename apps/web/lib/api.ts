@@ -569,6 +569,62 @@ export async function listAuditEntries(): Promise<AuditEntry[]> {
   return (await response.json()) as AuditEntry[];
 }
 
+// Pipeline (`ADR-0051`, `ENG-0160`) — Application+API+Frontend completos:
+// Domain+Infrastructure já existiam desde `ENG-0043`, sem forma de um usuário
+// criar/nomear/reordenar Pipelines através do sistema.
+
+export interface Stage {
+  id: string;
+  name: string;
+  order: number;
+}
+
+export interface Pipeline {
+  id: string;
+  organizationId: string;
+  name: string;
+  stages: Stage[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function listPipelines(): Promise<Pipeline[]> {
+  const response = await authenticatedFetch("/pipelines");
+  if (!response.ok) throw new Error("Falha ao listar Pipelines");
+  return (await response.json()) as Pipeline[];
+}
+
+export async function createPipeline(name: string): Promise<Pipeline> {
+  const response = await authenticatedFetch("/pipelines", { method: "POST", body: JSON.stringify({ name }) });
+  return parseOrThrow<Pipeline>(response, "Falha ao criar Pipeline");
+}
+
+export async function renamePipeline(id: string, name: string): Promise<Pipeline> {
+  const response = await authenticatedFetch(`/pipelines/${id}`, { method: "PATCH", body: JSON.stringify({ name }) });
+  return parseOrThrow<Pipeline>(response, "Falha ao renomear Pipeline");
+}
+
+export async function addStage(pipelineId: string, name: string): Promise<Pipeline> {
+  const response = await authenticatedFetch(`/pipelines/${pipelineId}/stages`, { method: "POST", body: JSON.stringify({ name }) });
+  return parseOrThrow<Pipeline>(response, "Falha ao adicionar Stage");
+}
+
+export async function reorderStages(pipelineId: string, orderedStageIds: string[]): Promise<Pipeline> {
+  const response = await authenticatedFetch(`/pipelines/${pipelineId}/stages/reorder`, {
+    method: "POST",
+    body: JSON.stringify({ orderedStageIds }),
+  });
+  return parseOrThrow<Pipeline>(response, "Falha ao reordenar Stages");
+}
+
+export async function renameStage(pipelineId: string, stageId: string, name: string): Promise<Pipeline> {
+  const response = await authenticatedFetch(`/pipelines/${pipelineId}/stages/${stageId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ name }),
+  });
+  return parseOrThrow<Pipeline>(response, "Falha ao renomear Stage");
+}
+
 // Lead (`ADR-0042`, `ENG-0143`) — adaptado do Lead-to-Convert do Salesforce.
 
 export type LeadStatus = "new" | "contacted" | "qualified" | "unqualified" | "converted";

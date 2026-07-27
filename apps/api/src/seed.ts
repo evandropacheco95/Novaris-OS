@@ -35,6 +35,7 @@ const BOOTSTRAP_SYSTEM_ID = new UniqueEntityId("00000000-0000-0000-0000-00000000
  */
 const FULL_PERMISSION_CATALOG = [
   "sales.opportunities.manage",
+  "sales.pipelines.manage",
   "relationship.parties.manage",
   "relationship.relationships.manage",
   "identity.users.manage",

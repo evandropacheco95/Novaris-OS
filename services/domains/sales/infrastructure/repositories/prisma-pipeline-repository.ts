@@ -61,7 +61,7 @@ export class PrismaPipelineRepository implements PipelineRepository {
         this.client.pipeline.upsert({
           where: { id: data.id },
           create: data,
-          update: {},
+          update: { name: data.name },
         }),
         ...entity.getStages().map((stage) =>
           this.client.stage.upsert({
@@ -70,9 +70,11 @@ export class PrismaPipelineRepository implements PipelineRepository {
               id: stage.id.toString(),
               pipelineId: entity.id.toString(),
               name: stage.name,
+              order: stage.order,
             },
             update: {
               name: stage.name,
+              order: stage.order,
             },
           }),
         ),

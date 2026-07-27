@@ -24,6 +24,7 @@ import { InMemoryPipelineRepository } from "../../../infrastructure/repositories
 function buildPipeline(): Pipeline {
   return Pipeline.create({
     organizationId: new UniqueEntityId(),
+    name: "Pipeline Padrão",
   }).getValue()!;
 }
 

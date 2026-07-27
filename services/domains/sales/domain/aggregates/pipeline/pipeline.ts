@@ -1,4 +1,4 @@
-import { AggregateRoot, Result, ConflictError } from "@novaris/shared-kernel";
+import { AggregateRoot, Result, ConflictError, ValidationError, NotFoundError } from "@novaris/shared-kernel";
 import type { UniqueEntityId, DomainError, Timestamped } from "@novaris/shared-kernel";
 import type { Stage } from "../../entities/stage/stage.js";
 
@@ -31,13 +31,13 @@ import type { Stage } from "../../entities/stage/stage.js";
  * plano). `Stage` continua Internal Entity, sem Repository ou Factory Method
  * próprios para uso externo (`ADR-0021`).
  *
- * **Estado deliberadamente mínimo** — nenhum campo além do que já é exigido
- * estruturalmente. Campos não incluídos, por ausência de fonte:
- * - Nome/label do `Pipeline` — nenhuma fonte define um campo de identificação
- *   textual (`BOM.md § Pipeline`: só "Fluxo de trabalho configurável", sem
- *   atributo). TODO: `SALES_AGGREGATE_DESIGN.md § 13`.
- * - Mecanismo de criação/edição (quem pode, quando) — `Needs Evidence`
- *   (`ADR-0021 § Consequências`). TODO.
+ * **`name`/reorder adicionados por `ADR-0051`** (decisão direta do CTO:
+ * múltiplos Pipelines nomeados por Organização + reorder de Stage via
+ * drag-and-drop) — supera a nota original abaixo de que "nome" não tinha
+ * fonte. Campos ainda não incluídos, por ausência de fonte:
+ * - Mecanismo fino de criação/edição (quem pode, além do gate de permissão
+ *   `sales.pipelines.manage`) — `Needs Evidence` (`ADR-0021 § Consequências`),
+ *   não resolvido por `ADR-0051`.
  * - `organizationId` como campo **incluído** abaixo — não é invenção
  *   específica de `Pipeline`, é a regra transversal já congelada de
  *   `AGGREGATE_IMPLEMENTATION_STANDARD.md § 7` (ENS-0001): "todo `TProps` de
@@ -46,19 +46,20 @@ import type { Stage } from "../../entities/stage/stage.js";
  *   "candidata, não confirmada por nenhuma fonte explícita" — incluído aqui
  *   por aplicação da regra geral de ENS-0001, não por confirmação específica
  *   de `Sales`.
- * - Ordem/reordenação, remoção, ativação/desativação de `Stage` — nenhuma
- *   dessas regras existe em nenhuma ADR (`ADR-0021 § Consequências`,
- *   `SALES_AGGREGATE_DESIGN.md § 7`, "Allowed State Transitions — Não
- *   coberto") — explicitamente não implementadas por instrução desta missão.
+ * - Remoção, ativação/desativação de `Stage` — ainda não implementadas
+ *   (`ADR-0051` cobriu só nome + ordem, por serem as 2 decisões tomadas pelo
+ *   CTO); TODO se uma decisão futura exigir.
  */
 export interface PipelineProps {
   organizationId: UniqueEntityId;
+  name: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface CreatePipelineInput {
   organizationId: UniqueEntityId;
+  name: string;
 }
 
 export class Pipeline extends AggregateRoot<PipelineProps> implements Timestamped {
@@ -80,9 +81,13 @@ export class Pipeline extends AggregateRoot<PipelineProps> implements Timestampe
    * "No Hidden Decisions" (`ARCHITECTURE_GOVERNANCE.md § 2`).
    */
   static create(input: CreatePipelineInput): Result<Pipeline, DomainError> {
+    if (input.name.trim().length === 0) {
+      return Result.fail(new ValidationError('"name" é obrigatório para uma Pipeline'));
+    }
     const now = new Date();
     const props: PipelineProps = {
       organizationId: input.organizationId,
+      name: input.name,
       createdAt: now,
       updatedAt: now,
     };
@@ -113,7 +118,46 @@ export class Pipeline extends AggregateRoot<PipelineProps> implements Timestampe
     if (alreadyExists) {
       return Result.fail(new ConflictError(`Stage "${stage.id.toString()}" já pertence a esta Pipeline`));
     }
+    stage.setOrder(this.stages.length);
     this.stages.push(stage);
+    this.props.updatedAt = new Date();
+    return Result.ok(undefined);
+  }
+
+  /** Renomeia a Pipeline — adicionado por `ADR-0051`. */
+  rename(name: string): Result<void, DomainError> {
+    if (name.trim().length === 0) {
+      return Result.fail(new ValidationError('"name" é obrigatório para uma Pipeline'));
+    }
+    this.props.name = name;
+    this.props.updatedAt = new Date();
+    return Result.ok(undefined);
+  }
+
+  /**
+   * Reordena os Stages existentes — adicionado por `ADR-0051` (decisão do
+   * CTO: reorder via drag-and-drop na UI). Valida que `orderedStageIds`
+   * contém exatamente o mesmo conjunto de ids já pertencentes a esta
+   * Pipeline (nenhum a mais, nenhum a menos, sem duplicatas) antes de
+   * reatribuir `order` sequencialmente — mesma disciplina de integridade
+   * estrutural já aplicada por `addStage()`.
+   */
+  reorderStages(orderedStageIds: UniqueEntityId[]): Result<void, DomainError> {
+    if (orderedStageIds.length !== this.stages.length) {
+      return Result.fail(new ValidationError("A lista de reorder deve conter exatamente as Stages existentes desta Pipeline"));
+    }
+    const stageById = new Map(this.stages.map((stage) => [stage.id.toString(), stage]));
+    const seen = new Set<string>();
+    for (const stageId of orderedStageIds) {
+      const key = stageId.toString();
+      if (seen.has(key) || !stageById.has(key)) {
+        return Result.fail(new NotFoundError(`Stage "${key}" não pertence a esta Pipeline ou está duplicada na lista de reorder`));
+      }
+      seen.add(key);
+    }
+    orderedStageIds.forEach((stageId, index) => {
+      stageById.get(stageId.toString())!.setOrder(index);
+    });
     this.props.updatedAt = new Date();
     return Result.ok(undefined);
   }
@@ -133,11 +177,15 @@ export class Pipeline extends AggregateRoot<PipelineProps> implements Timestampe
   }
 
   /**
-   * Nenhum outro método de mutação é implementado — `reorderStage`,
-   * `removeStage`, `activateStage`, `deactivateStage` não existem em nenhuma
-   * ADR (`ADR-0021 § Consequências`) — implementá-los inventaria regra de
-   * negócio, restrição explícita desta missão (ENG-0043).
+   * `removeStage`/`activateStage`/`deactivateStage` ainda não existem —
+   * `ADR-0051` cobriu só `rename`/`reorderStages` (as 2 decisões tomadas
+   * pelo CTO); implementar os demais agora inventaria regra de negócio sem
+   * fonte.
    */
+
+  get name(): string {
+    return this.props.name;
+  }
 
   get organizationId(): UniqueEntityId {
     return this.props.organizationId;

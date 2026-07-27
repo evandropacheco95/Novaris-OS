@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, Handshake } from "lucide-react";
+import { ArrowUpRight, GitBranch, Handshake } from "lucide-react";
 import { createOpportunity, getToken, useCurrentUser, listOpportunities, listParties, markLost, markWon, type Opportunity, type Party } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { DashboardShell } from "@/components/dashboard-shell";
@@ -106,6 +106,9 @@ export default function OpportunitiesPage() {
         description="Negociações em andamento com suas Parties."
         actions={
           <>
+            <Button variant="secondary" size="sm" icon={<GitBranch size={14} />} onClick={() => router.push("/pipelines")}>
+              Configurar Pipelines
+            </Button>
             <Button variant="secondary" size="sm" icon={<ArrowUpRight size={14} />} onClick={() => router.push("/leads")}>
               Leads
             </Button>

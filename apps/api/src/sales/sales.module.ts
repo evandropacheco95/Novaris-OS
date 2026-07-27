@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { prisma } from "@novaris/database";
 import {
   createOpportunityRepository,
+  createPipelineRepository,
   createLeadRepository,
   createProductRepository,
   createQuotationRepository,
@@ -13,6 +14,11 @@ import {
   ApproveProposalHandler,
   MarkOpportunityWonHandler,
   MarkOpportunityLostHandler,
+  CreatePipelineHandler,
+  AddStageHandler,
+  ReorderStagesHandler,
+  RenamePipelineHandler,
+  RenameStageHandler,
   CreateLeadHandler,
   UpdateLeadStatusHandler,
   ConvertLeadHandler,
@@ -34,6 +40,7 @@ import { CreatePartyHandler } from "@novaris/customer";
 import { AuthModule } from "../auth/auth.module.js";
 import { CustomerModule } from "../customer/customer.module.js";
 import { OpportunityController } from "./opportunity.controller.js";
+import { PipelineController } from "./pipeline.controller.js";
 import { LeadController } from "./lead.controller.js";
 import { ProductController } from "./product.controller.js";
 import { QuotationController } from "./quotation.controller.js";
@@ -41,6 +48,7 @@ import { ContractController } from "./contract.controller.js";
 import { RevenueController } from "./revenue.controller.js";
 
 const OPPORTUNITY_REPOSITORY = "OPPORTUNITY_REPOSITORY";
+const PIPELINE_REPOSITORY = "PIPELINE_REPOSITORY";
 const LEAD_REPOSITORY = "LEAD_REPOSITORY";
 const PRODUCT_REPOSITORY = "PRODUCT_REPOSITORY";
 const QUOTATION_REPOSITORY = "QUOTATION_REPOSITORY";
@@ -62,7 +70,15 @@ const REVENUE_REPOSITORY = "REVENUE_REPOSITORY";
  */
 @Module({
   imports: [AuthModule, CustomerModule],
-  controllers: [OpportunityController, LeadController, ProductController, QuotationController, ContractController, RevenueController],
+  controllers: [
+    OpportunityController,
+    PipelineController,
+    LeadController,
+    ProductController,
+    QuotationController,
+    ContractController,
+    RevenueController,
+  ],
   providers: [
     {
       provide: OPPORTUNITY_REPOSITORY,
@@ -104,6 +120,39 @@ const REVENUE_REPOSITORY = "REVENUE_REPOSITORY";
       // padrão de Dependency Injection já usado por NestJS para Ports/Contracts).
       provide: "OpportunityRepository",
       useExisting: OPPORTUNITY_REPOSITORY,
+    },
+    {
+      provide: PIPELINE_REPOSITORY,
+      useFactory: () => createPipelineRepository(prisma),
+    },
+    {
+      provide: CreatePipelineHandler,
+      useFactory: (repository: ReturnType<typeof createPipelineRepository>) => new CreatePipelineHandler(repository),
+      inject: [PIPELINE_REPOSITORY],
+    },
+    {
+      provide: AddStageHandler,
+      useFactory: (repository: ReturnType<typeof createPipelineRepository>) => new AddStageHandler(repository),
+      inject: [PIPELINE_REPOSITORY],
+    },
+    {
+      provide: ReorderStagesHandler,
+      useFactory: (repository: ReturnType<typeof createPipelineRepository>) => new ReorderStagesHandler(repository),
+      inject: [PIPELINE_REPOSITORY],
+    },
+    {
+      provide: RenamePipelineHandler,
+      useFactory: (repository: ReturnType<typeof createPipelineRepository>) => new RenamePipelineHandler(repository),
+      inject: [PIPELINE_REPOSITORY],
+    },
+    {
+      provide: RenameStageHandler,
+      useFactory: (repository: ReturnType<typeof createPipelineRepository>) => new RenameStageHandler(repository),
+      inject: [PIPELINE_REPOSITORY],
+    },
+    {
+      provide: "PipelineRepository",
+      useExisting: PIPELINE_REPOSITORY,
     },
     {
       provide: LEAD_REPOSITORY,

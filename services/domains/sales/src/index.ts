@@ -23,6 +23,8 @@ export {
   type CreateOpportunityInput,
 } from "../domain/aggregates/opportunity/opportunity.js";
 
+// Pipeline: `name` e `Pipeline.reorderStages()`/`rename()` adicionados por
+// `ADR-0051` (multi-pipeline nomeado + reorder de Stage via drag-and-drop).
 export { Pipeline, type PipelineProps, type CreatePipelineInput } from "../domain/aggregates/pipeline/pipeline.js";
 
 export {
@@ -95,6 +97,20 @@ export { SubmitProposalHandler } from "../application/handlers/submit-proposal/s
 export { ApproveProposalHandler } from "../application/handlers/approve-proposal/approve-proposal.handler.js";
 export { MarkOpportunityWonHandler } from "../application/handlers/mark-opportunity-won/mark-opportunity-won.handler.js";
 export { MarkOpportunityLostHandler } from "../application/handlers/mark-opportunity-lost/mark-opportunity-lost.handler.js";
+
+// Pipeline (`ADR-0051`) — Application Layer completa: antes desta missão só
+// existia Domain+Infrastructure, sem forma de um usuário criar/nomear/reordenar
+// Pipelines através do sistema.
+export { CreatePipelineCommand } from "../application/commands/create-pipeline/create-pipeline.command.js";
+export { CreatePipelineHandler } from "../application/handlers/create-pipeline/create-pipeline.handler.js";
+export { AddStageCommand } from "../application/commands/add-stage/add-stage.command.js";
+export { AddStageHandler } from "../application/handlers/add-stage/add-stage.handler.js";
+export { ReorderStagesCommand } from "../application/commands/reorder-stages/reorder-stages.command.js";
+export { ReorderStagesHandler } from "../application/handlers/reorder-stages/reorder-stages.handler.js";
+export { RenamePipelineCommand } from "../application/commands/rename-pipeline/rename-pipeline.command.js";
+export { RenamePipelineHandler } from "../application/handlers/rename-pipeline/rename-pipeline.handler.js";
+export { RenameStageCommand } from "../application/commands/rename-stage/rename-stage.command.js";
+export { RenameStageHandler } from "../application/handlers/rename-stage/rename-stage.handler.js";
 
 export { CreateLeadCommand } from "../application/commands/create-lead/create-lead.command.js";
 export { CreateLeadHandler } from "../application/handlers/create-lead/create-lead.handler.js";

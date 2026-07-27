@@ -15,17 +15,21 @@ export class PrismaPipelineMapper {
     return {
       id: pipeline.id.toString(),
       organizationId: pipeline.organizationId.toString(),
+      name: pipeline.name,
     };
   }
 
   static toDomain(record: PrismaPipelineWithStages): Pipeline {
-    const stages: Stage[] = record.stages.map((stageRecord) => {
-      const stageProps: StageProps = { name: stageRecord.name };
-      return Stage.reconstitute(stageProps, new UniqueEntityId(stageRecord.id));
-    });
+    const stages: Stage[] = [...record.stages]
+      .sort((a, b) => a.order - b.order)
+      .map((stageRecord) => {
+        const stageProps: StageProps = { name: stageRecord.name, order: stageRecord.order };
+        return Stage.reconstitute(stageProps, new UniqueEntityId(stageRecord.id));
+      });
 
     const props: PipelineProps = {
       organizationId: new UniqueEntityId(record.organizationId),
+      name: record.name,
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
     };
