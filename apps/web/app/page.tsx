@@ -31,13 +31,18 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { StatCard } from "@/components/stat-card";
 import { Card } from "@/components/card";
 import { StatusDonut } from "@/components/status-donut";
+import { Reveal } from "@/components/reveal";
+import { Skeleton } from "@/components/skeleton";
 
 /**
  * Home — painel real de visão geral (`ENG-0147`, elevação de UI/UX), primeira
  * tela após login. Antes só redirecionava direto para `/opportunities`
  * (`ENG-0123`); agora agrega contagens reais dos domínios já implementados
  * num único painel, pensado para abrir uma apresentação ao vivo da
- * plataforma. Migrado para Tailwind em `ENG-0157`.
+ * plataforma. Migrado para Tailwind em `ENG-0157`. Elevação de design real
+ * com inspiração do 21st.dev em `ENG-0158`: StatCards com `Reveal` staggered
+ * e glow no hover, skeleton de carregamento, card de "Acessos rápidos" com
+ * leve efeito de vidro (glass).
  */
 export default function HomePage() {
   const router = useRouter();
@@ -103,48 +108,63 @@ export default function HomePage() {
       </div>
 
       {loading ? (
-        <p className="text-[13px] text-nov-s500">Carregando painel...</p>
+        <div className="mb-8 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
+          <span className="sr-only">Carregando painel...</span>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-[104px]" />
+          ))}
+        </div>
       ) : (
         <>
           <div className="mb-8 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
-            <StatCard label="Oportunidades abertas" value={openOpportunities} icon={<TrendingUp size={18} />} href="/opportunities" tone="accent" />
-            <StatCard label="Leads em qualificação" value={newLeads} icon={<Sparkles size={18} />} href="/leads" tone="accent" />
-            <StatCard label="Parties cadastradas" value={parties.length} icon={<Users size={18} />} href="/customer" tone="neutral" />
-            <StatCard label="Atividades em aberto" value={openActivities} icon={<ActivityIcon size={18} />} href="/activity" tone="neutral" />
-            <StatCard label="Projetos ativos" value={projects.length} icon={<FolderKanban size={18} />} href="/projects" tone="neutral" />
-            <StatCard label="Faturas pendentes" value={pendingInvoices} icon={<Wallet size={18} />} href="/financial" tone={pendingInvoices > 0 ? "danger" : "success"} />
+            {[
+              { label: "Oportunidades abertas", value: openOpportunities, icon: <TrendingUp size={18} />, href: "/opportunities", tone: "accent" as const },
+              { label: "Leads em qualificação", value: newLeads, icon: <Sparkles size={18} />, href: "/leads", tone: "accent" as const },
+              { label: "Parties cadastradas", value: parties.length, icon: <Users size={18} />, href: "/customer", tone: "neutral" as const },
+              { label: "Atividades em aberto", value: openActivities, icon: <ActivityIcon size={18} />, href: "/activity", tone: "neutral" as const },
+              { label: "Projetos ativos", value: projects.length, icon: <FolderKanban size={18} />, href: "/projects", tone: "neutral" as const },
+              { label: "Faturas pendentes", value: pendingInvoices, icon: <Wallet size={18} />, href: "/financial", tone: (pendingInvoices > 0 ? "danger" : "success") as "danger" | "success" },
+            ].map((stat, i) => (
+              <Reveal key={stat.href} index={i}>
+                <StatCard {...stat} />
+              </Reveal>
+            ))}
           </div>
 
           <div className="grid grid-cols-[minmax(260px,380px)_1fr] gap-4">
-            <StatusDonut title="Pipeline de Opportunities" data={opportunitiesByStatus} />
+            <Reveal index={6}>
+              <StatusDonut title="Pipeline de Opportunities" data={opportunitiesByStatus} />
+            </Reveal>
 
-            <Card padding={24}>
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="m-0 text-sm font-bold text-nov-s100">Acessos rápidos</h3>
-              </div>
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2.5">
-                {[
-                  { label: "Leads", href: "/leads" },
-                  { label: "Quotations", href: "/quotations" },
-                  { label: "Products", href: "/products" },
-                  { label: "Contracts", href: "/contracts" },
-                  { label: "Cases", href: "/cases" },
-                  { label: "Comments", href: "/comments" },
-                  { label: "Calendário", href: "/calendar-events" },
-                  { label: "Reminders", href: "/reminders" },
-                  { label: "Checklists", href: "/checklists" },
-                ].map((link) => (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    className="flex items-center justify-between rounded-nov border border-nov-border bg-nov-bg2 px-3.5 py-2.5 text-[13px] font-medium text-nov-s300 no-underline transition-[border-color,color] duration-nov-fast hover:border-nov-b700 hover:text-nov-s100"
-                  >
-                    {link.label}
-                    <ArrowUpRight size={14} />
-                  </a>
-                ))}
-              </div>
-            </Card>
+            <Reveal index={7}>
+              <Card padding={24} glass>
+                <div className="mb-4 flex items-center justify-between">
+                  <h3 className="m-0 text-sm font-bold text-nov-s100">Acessos rápidos</h3>
+                </div>
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2.5">
+                  {[
+                    { label: "Leads", href: "/leads" },
+                    { label: "Quotations", href: "/quotations" },
+                    { label: "Products", href: "/products" },
+                    { label: "Contracts", href: "/contracts" },
+                    { label: "Cases", href: "/cases" },
+                    { label: "Comments", href: "/comments" },
+                    { label: "Calendário", href: "/calendar-events" },
+                    { label: "Reminders", href: "/reminders" },
+                    { label: "Checklists", href: "/checklists" },
+                  ].map((link) => (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      className="flex items-center justify-between rounded-nov border border-nov-border bg-nov-bg2 px-3.5 py-2.5 text-[13px] font-medium text-nov-s300 no-underline transition-[border-color,color] duration-nov-fast hover:border-nov-b700 hover:text-nov-s100"
+                    >
+                      {link.label}
+                      <ArrowUpRight size={14} />
+                    </a>
+                  ))}
+                </div>
+              </Card>
+            </Reveal>
           </div>
         </>
       )}

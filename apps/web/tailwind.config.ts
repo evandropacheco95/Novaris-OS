@@ -43,6 +43,8 @@ const config: Config = {
         "nov-danger-soft": "var(--nov-danger-soft)",
         "nov-warning": "var(--nov-warning)",
         "nov-warning-soft": "var(--nov-warning-soft)",
+        "nov-glass-bg": "var(--glass-bg)",
+        "nov-glass-border": "var(--glass-border)",
       },
       fontFamily: {
         "nov-display": "var(--ff-display)",
@@ -67,6 +69,7 @@ const config: Config = {
       animation: {
         "nov-spin": "nov-spin 0.7s linear infinite",
         "nov-fade-in": "nov-fade-in var(--transition) both",
+        "nov-shimmer": "nov-shimmer 1.6s ease-in-out infinite",
       },
     },
   },

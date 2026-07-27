@@ -81,6 +81,10 @@
 
   --transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Glass — efeito de vidro do brandkit (`ENG-0158`), usado com moderação em cards de destaque */
+  --glass-bg: #ffffff08;
+  --glass-border: #ffffff14;
 }
 
 * {
@@ -153,5 +157,14 @@ a {
 @keyframes nov-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes nov-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
   }
 }
