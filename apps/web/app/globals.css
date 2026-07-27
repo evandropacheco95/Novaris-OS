@@ -1,9 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /**
  * Design tokens — extraídos do brandkit real da NOVARIS
  * (`NOVARIS_Brand_Identity_v1.0.html`, fora deste repositório), namespace
  * `--nov-*` preservado como no arquivo original. Única fonte de verdade
  * visual até que um design system formal seja criado em
  * `knowledge/engineering` — nenhuma cor/token aqui foi inventado.
+ *
+ * A partir de `ADR-0050`, esses tokens também são consumidos via classes
+ * Tailwind (`tailwind.config.ts` referencia cada `var(--nov-*)` diretamente,
+ * nunca recria o valor) — esta continua sendo a única fonte de verdade.
  */
 :root {
   /* Fundo — escala escura "cosmic" */
