@@ -1,6 +1,6 @@
 # .github
 
-Configurações do GitHub para o repositório NOVARIS: templates de issues, template de pull request e, futuramente, workflows de CI/CD (GitHub Actions).
+Configurações do GitHub para o repositório NOVARIS: templates de issues, template de pull request, `CODEOWNERS` e workflow de CI (GitHub Actions).
 
 ## Conteúdo
 
@@ -8,9 +8,9 @@ Configurações do GitHub para o repositório NOVARIS: templates de issues, temp
 |---|---|
 | `ISSUE_TEMPLATE/` | Templates padronizados para reportar bugs e propor features |
 | `PULL_REQUEST_TEMPLATE.md` | Checklist padrão exigido em todo Pull Request |
-| `CODEOWNERS` | Estrutura de responsabilidade por pasta (Missão ENG-0000) — donos reais ainda `TODO` |
-| `workflows/` *(a criar)* | Pipelines de CI/CD — ver [engineering/pipeline-ci-cd.md](../engineering/pipeline-ci-cd.md) e [docs/08-infraestrutura/github-actions.md](../docs/08-infraestrutura/github-actions.md) |
+| `CODEOWNERS` | Estrutura de responsabilidade por pasta — dono real atribuído (`ENS-0004`) |
+| `workflows/ci.yml` | Build+lint+test do monorepo (`pnpm`/Turborepo) em todo push/PR para `master` (`ENS-0004`) — exigido como status check pela branch protection |
 
 ## Status
 
-🚧 Workflows de CI/CD ainda não implementados — apenas templates de colaboração e `CODEOWNERS` (estrutura) nesta fase.
+🟢 CI mínimo implementado (`ENS-0004`) — `workflows/ci.yml` roda `pnpm build lint test`, exigido como gate obrigatório de merge na `master`. Ver [engineering/git-workflow.md](../engineering/git-workflow.md) para a política completa de branch/merge.

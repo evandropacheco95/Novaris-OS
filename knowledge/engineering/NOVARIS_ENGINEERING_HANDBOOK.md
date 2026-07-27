@@ -91,7 +91,7 @@ Corresponde à Fase 8 de `EXECUTION_PROTOCOL.md` (Constituição, Artigo 19 — 
 
 ## 11. Processo de Merge
 
-Checklist de Pull Request já definido: [ENGINEERING_PLAYBOOK.md § 18](ENGINEERING_PLAYBOOK.md#18-pull-request-checklist) (estrutura de camadas respeitada, Object Specification presente, testes, logging, documentação atualizada no mesmo PR, ADR se houve decisão arquitetural). Formato de revisão: [.command-center/CODE_REVIEW.md](../../.command-center/CODE_REVIEW.md). **Requer decisão, não inventado aqui**: número mínimo de aprovações, se CI bloqueia merge automaticamente, política de branch protection — nenhuma fonte anterior define esses parâmetros.
+Checklist de Pull Request já definido: [ENGINEERING_PLAYBOOK.md § 18](ENGINEERING_PLAYBOOK.md#18-pull-request-checklist) (estrutura de camadas respeitada, Object Specification presente, testes, logging, documentação atualizada no mesmo PR, ADR se houve decisão arquitetural). Formato de revisão: [.command-center/CODE_REVIEW.md](../../.command-center/CODE_REVIEW.md). **Resolvido por `ENS-0004`**: 0 aprovações obrigatórias (repositório single-committer hoje), CI (`.github/workflows/ci.yml`) obrigatório antes do merge, branch protection real configurada na `master`. Ver [engineering/git-workflow.md](../../engineering/git-workflow.md).
 
 ## 12. Processo de Release
 

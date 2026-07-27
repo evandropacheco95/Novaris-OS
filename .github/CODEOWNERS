@@ -1,23 +1,24 @@
 # CODEOWNERS — estrutura de responsabilidade por pasta.
-# Donos reais ainda não atribuídos (TODO) — não inventados aqui, ver PROJECT_RULES.md/CONSTITUTION.md § Artigo 15.
+# Donos atribuídos por ENS-0004 — único committer real do repositório hoje;
+# revisitar por área quando houver um 2º colaborador (ver PROJECT_RULES.md/CONSTITUTION.md § Artigo 15).
 
 # Governança — requer revisão de quem tem autoridade constitucional
-/PROJECT_RULES.md               # TODO
-/knowledge/core/CONSTITUTION.md # TODO
-/knowledge/core/NOVARIS_CONSTITUTION.md # TODO
-/adr/                            # TODO
+/PROJECT_RULES.md               @evandropacheco95
+/knowledge/core/CONSTITUTION.md @evandropacheco95
+/knowledge/core/NOVARIS_CONSTITUTION.md @evandropacheco95
+/adr/                            @evandropacheco95
 
 # Kernel
-/services/                       # TODO
+/services/                       @evandropacheco95
 
 # Frontend
-/apps/web/                       # TODO
-/apps/admin/                     # TODO
+/apps/web/                       @evandropacheco95
+/apps/admin/                     @evandropacheco95
 
 # Dados
-/packages/database/              # TODO
-/knowledge/core/BOM.md           # TODO
-/knowledge/core/DATABASE_ARCHITECTURE.md # TODO
+/packages/database/              @evandropacheco95
+/knowledge/core/BOM.md           @evandropacheco95
+/knowledge/core/DATABASE_ARCHITECTURE.md @evandropacheco95
 
 # Infraestrutura
-/infrastructure/                 # TODO
+/infrastructure/                 @evandropacheco95
