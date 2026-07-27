@@ -96,14 +96,14 @@ export default function CustomerPage() {
     <DashboardShell title="Relationship">
       <PageHeader title="Relationship" description="Parties e vínculos entre elas." />
 
-      {error && <p style={{ color: "var(--nov-danger)", fontSize: 13 }}>{error}</p>}
-      {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
+      {error && <p className="text-[13px] text-nov-danger">{error}</p>}
+      {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
 
-      <section style={{ marginBottom: 36 }}>
-        <h2 style={sectionTitleStyle}>Parties</h2>
+      <section className="mb-9">
+        <h2 className={SECTION_TITLE_CLASS}>Parties</h2>
 
         {!loading && parties.length > 0 && (
-          <div style={{ maxWidth: 380, marginBottom: 20 }}>
+          <div className="mb-5 max-w-[380px]">
             <StatusDonut
               title="Parties por tipo"
               data={[
@@ -114,12 +114,12 @@ export default function CustomerPage() {
           </div>
         )}
 
-        <form onSubmit={handleCreateParty} style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+        <form onSubmit={handleCreateParty} className="mb-4 flex flex-wrap gap-2">
           <Select value={partyType} onChange={(e) => setPartyType(e.target.value as Party["partyType"])}>
             <option value="person">Pessoa</option>
             <option value="external_organization">Organização Externa</option>
           </Select>
-          <Input placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} required style={{ flex: 1 }} />
+          <Input placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} required className="flex-1" />
           <Input placeholder="Documento (opcional)" value={document} onChange={(e) => setDocument(e.target.value)} />
           <Button type="submit" icon={<UserPlus size={15} />}>
             Nova Party
@@ -128,23 +128,21 @@ export default function CustomerPage() {
 
         {!loading && parties.length === 0 && <EmptyState message="Nenhuma Party ainda." />}
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div className="flex flex-col gap-2.5">
           {parties.map((party) => (
             <Card key={party.id} padding={16}>
-              <div style={{ fontSize: 11, color: "var(--nov-s500)", fontFamily: "monospace", marginBottom: 4 }}>{party.id}</div>
-              <div style={{ fontSize: 14, color: "var(--nov-s100)", fontWeight: 600, marginBottom: 4 }}>{party.name}</div>
-              {party.document && <div style={{ fontSize: 12, color: "var(--nov-s400)", marginBottom: 6 }}>{party.document}</div>}
-              <Tag tone={party.partyType === "person" ? "accent" : "neutral"}>
-                {party.partyType === "person" ? "Pessoa" : "Organização Externa"}
-              </Tag>
+              <div className="mb-1 font-mono text-[11px] text-nov-s500">{party.id}</div>
+              <div className="mb-1 text-sm font-semibold text-nov-s100">{party.name}</div>
+              {party.document && <div className="mb-1.5 text-xs text-nov-s400">{party.document}</div>}
+              <Tag tone={party.partyType === "person" ? "accent" : "neutral"}>{party.partyType === "person" ? "Pessoa" : "Organização Externa"}</Tag>
             </Card>
           ))}
         </div>
       </section>
 
       <section>
-        <h2 style={sectionTitleStyle}>Relationships</h2>
-        <form onSubmit={handleCreateRelationship} style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+        <h2 className={SECTION_TITLE_CLASS}>Relationships</h2>
+        <form onSubmit={handleCreateRelationship} className="mb-4 flex flex-wrap gap-2">
           <Select value={partyIdA} onChange={(e) => setPartyIdA(e.target.value)} required>
             <option value="">Party A</option>
             {parties.map((p) => (
@@ -175,10 +173,10 @@ export default function CustomerPage() {
 
         {!loading && relationships.length === 0 && <EmptyState message="Nenhum Relationship ainda." />}
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div className="flex flex-col gap-2.5">
           {relationships.map((relationship) => (
-            <Card key={relationship.id} padding={16} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ fontSize: 14, color: "var(--nov-s200)" }}>
+            <Card key={relationship.id} padding={16} className="flex items-center justify-between">
+              <div className="text-sm text-nov-s200">
                 {partyName(relationship.partyIdA)} ↔ {partyName(relationship.partyIdB)}
               </div>
               <Tag>{relationship.type}</Tag>
@@ -190,4 +188,4 @@ export default function CustomerPage() {
   );
 }
 
-const sectionTitleStyle = { fontSize: 14, fontWeight: 700, color: "var(--nov-s200)", marginBottom: 14, letterSpacing: "-0.01em" };
+const SECTION_TITLE_CLASS = "mb-3.5 text-sm font-bold tracking-[-0.01em] text-nov-s200";

@@ -64,6 +64,10 @@ const config: Config = {
         "nov-fast": "120ms",
         nov: "200ms",
       },
+      animation: {
+        "nov-spin": "nov-spin 0.7s linear infinite",
+        "nov-fade-in": "nov-fade-in var(--transition) both",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

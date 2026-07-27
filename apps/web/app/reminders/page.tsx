@@ -77,7 +77,7 @@ export default function RemindersPage() {
       <PageHeader title="Reminders" description="Lembretes vinculados a Parties, adaptado do Salesforce Reminder." actions={<Button variant="secondary" size="sm" onClick={() => router.push("/activity")}>← Activity</Button>} />
 
       {!loading && reminders.length > 0 && (
-        <div style={{ maxWidth: 380, marginBottom: 24 }}>
+        <div className="mb-6 max-w-[380px]">
           <StatusDonut
             title="Reminders por status"
             data={[
@@ -88,7 +88,7 @@ export default function RemindersPage() {
         </div>
       )}
 
-      <form onSubmit={handleCreate} style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
+      <form onSubmit={handleCreate} className="mb-6 flex flex-wrap gap-2">
         <Select value={partyId} onChange={(e) => setPartyId(e.target.value)} required>
           <option value="">Party</option>
           {parties.map((p) => (
@@ -97,23 +97,23 @@ export default function RemindersPage() {
             </option>
           ))}
         </Select>
-        <Input placeholder="Mensagem" value={message} onChange={(e) => setMessage(e.target.value)} required style={{ flex: 1 }} />
+        <Input placeholder="Mensagem" value={message} onChange={(e) => setMessage(e.target.value)} required className="flex-1" />
         <Input type="datetime-local" value={remindAt} onChange={(e) => setRemindAt(e.target.value)} required />
         <Button type="submit" icon={<BellPlus size={15} />}>
           Novo Reminder
         </Button>
       </form>
 
-      {error && <p style={{ color: "var(--nov-danger)", fontSize: 13 }}>{error}</p>}
-      {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
+      {error && <p className="text-[13px] text-nov-danger">{error}</p>}
+      {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
       {!loading && reminders.length === 0 && <EmptyState message="Nenhum Reminder ainda." />}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="flex flex-col gap-2.5">
         {reminders.map((reminder) => (
-          <Card key={reminder.id} padding={18} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              <div style={{ fontSize: 14, color: "var(--nov-s100)" }}>{reminder.message}</div>
-              <div style={{ fontSize: 12, color: "var(--nov-s500)" }}>
+          <Card key={reminder.id} padding={18} className="flex items-center justify-between">
+            <div className="flex flex-col gap-1">
+              <div className="text-sm text-nov-s100">{reminder.message}</div>
+              <div className="text-xs text-nov-s500">
                 {partyName(reminder.partyId)} · {new Date(reminder.remindAt).toLocaleString("pt-BR")}
               </div>
               <Tag tone={reminder.dismissed ? "neutral" : "accent"}>{reminder.dismissed ? "Dispensado" : "Ativo"}</Tag>

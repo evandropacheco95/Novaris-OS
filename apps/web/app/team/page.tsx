@@ -139,14 +139,14 @@ export default function TeamPage() {
     <DashboardShell title="Identity">
       <PageHeader title="Identity" description="Usuários, Roles e Permissions da sua Organization." />
 
-      {error && <p style={{ color: "var(--nov-danger)", fontSize: 13 }}>{error}</p>}
-      {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
+      {error && <p className="text-[13px] text-nov-danger">{error}</p>}
+      {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
 
-      <section style={{ marginBottom: 36 }}>
-        <h2 style={sectionTitleStyle}>Usuários</h2>
+      <section className="mb-9">
+        <h2 className={SECTION_TITLE_CLASS}>Usuários</h2>
 
         {!loading && users.length > 0 && (
-          <div style={{ maxWidth: 380, marginBottom: 20 }}>
+          <div className="mb-5 max-w-[380px]">
             <StatusDonut
               title="Usuários por status"
               data={[
@@ -159,19 +159,19 @@ export default function TeamPage() {
           </div>
         )}
 
-        <form onSubmit={handleCreateUser} style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-          <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ flex: 1 }} />
+        <form onSubmit={handleCreateUser} className="mb-4 flex gap-2">
+          <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required className="flex-1" />
           <Button type="submit" icon={<UserPlus size={15} />}>
             Novo Usuário
           </Button>
         </form>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div className="flex flex-col gap-2.5">
           {users.map((user) => (
             <Card key={user.id} padding={18}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div className="flex items-center justify-between">
                 <div>
-                  <div style={{ fontSize: 14, color: "var(--nov-s200)", marginBottom: 6 }}>{user.email}</div>
+                  <div className="mb-1.5 text-sm text-nov-s200">{user.email}</div>
                   <Tag tone={STATUS_TONE[user.status]}>{user.status}</Tag>
                 </div>
                 {user.status !== "disabled" && (
@@ -181,14 +181,10 @@ export default function TeamPage() {
                 )}
               </div>
               {roles.length > 0 && (
-                <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 12, borderTop: "1px solid var(--nov-border)", paddingTop: 12 }}>
+                <div className="mt-3 flex flex-wrap gap-3.5 border-t border-nov-border pt-3">
                   {roles.map((role) => (
-                    <label key={role.id} style={{ fontSize: 12, color: "var(--nov-s400)", display: "flex", gap: 6, alignItems: "center", cursor: "pointer" }}>
-                      <input
-                        type="checkbox"
-                        checked={user.roleIds.includes(role.id)}
-                        onChange={(e) => handleRoleToggle(user, role.id, e.target.checked)}
-                      />
+                    <label key={role.id} className="flex cursor-pointer items-center gap-1.5 text-xs text-nov-s400">
+                      <input type="checkbox" checked={user.roleIds.includes(role.id)} onChange={(e) => handleRoleToggle(user, role.id, e.target.checked)} />
                       {role.name}
                     </label>
                   ))}
@@ -200,15 +196,15 @@ export default function TeamPage() {
       </section>
 
       <section>
-        <h2 style={sectionTitleStyle}>Roles</h2>
-        <form onSubmit={handleCreateRole} style={{ display: "flex", gap: 8, marginBottom: 10 }}>
-          <Input placeholder="Nome da Role" value={roleName} onChange={(e) => setRoleName(e.target.value)} required style={{ flex: 1 }} />
+        <h2 className={SECTION_TITLE_CLASS}>Roles</h2>
+        <form onSubmit={handleCreateRole} className="mb-2.5 flex gap-2">
+          <Input placeholder="Nome da Role" value={roleName} onChange={(e) => setRoleName(e.target.value)} required className="flex-1" />
           <Button type="submit" icon={<ShieldPlus size={15} />}>
             Nova Role
           </Button>
         </form>
 
-        <form onSubmit={handleGrantPermission} style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        <form onSubmit={handleGrantPermission} className="mb-4 flex gap-2">
           <Select value={permissionRoleId} onChange={(e) => setPermissionRoleId(e.target.value)} required>
             <option value="">Role</option>
             {roles.map((role) => (
@@ -217,17 +213,17 @@ export default function TeamPage() {
               </option>
             ))}
           </Select>
-          <Input placeholder="dominio.recurso.acao" value={permissionCode} onChange={(e) => setPermissionCode(e.target.value)} required style={{ flex: 1 }} />
+          <Input placeholder="dominio.recurso.acao" value={permissionCode} onChange={(e) => setPermissionCode(e.target.value)} required className="flex-1" />
           <Button type="submit" icon={<ShieldCheck size={15} />}>
             Conceder Permission
           </Button>
         </form>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div className="flex flex-col gap-2.5">
           {roles.map((role) => (
             <Card key={role.id} padding={18}>
-              <div style={{ fontSize: 14, color: "var(--nov-s200)", marginBottom: 8 }}>{role.name}</div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              <div className="mb-2 text-sm text-nov-s200">{role.name}</div>
+              <div className="flex flex-wrap gap-1.5">
                 {role.permissions.map((code) => (
                   <Tag key={code} tone="neutral">
                     {code}
@@ -242,4 +238,4 @@ export default function TeamPage() {
   );
 }
 
-const sectionTitleStyle = { fontSize: 14, fontWeight: 700, color: "var(--nov-s200)", marginBottom: 14, letterSpacing: "-0.01em" };
+const SECTION_TITLE_CLASS = "mb-3.5 text-sm font-bold tracking-[-0.01em] text-nov-s200";

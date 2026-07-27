@@ -144,8 +144,8 @@ export default function QuotationsPage() {
         }
       />
 
-      <form onSubmit={handleCreate} style={{ display: "flex", gap: 8, marginBottom: 24 }}>
-        <Select value={opportunityId} onChange={(e) => setOpportunityId(e.target.value)} required style={{ flex: 1 }}>
+      <form onSubmit={handleCreate} className="mb-6 flex gap-2">
+        <Select value={opportunityId} onChange={(e) => setOpportunityId(e.target.value)} required className="flex-1">
           <option value="">Opportunity</option>
           {opportunities.map((o) => (
             <option key={o.id} value={o.id}>
@@ -158,45 +158,41 @@ export default function QuotationsPage() {
         </Button>
       </form>
 
-      {!loading && opportunities.length === 0 && (
-        <p style={{ color: "var(--nov-s500)", fontSize: 13, marginBottom: 16 }}>Cadastre uma Opportunity antes de criar uma Quotation.</p>
-      )}
-      {!loading && products.length === 0 && (
-        <p style={{ color: "var(--nov-s500)", fontSize: 13, marginBottom: 16 }}>Cadastre um Product antes de adicionar itens a uma Quotation.</p>
-      )}
+      {!loading && opportunities.length === 0 && <p className="mb-4 text-[13px] text-nov-s500">Cadastre uma Opportunity antes de criar uma Quotation.</p>}
+      {!loading && products.length === 0 && <p className="mb-4 text-[13px] text-nov-s500">Cadastre um Product antes de adicionar itens a uma Quotation.</p>}
 
-      {error && <p style={{ color: "var(--nov-danger)", fontSize: 13 }}>{error}</p>}
-      {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
+      {error && <p className="text-[13px] text-nov-danger">{error}</p>}
+      {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
       {!loading && quotations.length === 0 && <EmptyState message="Nenhuma Quotation ainda." />}
 
       {!loading && quotations.length > 0 && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16 }}>
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-4">
           {(["draft", "sent", "accepted", "rejected"] as const).map((status) => {
             const columnQuotations = quotations.filter((q) => q.status === status);
             return (
               <div key={status}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, padding: "0 2px" }}>
+                <div className="mb-3 flex items-center gap-2 px-0.5">
                   <Tag tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Tag>
-                  <span style={{ fontSize: 12, color: "var(--nov-s500)" }}>{columnQuotations.length}</span>
+                  <span className="text-xs text-nov-s500">{columnQuotations.length}</span>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <div className="flex flex-col gap-2.5">
                   {columnQuotations.map((quotation) => (
                     <Card key={quotation.id} padding={16}>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                        <div style={{ fontSize: 11, color: "var(--nov-s500)" }}>Opp: {quotation.opportunityId.slice(0, 8)}</div>
-                        <div style={{ fontSize: 14, color: "var(--nov-s100)", fontWeight: 600 }}>R$ {quotation.total.toFixed(2)}</div>
+                      <div className="flex flex-col gap-1.5">
+                        <div className="text-[11px] text-nov-s500">Opp: {quotation.opportunityId.slice(0, 8)}</div>
+                        <div className="text-sm font-semibold text-nov-s100">R$ {quotation.total.toFixed(2)}</div>
 
                         {quotation.lineItems.length > 0 && (
-                          <div style={{ display: "flex", flexDirection: "column", gap: 3, borderTop: "1px solid var(--nov-border)", paddingTop: 8, marginTop: 2 }}>
+                          <div className="mt-0.5 flex flex-col gap-0.5 border-t border-nov-border pt-2">
                             {quotation.lineItems.map((item) => (
-                              <div key={item.id} style={{ fontSize: 11.5, color: "var(--nov-s400)" }}>
+                              <div key={item.id} className="text-[11.5px] text-nov-s400">
                                 {productName(item.productId)} · {item.quantity}× = R$ {item.lineTotal.toFixed(2)}
                               </div>
                             ))}
                           </div>
                         )}
 
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
+                        <div className="mt-1 flex flex-wrap gap-1.5">
                           {quotation.status === "draft" && (
                             <>
                               <Button size="sm" variant="secondary" onClick={() => setAddingToId(addingToId === quotation.id ? null : quotation.id)}>+ Item</Button>
@@ -215,7 +211,7 @@ export default function QuotationsPage() {
                         </div>
 
                         {addingToId === quotation.id && (
-                          <div style={{ display: "flex", flexDirection: "column", gap: 6, borderTop: "1px solid var(--nov-border)", paddingTop: 8, marginTop: 2 }}>
+                          <div className="mt-0.5 flex flex-col gap-1.5 border-t border-nov-border pt-2">
                             <Select value={lineProductId} onChange={(e) => setLineProductId(e.target.value)}>
                               <option value="">Product</option>
                               {products.map((p) => (
@@ -224,8 +220,8 @@ export default function QuotationsPage() {
                                 </option>
                               ))}
                             </Select>
-                            <div style={{ display: "flex", gap: 6 }}>
-                              <Input type="number" min="1" value={lineQuantity} onChange={(e) => setLineQuantity(e.target.value)} style={{ width: 70 }} />
+                            <div className="flex gap-1.5">
+                              <Input type="number" min="1" value={lineQuantity} onChange={(e) => setLineQuantity(e.target.value)} className="w-[70px]" />
                               <Button size="sm" onClick={() => handleAddLineItem(quotation.id)}>Adicionar</Button>
                             </div>
                           </div>
@@ -233,7 +229,7 @@ export default function QuotationsPage() {
                       </div>
                     </Card>
                   ))}
-                  {columnQuotations.length === 0 && <div style={{ fontSize: 12, color: "var(--nov-s600)", padding: "10px 2px" }}>Nenhuma aqui.</div>}
+                  {columnQuotations.length === 0 && <div className="px-0.5 py-2.5 text-xs text-nov-s600">Nenhuma aqui.</div>}
                 </div>
               </div>
             );

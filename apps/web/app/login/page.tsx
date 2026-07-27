@@ -11,7 +11,8 @@ import { Input } from "@/components/input";
  * Tela de login, elevada (`ENG-0147`) com a paleta/tipografia real do
  * brandkit da NOVARIS (`NOVARIS_Brand_Identity_v1.0.html`) — fundo `--nov-bg`,
  * acento `--nov-b600`, wordmark em `--ff-display` (Orbitron), moldura de
- * cantos ("bracket corners") como no topo de toda peça do brandkit.
+ * cantos ("bracket corners") como no topo de toda peça do brandkit. Migrado
+ * para Tailwind em `ENG-0157`.
  */
 export default function LoginPage() {
   const router = useRouter();
@@ -37,57 +38,31 @@ export default function LoginPage() {
 
   return (
     <main
-      style={{
-        display: "flex",
-        minHeight: "100vh",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "radial-gradient(circle at 30% 20%, var(--nov-bg3), var(--nov-bg))",
-      }}
+      className="flex min-h-screen items-center justify-center"
+      style={{ background: "radial-gradient(circle at 30% 20%, var(--nov-bg3), var(--nov-bg))" }}
     >
-      <div className="nov-animate-in" style={{ position: "relative", width: 380 }}>
-        <div style={{ position: "absolute", top: -12, left: -12, width: 14, height: 14, borderLeft: "2px solid var(--nov-b600)", borderTop: "2px solid var(--nov-b600)" }} />
-        <div style={{ position: "absolute", bottom: -12, right: -12, width: 14, height: 14, borderRight: "2px solid var(--nov-b600)", borderBottom: "2px solid var(--nov-b600)" }} />
+      <div className="nov-animate-in relative w-[380px]">
+        <div className="absolute -left-3 -top-3 h-3.5 w-3.5 border-l-2 border-t-2 border-nov-b600" />
+        <div className="absolute -bottom-3 -right-3 h-3.5 w-3.5 border-b-2 border-r-2 border-nov-b600" />
 
-        <form
-          onSubmit={handleSubmit}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 16,
-            padding: 44,
-            background: "linear-gradient(180deg, var(--nov-surface2), var(--nov-surface))",
-            border: "1px solid var(--nov-border)",
-            borderRadius: "var(--radius-lg)",
-            boxShadow: "var(--shadow-lg)",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
-            <div
-              style={{
-                width: 34,
-                height: 34,
-                borderRadius: 9,
-                background: "linear-gradient(135deg, var(--nov-b400), var(--nov-b700))",
-                boxShadow: "0 0 20px -2px var(--nov-bglow)",
-                flexShrink: 0,
-              }}
-            />
-            <h1 style={{ fontFamily: "var(--ff-display)", fontSize: 22, letterSpacing: "0.1em", margin: 0, color: "var(--nov-s50)" }}>NOVARIS</h1>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 rounded-nov-lg border border-nov-border bg-gradient-to-b from-nov-surface2 to-nov-surface p-11 shadow-nov-lg">
+          <div className="mb-1 flex items-center gap-3">
+            <div className="h-[34px] w-[34px] shrink-0 rounded-[9px] bg-gradient-to-br from-nov-b400 to-nov-b700 shadow-[0_0_20px_-2px_var(--nov-bglow)]" />
+            <h1 className="m-0 font-nov-display text-[22px] tracking-[0.1em] text-nov-s50">NOVARIS</h1>
           </div>
 
           <div>
             <Tag>Intelligent Operating Platform</Tag>
           </div>
 
-          <p style={{ margin: "4px 0 0", fontSize: 13, color: "var(--nov-s400)" }}>Entrar na plataforma</p>
+          <p className="mt-1 mb-0 text-[13px] text-nov-s400">Entrar na plataforma</p>
 
           <Input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           <Input type="password" placeholder="Senha" value={password} onChange={(e) => setPassword(e.target.value)} required />
 
-          {error && <p style={{ color: "var(--nov-danger)", fontSize: 13, margin: 0 }}>{error}</p>}
+          {error && <p className="m-0 text-[13px] text-nov-danger">{error}</p>}
 
-          <Button type="submit" loading={loading} style={{ marginTop: 8, width: "100%" }}>
+          <Button type="submit" loading={loading} className="mt-2 w-full">
             {loading ? "Entrando..." : "Entrar"}
           </Button>
         </form>

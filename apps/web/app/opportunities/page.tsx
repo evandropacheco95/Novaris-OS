@@ -27,7 +27,8 @@ const STATUS_TONE: Record<Opportunity["status"], "accent" | "success" | "danger"
 /**
  * Tela de Opportunities — segunda tela real da NOVARIS (`ENG-0123`), elevada
  * visualmente em `ENG-0147` com o design system compartilhado
- * (`Card`/`Button`/`PageHeader`/`EmptyState`).
+ * (`Card`/`Button`/`PageHeader`/`EmptyState`). Migrado para Tailwind em
+ * `ENG-0157`.
  */
 export default function OpportunitiesPage() {
   const router = useRouter();
@@ -103,8 +104,8 @@ export default function OpportunitiesPage() {
         }
       />
 
-      <form onSubmit={handleCreate} style={{ display: "flex", gap: 8, marginBottom: 24 }}>
-        <Select value={partyId} onChange={(e) => setPartyId(e.target.value)} required style={{ flex: 1 }}>
+      <form onSubmit={handleCreate} className="mb-6 flex gap-2">
+        <Select value={partyId} onChange={(e) => setPartyId(e.target.value)} required className="flex-1">
           <option value="">Party</option>
           {parties.map((p) => (
             <option key={p.id} value={p.id}>
@@ -117,32 +118,30 @@ export default function OpportunitiesPage() {
         </Button>
       </form>
 
-      {!loading && parties.length === 0 && (
-        <p style={{ color: "var(--nov-s500)", fontSize: 13, marginBottom: 16 }}>Cadastre uma Party em Relationship antes de criar uma Opportunity.</p>
-      )}
+      {!loading && parties.length === 0 && <p className="mb-4 text-[13px] text-nov-s500">Cadastre uma Party em Relationship antes de criar uma Opportunity.</p>}
 
-      {error && <p style={{ color: "var(--nov-danger)", fontSize: 13 }}>{error}</p>}
-      {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
+      {error && <p className="text-[13px] text-nov-danger">{error}</p>}
+      {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
       {!loading && opportunities.length === 0 && <EmptyState message="Nenhuma Opportunity ainda." />}
 
       {!loading && opportunities.length > 0 && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+        <div className="grid grid-cols-3 gap-4">
           {(["open", "won", "lost"] as const).map((status) => {
             const columnOpportunities = opportunities.filter((o) => o.status === status);
             return (
               <div key={status}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, padding: "0 2px" }}>
+                <div className="mb-3 flex items-center gap-2 px-0.5">
                   <Tag tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Tag>
-                  <span style={{ fontSize: 12, color: "var(--nov-s500)" }}>{columnOpportunities.length}</span>
+                  <span className="text-xs text-nov-s500">{columnOpportunities.length}</span>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <div className="flex flex-col gap-2.5">
                   {columnOpportunities.map((opportunity) => (
                     <Card key={opportunity.id} padding={16}>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                        <div style={{ fontSize: 11, color: "var(--nov-s500)", fontFamily: "monospace" }}>{opportunity.id.slice(0, 8)}</div>
-                        <div style={{ fontSize: 14, color: "var(--nov-s100)", fontWeight: 600 }}>{partyName(opportunity.partyId)}</div>
+                      <div className="flex flex-col gap-2">
+                        <div className="font-mono text-[11px] text-nov-s500">{opportunity.id.slice(0, 8)}</div>
+                        <div className="text-sm font-semibold text-nov-s100">{partyName(opportunity.partyId)}</div>
                         {opportunity.status === "open" && (
-                          <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+                          <div className="mt-1 flex gap-2">
                             <Button size="sm" onClick={() => handleClose(opportunity.id, "won")}>
                               Ganhar
                             </Button>
@@ -154,9 +153,7 @@ export default function OpportunitiesPage() {
                       </div>
                     </Card>
                   ))}
-                  {columnOpportunities.length === 0 && (
-                    <div style={{ fontSize: 12, color: "var(--nov-s600)", padding: "10px 2px" }}>Nenhuma aqui.</div>
-                  )}
+                  {columnOpportunities.length === 0 && <div className="px-0.5 py-2.5 text-xs text-nov-s600">Nenhuma aqui.</div>}
                 </div>
               </div>
             );

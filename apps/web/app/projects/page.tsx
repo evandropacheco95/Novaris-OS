@@ -100,11 +100,11 @@ export default function ProjectsPage() {
     <DashboardShell title="Project">
       <PageHeader title="Projects" description="Projetos e suas Tasks." />
 
-      {error && <p style={{ color: "var(--nov-danger)", fontSize: 13 }}>{error}</p>}
-      {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
+      {error && <p className="text-[13px] text-nov-danger">{error}</p>}
+      {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
 
-      <form onSubmit={handleCreateProject} style={{ display: "flex", gap: 8, marginBottom: 24 }}>
-        <Input placeholder="Nome do Project" value={name} onChange={(e) => setName(e.target.value)} required style={{ flex: 1 }} />
+      <form onSubmit={handleCreateProject} className="mb-6 flex gap-2">
+        <Input placeholder="Nome do Project" value={name} onChange={(e) => setName(e.target.value)} required className="flex-1" />
         <Button type="submit" icon={<FolderPlus size={15} />}>
           Novo Project
         </Button>
@@ -113,7 +113,7 @@ export default function ProjectsPage() {
       {!loading && projects.length === 0 && <EmptyState message="Nenhum Project ainda." />}
 
       {!loading && projects.some((p) => p.tasks.length > 0) && (
-        <div style={{ maxWidth: 380, marginBottom: 24 }}>
+        <div className="mb-6 max-w-[380px]">
           <StatusDonut
             title="Tasks por status (todos os Projects)"
             data={STATUS_ORDER.map((status) => ({
@@ -125,32 +125,21 @@ export default function ProjectsPage() {
         </div>
       )}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div className="flex flex-col gap-4">
         {projects.map((project) => (
           <Card key={project.id} padding={20}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: "var(--nov-s100)", marginBottom: 14 }}>{project.name}</div>
+            <div className="mb-3.5 text-[15px] font-semibold text-nov-s100">{project.name}</div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
+            <div className="mb-3.5 flex flex-col gap-2">
               {project.tasks.map((task) => (
-                <div
-                  key={task.id}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "9px 14px",
-                    background: "var(--nov-bg2)",
-                    border: "1px solid var(--nov-border)",
-                    borderRadius: "var(--radius)",
-                  }}
-                >
-                  <span style={{ fontSize: 13, color: "var(--nov-s200)" }}>{task.title}</span>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div key={task.id} className="flex items-center justify-between rounded-nov border border-nov-border bg-nov-bg2 px-3.5 py-2">
+                  <span className="text-[13px] text-nov-s200">{task.title}</span>
+                  <div className="flex items-center gap-2">
                     <Tag tone={STATUS_TONE[task.status]}>{STATUS_LABEL[task.status]}</Tag>
                     <Select
                       value={task.status}
                       onChange={(e) => handleStatusChange(project.id, task.id, e.target.value as ProjectTask["status"])}
-                      style={{ padding: "5px 9px", fontSize: 12 }}
+                      className="px-2.5 py-[5px] text-xs"
                     >
                       {STATUS_ORDER.map((status) => (
                         <option key={status} value={status}>
@@ -161,15 +150,15 @@ export default function ProjectsPage() {
                   </div>
                 </div>
               ))}
-              {project.tasks.length === 0 && <div style={{ fontSize: 12, color: "var(--nov-s500)" }}>Nenhuma Task ainda.</div>}
+              {project.tasks.length === 0 && <div className="text-xs text-nov-s500">Nenhuma Task ainda.</div>}
             </div>
 
-            <form onSubmit={(e) => handleAddTask(project.id, e)} style={{ display: "flex", gap: 8 }}>
+            <form onSubmit={(e) => handleAddTask(project.id, e)} className="flex gap-2">
               <Input
                 placeholder="Nova Task"
                 value={taskTitles[project.id] ?? ""}
                 onChange={(e) => setTaskTitles((prev) => ({ ...prev, [project.id]: e.target.value }))}
-                style={{ flex: 1 }}
+                className="flex-1"
               />
               <Button type="submit" size="sm" variant="secondary">
                 Adicionar Task

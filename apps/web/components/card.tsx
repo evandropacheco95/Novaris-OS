@@ -1,6 +1,7 @@
 "use client";
 
-import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
@@ -8,36 +9,17 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
   interactive?: boolean;
 }
 
-/** Card — superfície elevada compartilhada do design system NOVARIS (`ENG-0147`). */
-export function Card({ children, padding = 20, interactive = false, style, ...rest }: CardProps) {
-  const base: CSSProperties = {
-    background: "linear-gradient(180deg, var(--nov-surface2), var(--nov-surface))",
-    border: "1px solid var(--nov-border)",
-    borderRadius: "var(--radius-lg)",
-    padding,
-    boxShadow: "var(--shadow-md)",
-    transition: "transform var(--transition), box-shadow var(--transition), border-color var(--transition)",
-    ...style,
-  };
-
+/** Card — superfície elevada compartilhada do design system NOVARIS (`ENG-0147`, migrado para Tailwind em `ENG-0157`). */
+export function Card({ children, padding = 20, interactive = false, className, style, ...rest }: CardProps) {
   return (
     <div
       {...rest}
-      style={base}
-      onMouseEnter={(e) => {
-        if (interactive) {
-          e.currentTarget.style.borderColor = "var(--nov-border2)";
-          e.currentTarget.style.boxShadow = "var(--shadow-lg)";
-          e.currentTarget.style.transform = "translateY(-2px)";
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (interactive) {
-          e.currentTarget.style.borderColor = "var(--nov-border)";
-          e.currentTarget.style.boxShadow = "var(--shadow-md)";
-          e.currentTarget.style.transform = "translateY(0)";
-        }
-      }}
+      style={{ padding, ...style }}
+      className={cn(
+        "bg-gradient-to-b from-nov-surface2 to-nov-surface border border-nov-border rounded-nov-lg shadow-nov-md transition-[transform,box-shadow,border-color] duration-nov",
+        interactive && "hover:border-nov-border2 hover:shadow-nov-lg hover:-translate-y-0.5",
+        className,
+      )}
     >
       {children}
     </div>

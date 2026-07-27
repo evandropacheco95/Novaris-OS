@@ -1,49 +1,28 @@
 "use client";
 
-import type { FocusEvent, InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes, ReactNode } from "react";
+import type { InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes, ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
-const baseFieldStyle = {
-  padding: "10px 13px",
-  borderRadius: "var(--radius)",
-  border: "1px solid var(--nov-border2)",
-  background: "var(--nov-bg2)",
-  color: "var(--nov-s100)",
-  fontSize: 13.5,
-  fontFamily: "var(--ff-body)",
-  transition: "border-color var(--transition-fast), box-shadow var(--transition-fast)",
-  outline: "none",
-} as const;
+const FIELD_CLASS =
+  "rounded-nov border border-nov-border2 bg-nov-bg2 px-[13px] py-2.5 text-[13.5px] text-nov-s100 font-nov-body outline-none transition-[border-color,box-shadow] duration-nov-fast focus:border-nov-b500 focus:shadow-[0_0_0_3px_var(--nov-bsoft)]";
 
-function focusHandlers() {
-  return {
-    onFocus: (e: FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-      e.currentTarget.style.borderColor = "var(--nov-b500)";
-      e.currentTarget.style.boxShadow = "0 0 0 3px var(--nov-bsoft)";
-    },
-    onBlur: (e: FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-      e.currentTarget.style.borderColor = "var(--nov-border2)";
-      e.currentTarget.style.boxShadow = "none";
-    },
-  };
+/** Input — primitivo compartilhado do design system NOVARIS (`ENG-0147`, migrado para Tailwind em `ENG-0157`). */
+export function Input({ className, ...rest }: InputHTMLAttributes<HTMLInputElement>) {
+  return <input {...rest} className={cn(FIELD_CLASS, className)} />;
 }
 
-/** Input — primitivo compartilhado do design system NOVARIS (`ENG-0147`). */
-export function Input({ style, ...rest }: InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...rest} {...focusHandlers()} style={{ ...baseFieldStyle, ...style }} />;
+export function Textarea({ className, ...rest }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return <textarea {...rest} className={cn(FIELD_CLASS, "min-h-[72px] resize-y", className)} />;
 }
 
-export function Textarea({ style, ...rest }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea {...rest} {...focusHandlers()} style={{ ...baseFieldStyle, resize: "vertical", minHeight: 72, ...style }} />;
-}
-
-export function Select({ style, children, ...rest }: SelectHTMLAttributes<HTMLSelectElement> & { children: ReactNode }) {
+export function Select({ className, children, ...rest }: SelectHTMLAttributes<HTMLSelectElement> & { children: ReactNode }) {
   return (
-    <select {...rest} {...focusHandlers()} style={{ ...baseFieldStyle, cursor: "pointer", ...style }}>
+    <select {...rest} className={cn(FIELD_CLASS, "cursor-pointer", className)}>
       {children}
     </select>
   );
 }
 
 export function Label({ children }: { children: ReactNode }) {
-  return <label style={{ fontSize: 12, fontWeight: 600, color: "var(--nov-s400)", letterSpacing: "0.03em", marginBottom: 6, display: "block" }}>{children}</label>;
+  return <label className="mb-1.5 block text-xs font-semibold tracking-[0.03em] text-nov-s400">{children}</label>;
 }

@@ -102,13 +102,13 @@ export default function FinancialPage() {
     <DashboardShell title="Financial">
       <PageHeader title="Financial" description="Faturas e planos de assinatura." />
 
-      {error && <p style={{ color: "var(--nov-danger)", fontSize: 13 }}>{error}</p>}
-      {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
+      {error && <p className="text-[13px] text-nov-danger">{error}</p>}
+      {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
 
-      <section style={{ marginBottom: 36 }}>
-        <h2 style={sectionTitleStyle}>Subscriptions</h2>
-        <form onSubmit={handleCreateSubscription} style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-          <Input placeholder="Nome do plano" value={subName} onChange={(e) => setSubName(e.target.value)} required style={{ flex: 1 }} />
+      <section className="mb-9">
+        <h2 className={SECTION_TITLE_CLASS}>Subscriptions</h2>
+        <form onSubmit={handleCreateSubscription} className="mb-4 flex gap-2">
+          <Input placeholder="Nome do plano" value={subName} onChange={(e) => setSubName(e.target.value)} required className="flex-1" />
           <Button type="submit" icon={<Wallet size={15} />}>
             Nova Subscription
           </Button>
@@ -116,20 +116,20 @@ export default function FinancialPage() {
 
         {!loading && subscriptions.length === 0 && <EmptyState message="Nenhuma Subscription ainda." />}
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div className="flex flex-col gap-2.5">
           {subscriptions.map((subscription) => (
             <Card key={subscription.id} padding={16}>
-              <div style={{ fontSize: 14, color: "var(--nov-s200)" }}>{subscription.name}</div>
+              <div className="text-sm text-nov-s200">{subscription.name}</div>
             </Card>
           ))}
         </div>
       </section>
 
       <section>
-        <h2 style={sectionTitleStyle}>Invoices</h2>
+        <h2 className={SECTION_TITLE_CLASS}>Invoices</h2>
 
         {!loading && invoices.length > 0 && (
-          <div style={{ maxWidth: 380, marginBottom: 20 }}>
+          <div className="mb-5 max-w-[380px]">
             <StatusDonut
               title="Invoices por status"
               data={[
@@ -140,9 +140,9 @@ export default function FinancialPage() {
           </div>
         )}
 
-        <form onSubmit={handleCreateInvoice} style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
-          <Input placeholder="Valor" type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} required style={{ width: 120 }} />
-          <Input placeholder="Moeda" value={currency} onChange={(e) => setCurrency(e.target.value)} required style={{ width: 90 }} />
+        <form onSubmit={handleCreateInvoice} className="mb-4 flex flex-wrap gap-2">
+          <Input placeholder="Valor" type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} required className="w-[120px]" />
+          <Input placeholder="Moeda" value={currency} onChange={(e) => setCurrency(e.target.value)} required className="w-[90px]" />
           <Select value={subscriptionId} onChange={(e) => setSubscriptionId(e.target.value)}>
             <option value="">Sem Subscription (avulsa)</option>
             {subscriptions.map((s) => (
@@ -158,17 +158,15 @@ export default function FinancialPage() {
 
         {!loading && invoices.length === 0 && <EmptyState message="Nenhuma Invoice ainda." />}
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div className="flex flex-col gap-2.5">
           {invoices.map((invoice) => (
-            <Card key={invoice.id} padding={18} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <Card key={invoice.id} padding={18} className="flex items-center justify-between">
               <div>
-                <div style={{ fontSize: 14, color: "var(--nov-s200)" }}>
+                <div className="text-sm text-nov-s200">
                   {invoice.currency} {invoice.amount.toFixed(2)}
                 </div>
-                {invoice.subscriptionId && (
-                  <div style={{ fontSize: 12, color: "var(--nov-s500)", marginTop: 4 }}>{subscriptionName(invoice.subscriptionId)}</div>
-                )}
-                <div style={{ marginTop: 6 }}>
+                {invoice.subscriptionId && <div className="mt-1 text-xs text-nov-s500">{subscriptionName(invoice.subscriptionId)}</div>}
+                <div className="mt-1.5">
                   <Tag tone={invoice.status === "paid" ? "success" : "neutral"}>{invoice.status === "paid" ? "Paga" : "Pendente"}</Tag>
                 </div>
               </div>
@@ -185,4 +183,4 @@ export default function FinancialPage() {
   );
 }
 
-const sectionTitleStyle = { fontSize: 14, fontWeight: 700, color: "var(--nov-s200)", marginBottom: 14, letterSpacing: "-0.01em" };
+const SECTION_TITLE_CLASS = "mb-3.5 text-sm font-bold tracking-[-0.01em] text-nov-s200";

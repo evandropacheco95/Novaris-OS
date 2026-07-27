@@ -1,42 +1,29 @@
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 import { Card } from "./card";
 
-/** StatCard — cartão de métrica compartilhado do design system NOVARIS (`ENG-0147`), usado na home (`/`). */
-export function StatCard({ label, value, icon, href, tone = "accent" }: { label: string; value: string | number; icon: ReactNode; href?: string; tone?: "accent" | "success" | "danger" | "neutral" }) {
-  const toneColor: Record<string, string> = {
-    accent: "var(--nov-b400)",
-    success: "var(--nov-success)",
-    danger: "var(--nov-danger)",
-    neutral: "var(--nov-s400)",
-  };
+const TONE_CLASS: Record<string, string> = {
+  accent: "text-nov-b400",
+  success: "text-nov-success",
+  danger: "text-nov-danger",
+  neutral: "text-nov-s400",
+};
 
+/** StatCard — cartão de métrica compartilhado do design system NOVARIS (`ENG-0147`, migrado para Tailwind em `ENG-0157`), usado na home (`/`). */
+export function StatCard({ label, value, icon, href, tone = "accent" }: { label: string; value: string | number; icon: ReactNode; href?: string; tone?: "accent" | "success" | "danger" | "neutral" }) {
   const content = (
-    <Card interactive={Boolean(href)} padding={20} style={{ display: "flex", flexDirection: "column", gap: 14, height: "100%" }}>
-      <div
-        style={{
-          width: 36,
-          height: 36,
-          borderRadius: "var(--radius)",
-          background: "var(--nov-bsoft)",
-          border: "1px solid var(--nov-border)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: toneColor[tone],
-        }}
-      >
-        {icon}
-      </div>
+    <Card interactive={Boolean(href)} padding={20} className="flex h-full flex-col gap-3.5">
+      <div className={cn("flex h-9 w-9 items-center justify-center rounded-nov border border-nov-border bg-nov-bsoft", TONE_CLASS[tone])}>{icon}</div>
       <div>
-        <div style={{ fontSize: 26, fontWeight: 700, color: "var(--nov-s50)", fontFamily: "var(--ff-display)", lineHeight: 1.2 }}>{value}</div>
-        <div style={{ fontSize: 12.5, color: "var(--nov-s500)", marginTop: 4 }}>{label}</div>
+        <div className="font-nov-display text-[26px] font-bold leading-tight text-nov-s50">{value}</div>
+        <div className="mt-1 text-[12.5px] text-nov-s500">{label}</div>
       </div>
     </Card>
   );
 
   if (href) {
     return (
-      <a href={href} style={{ textDecoration: "none", display: "block", height: "100%" }}>
+      <a href={href} className="block h-full no-underline">
         {content}
       </a>
     );

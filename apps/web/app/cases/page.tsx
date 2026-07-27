@@ -99,7 +99,7 @@ export default function CasesPage() {
     <DashboardShell title="Activity">
       <PageHeader title="Cases" description="Atendimento a Parties, adaptado do Salesforce Service Cloud." actions={<Button variant="secondary" size="sm" onClick={() => router.push("/activity")}>← Activity</Button>} />
 
-      <form onSubmit={handleCreate} style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
+      <form onSubmit={handleCreate} className="mb-6 flex flex-wrap gap-2">
         <Select value={partyId} onChange={(e) => setPartyId(e.target.value)} required>
           <option value="">Party</option>
           {parties.map((p) => (
@@ -108,8 +108,8 @@ export default function CasesPage() {
             </option>
           ))}
         </Select>
-        <Input placeholder="Assunto" value={subject} onChange={(e) => setSubject(e.target.value)} required style={{ flex: 1 }} />
-        <Input placeholder="Descrição (opcional)" value={description} onChange={(e) => setDescription(e.target.value)} style={{ flex: 1 }} />
+        <Input placeholder="Assunto" value={subject} onChange={(e) => setSubject(e.target.value)} required className="flex-1" />
+        <Input placeholder="Descrição (opcional)" value={description} onChange={(e) => setDescription(e.target.value)} className="flex-1" />
         <Select value={priority} onChange={(e) => setPriority(e.target.value as CasePriority)}>
           <option value="low">Baixa</option>
           <option value="medium">Média</option>
@@ -120,36 +120,34 @@ export default function CasesPage() {
         </Button>
       </form>
 
-      {!loading && parties.length === 0 && (
-        <p style={{ color: "var(--nov-s500)", fontSize: 13, marginBottom: 16 }}>Cadastre uma Party em Relationship antes de criar um Case.</p>
-      )}
+      {!loading && parties.length === 0 && <p className="mb-4 text-[13px] text-nov-s500">Cadastre uma Party em Relationship antes de criar um Case.</p>}
 
-      {error && <p style={{ color: "var(--nov-danger)", fontSize: 13 }}>{error}</p>}
-      {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
+      {error && <p className="text-[13px] text-nov-danger">{error}</p>}
+      {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
       {!loading && cases.length === 0 && <EmptyState message="Nenhum Case ainda." />}
 
       {!loading && cases.length > 0 && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+        <div className="grid grid-cols-3 gap-4">
           {(["new", "in_progress", "closed"] as const).map((status) => {
             const columnCases = cases.filter((c) => c.status === status);
             return (
               <div key={status}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, padding: "0 2px" }}>
+                <div className="mb-3 flex items-center gap-2 px-0.5">
                   <Tag tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Tag>
-                  <span style={{ fontSize: 12, color: "var(--nov-s500)" }}>{columnCases.length}</span>
+                  <span className="text-xs text-nov-s500">{columnCases.length}</span>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <div className="flex flex-col gap-2.5">
                   {columnCases.map((caseInstance) => (
                     <Card key={caseInstance.id} padding={16}>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                        <div style={{ fontSize: 14, color: "var(--nov-s100)", fontWeight: 600 }}>{caseInstance.subject}</div>
-                        <div style={{ fontSize: 11.5, color: "var(--nov-s500)" }}>
+                      <div className="flex flex-col gap-1.5">
+                        <div className="text-sm font-semibold text-nov-s100">{caseInstance.subject}</div>
+                        <div className="text-[11.5px] text-nov-s500">
                           {partyName(caseInstance.partyId)}
                           {caseInstance.description ? ` · ${caseInstance.description}` : ""}
                         </div>
                         <Tag tone={PRIORITY_TONE[caseInstance.priority]}>{caseInstance.priority}</Tag>
                         {caseInstance.status !== "closed" && (
-                          <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+                          <div className="mt-1 flex gap-2">
                             {caseInstance.status === "new" && (
                               <Button size="sm" onClick={() => handleTransition(caseInstance.id, "start")}>
                                 Iniciar
@@ -163,7 +161,7 @@ export default function CasesPage() {
                       </div>
                     </Card>
                   ))}
-                  {columnCases.length === 0 && <div style={{ fontSize: 12, color: "var(--nov-s600)", padding: "10px 2px" }}>Nenhum aqui.</div>}
+                  {columnCases.length === 0 && <div className="px-0.5 py-2.5 text-xs text-nov-s600">Nenhum aqui.</div>}
                 </div>
               </div>
             );

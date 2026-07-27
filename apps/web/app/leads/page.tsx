@@ -111,7 +111,7 @@ export default function LeadsPage() {
     <DashboardShell title="Sales">
       <PageHeader title="Leads" description="Contatos em qualificação, adaptado do Lead-to-Convert do Salesforce." actions={<Button variant="secondary" size="sm" onClick={() => router.push("/opportunities")}>← Opportunities</Button>} />
 
-      <form onSubmit={handleCreate} style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
+      <form onSubmit={handleCreate} className="mb-6 flex flex-wrap gap-2">
         <Input placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} required />
         <Input placeholder="E-mail (opcional)" value={email} onChange={(e) => setEmail(e.target.value)} />
         <Input placeholder="Telefone (opcional)" value={phone} onChange={(e) => setPhone(e.target.value)} />
@@ -122,31 +122,29 @@ export default function LeadsPage() {
         </Button>
       </form>
 
-      {error && <p style={{ color: "var(--nov-danger)", fontSize: 13 }}>{error}</p>}
-      {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
+      {error && <p className="text-[13px] text-nov-danger">{error}</p>}
+      {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
       {!loading && leads.length === 0 && <EmptyState message="Nenhum Lead ainda." />}
 
       {!loading && leads.length > 0 && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
           {(["new", "contacted", "qualified", "unqualified", "converted"] as const).map((status) => {
             const columnLeads = leads.filter((l) => l.status === status);
             return (
               <div key={status}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, padding: "0 2px" }}>
+                <div className="mb-3 flex items-center gap-2 px-0.5">
                   <Tag tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Tag>
-                  <span style={{ fontSize: 12, color: "var(--nov-s500)" }}>{columnLeads.length}</span>
+                  <span className="text-xs text-nov-s500">{columnLeads.length}</span>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <div className="flex flex-col gap-2.5">
                   {columnLeads.map((lead) => (
                     <Card key={lead.id} padding={16}>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                        <div style={{ fontSize: 14, color: "var(--nov-s100)", fontWeight: 600 }}>{lead.name}</div>
-                        <div style={{ fontSize: 11.5, color: "var(--nov-s500)" }}>
-                          {[lead.company, lead.email, lead.phone].filter(Boolean).join(" · ") || "—"}
-                        </div>
+                      <div className="flex flex-col gap-1.5">
+                        <div className="text-sm font-semibold text-nov-s100">{lead.name}</div>
+                        <div className="text-[11.5px] text-nov-s500">{[lead.company, lead.email, lead.phone].filter(Boolean).join(" · ") || "—"}</div>
 
                         {lead.status !== "converted" && (
-                          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 6 }}>
+                          <div className="mt-1.5 flex flex-col gap-1.5">
                             <Select value={lead.status} onChange={(e) => handleStatusChange(lead.id, e.target.value as Exclude<LeadStatus, "converted">)}>
                               {UPDATABLE_STATUSES.map((s) => (
                                 <option key={s} value={s}>
@@ -160,19 +158,19 @@ export default function LeadsPage() {
                           </div>
                         )}
                         {lead.status === "converted" && (
-                          <div style={{ fontSize: 11, color: "var(--nov-s500)" }}>
+                          <div className="text-[11px] text-nov-s500">
                             Party: {lead.convertedPartyId?.slice(0, 8)}
                             {lead.convertedOpportunityId && <> · Opp: {lead.convertedOpportunityId.slice(0, 8)}</>}
                           </div>
                         )}
 
                         {convertingId === lead.id && (
-                          <div style={{ display: "flex", flexDirection: "column", gap: 8, borderTop: "1px solid var(--nov-border)", paddingTop: 10, marginTop: 4 }}>
+                          <div className="mt-1 flex flex-col gap-2 border-t border-nov-border pt-2.5">
                             <Select value={partyType} onChange={(e) => setPartyType(e.target.value)}>
                               <option value="person">Pessoa</option>
                               <option value="external_organization">Organização</option>
                             </Select>
-                            <label style={{ fontSize: 12, color: "var(--nov-s300)", display: "flex", alignItems: "center", gap: 6 }}>
+                            <label className="flex items-center gap-1.5 text-xs text-nov-s300">
                               <input type="checkbox" checked={createOpportunityToo} onChange={(e) => setCreateOpportunityToo(e.target.checked)} />
                               Criar Opportunity também
                             </label>
@@ -184,7 +182,7 @@ export default function LeadsPage() {
                       </div>
                     </Card>
                   ))}
-                  {columnLeads.length === 0 && <div style={{ fontSize: 12, color: "var(--nov-s600)", padding: "10px 2px" }}>Nenhum aqui.</div>}
+                  {columnLeads.length === 0 && <div className="px-0.5 py-2.5 text-xs text-nov-s600">Nenhum aqui.</div>}
                 </div>
               </div>
             );

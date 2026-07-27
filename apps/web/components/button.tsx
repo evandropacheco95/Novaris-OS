@@ -1,6 +1,7 @@
 "use client";
 
 import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 type Variant = "primary" | "secondary" | "ghost" | "danger";
 type Size = "sm" | "md";
@@ -12,51 +13,33 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
 }
 
-const VARIANT_STYLE: Record<Variant, { background: string; color: string; border: string; hoverBackground: string }> = {
-  primary: { background: "linear-gradient(180deg, var(--nov-b500), var(--nov-b600))", color: "#fff", border: "1px solid var(--nov-b700)", hoverBackground: "linear-gradient(180deg, var(--nov-b400), var(--nov-b500))" },
-  secondary: { background: "var(--nov-surface2)", color: "var(--nov-s200)", border: "1px solid var(--nov-border2)", hoverBackground: "var(--nov-border2)" },
-  ghost: { background: "transparent", color: "var(--nov-s300)", border: "1px solid transparent", hoverBackground: "var(--nov-surface2)" },
-  danger: { background: "var(--nov-danger-soft)", color: "var(--nov-danger)", border: "1px solid #7a1f2e", hoverBackground: "#ff3b5c22" },
+const VARIANT_CLASS: Record<Variant, string> = {
+  primary:
+    "bg-gradient-to-b from-nov-b500 to-nov-b600 text-white border-nov-b700 hover:brightness-110 active:scale-[0.98]",
+  secondary: "bg-nov-surface2 text-nov-s200 border-nov-border2 hover:bg-nov-border2 active:scale-[0.98]",
+  ghost: "bg-transparent text-nov-s300 border-transparent hover:bg-nov-surface2 active:scale-[0.98]",
+  danger: "bg-nov-danger-soft text-nov-danger border-[#7a1f2e] hover:bg-[#ff3b5c22] active:scale-[0.98]",
 };
 
-/** Button — primitivo compartilhado do design system NOVARIS (elevação de UI/UX, `ENG-0147`). */
-export function Button({ variant = "primary", size = "md", icon, loading, children, style, disabled, ...rest }: ButtonProps) {
-  const v = VARIANT_STYLE[variant];
+const SIZE_CLASS: Record<Size, string> = {
+  sm: "px-3 py-[7px] text-[12.5px]",
+  md: "px-[18px] py-[10px] text-[13.5px]",
+};
+
+/** Button — primitivo compartilhado do design system NOVARIS (`ENG-0147`, migrado para Tailwind em `ENG-0157`). */
+export function Button({ variant = "primary", size = "md", icon, loading, children, className, disabled, ...rest }: ButtonProps & { className?: string }) {
   return (
     <button
       {...rest}
       disabled={disabled || loading}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 8,
-        padding: size === "sm" ? "7px 12px" : "10px 18px",
-        borderRadius: "var(--radius)",
-        border: v.border,
-        background: v.background,
-        color: v.color,
-        fontSize: size === "sm" ? 12.5 : 13.5,
-        fontWeight: 600,
-        fontFamily: "var(--ff-body)",
-        cursor: disabled || loading ? "not-allowed" : "pointer",
-        opacity: disabled || loading ? 0.55 : 1,
-        transition: "filter var(--transition-fast), transform var(--transition-fast), background var(--transition-fast)",
-        whiteSpace: "nowrap",
-        ...style,
-      }}
-      onMouseEnter={(e) => {
-        if (!disabled && !loading) e.currentTarget.style.filter = "brightness(1.08)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.filter = "none";
-      }}
-      onMouseDown={(e) => {
-        if (!disabled && !loading) e.currentTarget.style.transform = "scale(0.98)";
-      }}
-      onMouseUp={(e) => {
-        e.currentTarget.style.transform = "scale(1)";
-      }}
+      className={cn(
+        "inline-flex items-center justify-center gap-2 rounded-nov border font-nov-body font-semibold whitespace-nowrap transition-[filter,transform,background] duration-nov-fast",
+        VARIANT_CLASS[variant],
+        SIZE_CLASS[size],
+        (disabled || loading) && "opacity-55 cursor-not-allowed",
+        !(disabled || loading) && "cursor-pointer",
+        className,
+      )}
     >
       {loading ? <Spinner /> : icon}
       {children}
@@ -65,17 +48,5 @@ export function Button({ variant = "primary", size = "md", icon, loading, childr
 }
 
 function Spinner() {
-  return (
-    <span
-      style={{
-        width: 13,
-        height: 13,
-        borderRadius: "50%",
-        border: "2px solid currentColor",
-        borderTopColor: "transparent",
-        display: "inline-block",
-        animation: "nov-spin 0.7s linear infinite",
-      }}
-    />
-  );
+  return <span className="inline-block h-[13px] w-[13px] animate-nov-spin rounded-full border-2 border-current border-t-transparent" />;
 }

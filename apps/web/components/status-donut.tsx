@@ -11,23 +11,23 @@ interface StatusDonutSlice {
 
 /**
  * StatusDonut — breakdown de status compartilhado do design system NOVARIS
- * (`ENG-0148`), construído sobre Recharts (não Tailwind/shadcn — `apps/web`
- * usa CSS puro + tokens `--nov-*`, ver `ENG-0147`). Só resume contagens já
- * calculadas pelo chamador a partir de dados reais já buscados via API —
- * nunca busca ou infere dado próprio.
+ * (`ENG-0148`), construído sobre Recharts. Migrado para Tailwind em
+ * `ENG-0157` (o SVG do Recharts continua recebendo cor via prop `fill`, não
+ * classes). Só resume contagens já calculadas pelo chamador a partir de
+ * dados reais já buscados via API — nunca busca ou infere dado próprio.
  */
 export function StatusDonut({ title, data }: { title: string; data: StatusDonutSlice[] }) {
   const total = data.reduce((sum, slice) => sum + slice.value, 0);
 
   return (
     <Card padding={20}>
-      <h3 style={{ fontSize: 13, fontWeight: 700, margin: "0 0 16px", color: "var(--nov-s100)" }}>{title}</h3>
+      <h3 className="mb-4 mt-0 text-[13px] font-bold text-nov-s100">{title}</h3>
 
       {total === 0 ? (
-        <p style={{ fontSize: 12.5, color: "var(--nov-s500)", margin: 0 }}>Sem dados suficientes ainda.</p>
+        <p className="m-0 text-[12.5px] text-nov-s500">Sem dados suficientes ainda.</p>
       ) : (
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <div style={{ width: 108, height: 108, flexShrink: 0, position: "relative" }}>
+        <div className="flex items-center gap-5">
+          <div className="relative h-[108px] w-[108px] shrink-0">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie data={data} dataKey="value" nameKey="label" innerRadius={34} outerRadius={52} paddingAngle={2} stroke="none" isAnimationActive={false}>
@@ -37,31 +37,21 @@ export function StatusDonut({ title, data }: { title: string; data: StatusDonutS
                 </Pie>
               </PieChart>
             </ResponsiveContainer>
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                pointerEvents: "none",
-              }}
-            >
-              <span style={{ fontSize: 20, fontWeight: 700, fontFamily: "var(--ff-display)", color: "var(--nov-s50)", lineHeight: 1 }}>{total}</span>
-              <span style={{ fontSize: 9, color: "var(--nov-s500)", marginTop: 2 }}>total</span>
+            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+              <span className="font-nov-display text-xl font-bold leading-none text-nov-s50">{total}</span>
+              <span className="mt-0.5 text-[9px] text-nov-s500">total</span>
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
+          <div className="flex flex-1 flex-col gap-2">
             {data.map((slice) => (
-              <div key={slice.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: 2, background: slice.color, flexShrink: 0 }} />
-                  <span style={{ fontSize: 12.5, color: "var(--nov-s300)" }}>{slice.label}</span>
+              <div key={slice.label} className="flex items-center justify-between gap-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 shrink-0 rounded-sm" style={{ background: slice.color }} />
+                  <span className="text-[12.5px] text-nov-s300">{slice.label}</span>
                 </div>
-                <span style={{ fontSize: 12.5, fontWeight: 600, color: "var(--nov-s100)" }}>
-                  {slice.value} <span style={{ color: "var(--nov-s500)", fontWeight: 400 }}>({total > 0 ? Math.round((slice.value / total) * 100) : 0}%)</span>
+                <span className="text-[12.5px] font-semibold text-nov-s100">
+                  {slice.value} <span className="font-normal text-nov-s500">({total > 0 ? Math.round((slice.value / total) * 100) : 0}%)</span>
                 </span>
               </div>
             ))}

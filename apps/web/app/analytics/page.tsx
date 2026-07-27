@@ -140,11 +140,11 @@ export default function AnalyticsPage() {
     <DashboardShell title="Analytics">
       <PageHeader title="Analytics" description="Dashboards de indicadores, com widgets configuráveis." />
 
-      {error && <p style={{ color: "var(--nov-danger)", fontSize: 13 }}>{error}</p>}
-      {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
+      {error && <p className="text-[13px] text-nov-danger">{error}</p>}
+      {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
 
-      <form onSubmit={handleCreate} style={{ display: "flex", gap: 8, marginBottom: 24 }}>
-        <Input placeholder="Nome do dashboard" value={name} onChange={(e) => setName(e.target.value)} required style={{ flex: 1 }} />
+      <form onSubmit={handleCreate} className="mb-6 flex gap-2">
+        <Input placeholder="Nome do dashboard" value={name} onChange={(e) => setName(e.target.value)} required className="flex-1" />
         <Button type="submit" icon={<LayoutDashboard size={15} />}>
           Novo Dashboard
         </Button>
@@ -152,18 +152,18 @@ export default function AnalyticsPage() {
 
       {!loading && dashboards.length === 0 && <EmptyState message="Nenhum Dashboard ainda." />}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div className="flex flex-col gap-4">
         {dashboards.map((dashboard) => (
           <Card key={dashboard.id} padding={20}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-              <div style={{ fontSize: 14, color: "var(--nov-s100)", fontWeight: 600 }}>{dashboard.name}</div>
+            <div className="mb-3.5 flex items-center justify-between">
+              <div className="text-sm font-semibold text-nov-s100">{dashboard.name}</div>
               <Button size="sm" variant="secondary" icon={<Plus size={14} />} onClick={() => setAddingToId(addingToId === dashboard.id ? null : dashboard.id)}>
                 Widget
               </Button>
             </div>
 
             {addingToId === dashboard.id && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, borderBottom: "1px solid var(--nov-border)", paddingBottom: 14, marginBottom: 14 }}>
+              <div className="mb-3.5 flex flex-wrap gap-2 border-b border-nov-border pb-3.5">
                 <Select value={widgetType} onChange={(e) => handleTypeChange(e.target.value as WidgetType)}>
                   <option value="kpi">KPI numérico</option>
                   <option value="list">Lista</option>
@@ -177,7 +177,7 @@ export default function AnalyticsPage() {
                     </option>
                   ))}
                 </Select>
-                <Input placeholder="Título (opcional)" value={widgetTitle} onChange={(e) => setWidgetTitle(e.target.value)} style={{ flex: 1, minWidth: 140 }} />
+                <Input placeholder="Título (opcional)" value={widgetTitle} onChange={(e) => setWidgetTitle(e.target.value)} className="min-w-[140px] flex-1" />
                 <Button size="sm" onClick={() => handleAddWidget(dashboard.id)}>
                   Adicionar
                 </Button>
@@ -185,9 +185,9 @@ export default function AnalyticsPage() {
             )}
 
             {dashboard.widgets.length === 0 ? (
-              <div style={{ fontSize: 12, color: "var(--nov-s500)" }}>Sem widgets ainda.</div>
+              <div className="text-xs text-nov-s500">Sem widgets ainda.</div>
             ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14 }}>
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-3.5">
                 {dashboard.widgets.map((widget) => (
                   <WidgetView key={widget.id} widget={widget} metrics={metrics} />
                 ))}
@@ -206,9 +206,9 @@ function WidgetView({ widget, metrics }: { widget: Widget; metrics: MetricData |
   if (widget.type === "kpi") {
     const value = computeKpi(widget.metricKey, metrics);
     return (
-      <Card padding={16} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-        <div style={{ fontSize: 24, fontWeight: 700, fontFamily: "var(--ff-display)", color: "var(--nov-s50)" }}>{value}</div>
-        <div style={{ fontSize: 11.5, color: "var(--nov-s500)" }}>{widget.title}</div>
+      <Card padding={16} className="flex flex-col gap-1.5">
+        <div className="font-nov-display text-2xl font-bold text-nov-s50">{value}</div>
+        <div className="text-[11.5px] text-nov-s500">{widget.title}</div>
       </Card>
     );
   }
@@ -217,13 +217,13 @@ function WidgetView({ widget, metrics }: { widget: Widget; metrics: MetricData |
     const items = computeList(widget.metricKey, metrics);
     return (
       <Card padding={16}>
-        <div style={{ fontSize: 12.5, fontWeight: 600, color: "var(--nov-s200)", marginBottom: 8 }}>{widget.title}</div>
+        <div className="mb-2 text-[12.5px] font-semibold text-nov-s200">{widget.title}</div>
         {items.length === 0 ? (
-          <div style={{ fontSize: 12, color: "var(--nov-s600)" }}>Nenhum item.</div>
+          <div className="text-xs text-nov-s600">Nenhum item.</div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <div className="flex flex-col gap-1">
             {items.map((item, i) => (
-              <div key={i} style={{ fontSize: 12, color: "var(--nov-s400)" }}>
+              <div key={i} className="text-xs text-nov-s400">
                 {item}
               </div>
             ))}
@@ -241,16 +241,16 @@ function WidgetView({ widget, metrics }: { widget: Widget; metrics: MetricData |
   const bars = computeBars(metrics);
   return (
     <Card padding={16}>
-      <div style={{ fontSize: 12.5, fontWeight: 600, color: "var(--nov-s200)", marginBottom: 10 }}>{widget.title}</div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <div className="mb-2.5 text-[12.5px] font-semibold text-nov-s200">{widget.title}</div>
+      <div className="flex flex-col gap-2">
         {bars.map((bar) => (
           <div key={bar.label}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--nov-s400)", marginBottom: 3 }}>
+            <div className="mb-0.5 flex justify-between text-[11px] text-nov-s400">
               <span>{bar.label}</span>
               <span>{bar.value}</span>
             </div>
-            <div style={{ height: 6, borderRadius: 3, background: "var(--nov-bg2)", overflow: "hidden" }}>
-              <div style={{ height: "100%", width: `${bar.pct}%`, background: "var(--nov-b500)", borderRadius: 3 }} />
+            <div className="h-1.5 overflow-hidden rounded-sm bg-nov-bg2">
+              <div className="h-full rounded-sm bg-nov-b500" style={{ width: `${bar.pct}%` }} />
             </div>
           </div>
         ))}

@@ -94,16 +94,16 @@ export default function CommentsPage() {
     <DashboardShell title="Activity">
       <PageHeader title="Comments" description="Feed polimórfico, adaptado do Salesforce Chatter." actions={<Button variant="secondary" size="sm" onClick={() => router.push("/activity")}>← Activity</Button>} />
 
-      <form onSubmit={handleCreate} style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
+      <form onSubmit={handleCreate} className="mb-4 flex flex-wrap gap-2">
         <Input placeholder="Tipo do alvo (ex.: lead, case, opportunity)" value={targetType} onChange={(e) => setTargetType(e.target.value)} required />
         <Input placeholder="ID do alvo" value={targetId} onChange={(e) => setTargetId(e.target.value)} required />
-        <Input placeholder="Comentário" value={body} onChange={(e) => setBody(e.target.value)} required style={{ flex: 1 }} />
+        <Input placeholder="Comentário" value={body} onChange={(e) => setBody(e.target.value)} required className="flex-1" />
         <Button type="submit" icon={<MessageSquarePlus size={15} />}>
           Novo Comment
         </Button>
       </form>
 
-      <form onSubmit={handleFilter} style={{ display: "flex", gap: 8, marginBottom: 24 }}>
+      <form onSubmit={handleFilter} className="mb-6 flex gap-2">
         <Input placeholder="Filtrar por tipo" value={filterType} onChange={(e) => setFilterType(e.target.value)} />
         <Input placeholder="Filtrar por ID do alvo" value={filterId} onChange={(e) => setFilterId(e.target.value)} />
         <Button type="submit" variant="secondary" icon={<Filter size={14} />}>
@@ -111,25 +111,21 @@ export default function CommentsPage() {
         </Button>
       </form>
 
-      {error && <p style={{ color: "var(--nov-danger)", fontSize: 13 }}>{error}</p>}
-      {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
+      {error && <p className="text-[13px] text-nov-danger">{error}</p>}
+      {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
       {!loading && comments.length === 0 && <EmptyState message="Nenhum Comment ainda." />}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="flex flex-col gap-2.5">
         {comments.map((comment) => (
           <Card key={comment.id} padding={18}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex flex-1 flex-col gap-2">
                 <Tag tone="neutral">
                   {comment.targetType}:{comment.targetId}
                 </Tag>
-                {editingId === comment.id ? (
-                  <Input value={editBody} onChange={(e) => setEditBody(e.target.value)} />
-                ) : (
-                  <div style={{ fontSize: 14, color: "var(--nov-s100)" }}>{comment.body}</div>
-                )}
+                {editingId === comment.id ? <Input value={editBody} onChange={(e) => setEditBody(e.target.value)} /> : <div className="text-sm text-nov-s100">{comment.body}</div>}
               </div>
-              <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+              <div className="flex shrink-0 gap-2">
                 {editingId === comment.id ? (
                   <Button size="sm" onClick={() => handleUpdate(comment.id)}>Salvar</Button>
                 ) : (

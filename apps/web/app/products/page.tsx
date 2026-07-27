@@ -97,7 +97,7 @@ export default function ProductsPage() {
     <DashboardShell title="Sales">
       <PageHeader title="Products" description="Catálogo interno, adaptado do Salesforce Product2." actions={<Button variant="secondary" size="sm" onClick={() => router.push("/quotations")}>Quotations →</Button>} />
 
-      <form onSubmit={handleCreate} style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
+      <form onSubmit={handleCreate} className="mb-6 flex flex-wrap gap-2">
         <Input placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} required />
         <Input placeholder="SKU (opcional)" value={sku} onChange={(e) => setSku(e.target.value)} />
         <Input placeholder="Preço unitário" type="number" step="0.01" min="0" value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} required />
@@ -106,12 +106,12 @@ export default function ProductsPage() {
         </Button>
       </form>
 
-      {error && <p style={{ color: "var(--nov-danger)", fontSize: 13 }}>{error}</p>}
-      {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
+      {error && <p className="text-[13px] text-nov-danger">{error}</p>}
+      {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
       {!loading && products.length === 0 && <EmptyState message="Nenhum Product ainda." />}
 
       {!loading && products.length > 0 && (
-        <div style={{ maxWidth: 380, marginBottom: 24 }}>
+        <div className="mb-6 max-w-[380px]">
           <StatusDonut
             title="Products por status"
             data={[
@@ -122,18 +122,18 @@ export default function ProductsPage() {
         </div>
       )}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="flex flex-col gap-2.5">
         {products.map((product) => (
           <Card key={product.id} padding={18}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <div style={{ fontSize: 14, color: "var(--nov-s100)", fontWeight: 600 }}>{product.name}</div>
-                <div style={{ fontSize: 12, color: "var(--nov-s500)" }}>
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-1">
+                <div className="text-sm font-semibold text-nov-s100">{product.name}</div>
+                <div className="text-xs text-nov-s500">
                   {product.sku ? `SKU: ${product.sku} · ` : ""}R$ {product.unitPrice.toFixed(2)}
                 </div>
                 <Tag tone={product.active ? "success" : "neutral"}>{product.active ? "Ativo" : "Inativo"}</Tag>
               </div>
-              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <div className="flex items-center gap-2">
                 <Input
                   placeholder="Novo preço"
                   type="number"
@@ -141,7 +141,7 @@ export default function ProductsPage() {
                   min="0"
                   value={priceEdits[product.id] ?? ""}
                   onChange={(e) => setPriceEdits((prev) => ({ ...prev, [product.id]: e.target.value }))}
-                  style={{ width: 120 }}
+                  className="w-[120px]"
                 />
                 <Button size="sm" onClick={() => handleUpdatePrice(product.id)}>
                   Atualizar preço

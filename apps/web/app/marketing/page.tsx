@@ -95,11 +95,11 @@ export default function MarketingPage() {
     <DashboardShell title="Marketing">
       <PageHeader title="Marketing" description="Campanhas de marketing." />
 
-      {error && <p style={{ color: "var(--nov-danger)", fontSize: 13 }}>{error}</p>}
-      {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
+      {error && <p className="text-[13px] text-nov-danger">{error}</p>}
+      {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
 
-      <form onSubmit={handleCreate} style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
-        <Input placeholder="Nome da campanha" value={name} onChange={(e) => setName(e.target.value)} required style={{ flex: 1 }} />
+      <form onSubmit={handleCreate} className="mb-6 flex flex-wrap gap-2">
+        <Input placeholder="Nome da campanha" value={name} onChange={(e) => setName(e.target.value)} required className="flex-1" />
         <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
         <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
         <Button type="submit" icon={<Megaphone size={15} />}>
@@ -109,38 +109,32 @@ export default function MarketingPage() {
 
       {!loading && campaigns.length === 0 && <EmptyState message="Nenhuma Campaign ainda." />}
 
-      <input ref={fileInputRef} type="file" style={{ display: "none" }} onChange={handleFileSelected} />
+      <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileSelected} />
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="flex flex-col gap-2.5">
         {campaigns.map((campaign) => (
           <Card key={campaign.id} padding={18}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <div className="flex items-start justify-between">
               <div>
-                <div style={{ fontSize: 14, color: "var(--nov-s200)" }}>{campaign.name}</div>
+                <div className="text-sm text-nov-s200">{campaign.name}</div>
                 {(campaign.startDate || campaign.endDate) && (
-                  <div style={{ fontSize: 12, color: "var(--nov-s500)", marginTop: 6 }}>
+                  <div className="mt-1.5 text-xs text-nov-s500">
                     {formatDate(campaign.startDate) ?? "—"} até {formatDate(campaign.endDate) ?? "—"}
                   </div>
                 )}
               </div>
-              <Button
-                size="sm"
-                variant="secondary"
-                icon={<Paperclip size={14} />}
-                loading={uploadingToId === campaign.id}
-                onClick={() => handlePickFile(campaign.id)}
-              >
+              <Button size="sm" variant="secondary" icon={<Paperclip size={14} />} loading={uploadingToId === campaign.id} onClick={() => handlePickFile(campaign.id)}>
                 Adicionar Asset
               </Button>
             </div>
 
             {campaign.assets.length > 0 && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 6, borderTop: "1px solid var(--nov-border)", paddingTop: 10, marginTop: 12 }}>
+              <div className="mt-3 flex flex-col gap-1.5 border-t border-nov-border pt-2.5">
                 {campaign.assets.map((asset) => (
                   <button
                     key={asset.id}
                     onClick={() => downloadFile(asset.fileRecordId)}
-                    style={{ fontSize: 12, color: "var(--nov-b400)", background: "none", border: "none", padding: 0, textAlign: "left", cursor: "pointer" }}
+                    className="cursor-pointer border-none bg-transparent p-0 text-left text-xs text-nov-b400"
                   >
                     Asset {asset.fileRecordId.slice(0, 8)} · adicionado em {formatDate(asset.addedAt)}
                   </button>

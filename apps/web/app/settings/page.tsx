@@ -64,31 +64,31 @@ export default function SettingsPage() {
     <DashboardShell title="Workspace">
       <PageHeader title="Workspace" description="Perfil da sua Organization." />
 
-      {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
-      {error && <p style={{ color: "var(--nov-danger)", fontSize: 13 }}>{error}</p>}
-      {success && <p style={{ color: "var(--nov-success)", fontSize: 13 }}>Salvo com sucesso.</p>}
+      {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
+      {error && <p className="text-[13px] text-nov-danger">{error}</p>}
+      {success && <p className="text-[13px] text-nov-success">Salvo com sucesso.</p>}
 
       {organization && (
-        <Card padding={28} style={{ maxWidth: 460 }}>
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <div style={{ fontSize: 12, color: "var(--nov-s500)" }}>Slug: {organization.slug}</div>
+        <Card padding={28} className="max-w-[460px]">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <div className="text-xs text-nov-s500">Slug: {organization.slug}</div>
 
             <div>
               <Label>Nome</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} required style={{ width: "100%" }} />
+              <Input value={name} onChange={(e) => setName(e.target.value)} required className="w-full" />
             </div>
 
             <div>
               <Label>Razão Social</Label>
-              <Input value={legalName} onChange={(e) => setLegalName(e.target.value)} required style={{ width: "100%" }} />
+              <Input value={legalName} onChange={(e) => setLegalName(e.target.value)} required className="w-full" />
             </div>
 
             <div>
               <Label>Documento (CNPJ)</Label>
-              <Input value={document} onChange={(e) => setDocument(e.target.value)} required style={{ width: "100%" }} />
+              <Input value={document} onChange={(e) => setDocument(e.target.value)} required className="w-full" />
             </div>
 
-            <Button type="submit" icon={<Save size={15} />} style={{ marginTop: 4, alignSelf: "flex-start" }}>
+            <Button type="submit" icon={<Save size={15} />} className="mt-1 self-start">
               Salvar
             </Button>
           </form>

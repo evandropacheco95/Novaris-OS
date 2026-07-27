@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ListPlus } from "lucide-react";
 import { addChecklistItem, createChecklist, getToken, listChecklists, listParties, toggleChecklistItem, type Checklist, type Party } from "@/lib/api";
+import { cn } from "@/lib/utils";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Button } from "@/components/button";
 import { Input, Select } from "@/components/input";
@@ -86,7 +87,7 @@ export default function ChecklistsPage() {
     <DashboardShell title="Activity">
       <PageHeader title="Checklists" description="Listas de tarefas vinculadas a Parties." actions={<Button variant="secondary" size="sm" onClick={() => router.push("/activity")}>← Activity</Button>} />
 
-      <form onSubmit={handleCreate} style={{ display: "flex", gap: 8, marginBottom: 24 }}>
+      <form onSubmit={handleCreate} className="mb-6 flex gap-2">
         <Select value={partyId} onChange={(e) => setPartyId(e.target.value)} required>
           <option value="">Party</option>
           {parties.map((p) => (
@@ -95,51 +96,49 @@ export default function ChecklistsPage() {
             </option>
           ))}
         </Select>
-        <Input placeholder="Título" value={title} onChange={(e) => setTitle(e.target.value)} required style={{ flex: 1 }} />
+        <Input placeholder="Título" value={title} onChange={(e) => setTitle(e.target.value)} required className="flex-1" />
         <Button type="submit" icon={<ListPlus size={15} />}>
           Novo Checklist
         </Button>
       </form>
 
-      {error && <p style={{ color: "var(--nov-danger)", fontSize: 13 }}>{error}</p>}
-      {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
+      {error && <p className="text-[13px] text-nov-danger">{error}</p>}
+      {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
       {!loading && checklists.length === 0 && <EmptyState message="Nenhum Checklist ainda." />}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="flex flex-col gap-2.5">
         {checklists.map((checklist) => {
           const total = checklist.items.length;
           const done = checklist.items.filter((i) => i.completed).length;
           return (
             <Card key={checklist.id} padding={18}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-                <div style={{ fontSize: 14, color: "var(--nov-s100)", fontWeight: 600 }}>{checklist.title}</div>
-                {total > 0 && <div style={{ fontSize: 11.5, color: "var(--nov-s500)" }}>{done}/{total}</div>}
+              <div className="mb-1 flex items-center justify-between">
+                <div className="text-sm font-semibold text-nov-s100">{checklist.title}</div>
+                {total > 0 && <div className="text-[11.5px] text-nov-s500">{done}/{total}</div>}
               </div>
-              <div style={{ fontSize: 12, color: "var(--nov-s500)", marginBottom: 12 }}>{partyName(checklist.partyId)}</div>
+              <div className="mb-3 text-xs text-nov-s500">{partyName(checklist.partyId)}</div>
 
               {total > 0 && (
-                <div style={{ height: 4, borderRadius: 4, background: "var(--nov-border)", marginBottom: 12, overflow: "hidden" }}>
-                  <div style={{ height: "100%", width: `${(done / total) * 100}%`, background: "var(--nov-b500)", transition: "width var(--transition)" }} />
+                <div className="mb-3 h-1 overflow-hidden rounded bg-nov-border">
+                  <div className="h-full bg-nov-b500 transition-[width] duration-nov" style={{ width: `${(done / total) * 100}%` }} />
                 </div>
               )}
 
-              <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 12 }}>
+              <div className="mb-3 flex flex-col gap-1.5">
                 {checklist.items.map((item) => (
-                  <label key={item.id} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+                  <label key={item.id} className="flex cursor-pointer items-center gap-2">
                     <input type="checkbox" checked={item.completed} onChange={() => handleToggle(checklist.id, item.id)} />
-                    <span style={{ fontSize: 13, color: item.completed ? "var(--nov-s500)" : "var(--nov-s200)", textDecoration: item.completed ? "line-through" : "none" }}>
-                      {item.label}
-                    </span>
+                    <span className={cn("text-[13px]", item.completed ? "text-nov-s500 line-through" : "text-nov-s200")}>{item.label}</span>
                   </label>
                 ))}
               </div>
 
-              <div style={{ display: "flex", gap: 8 }}>
+              <div className="flex gap-2">
                 <Input
                   placeholder="Novo item"
                   value={newItemLabel[checklist.id] ?? ""}
                   onChange={(e) => setNewItemLabel((prev) => ({ ...prev, [checklist.id]: e.target.value }))}
-                  style={{ flex: 1 }}
+                  className="flex-1"
                 />
                 <Button size="sm" onClick={() => handleAddItem(checklist.id)}>
                   Adicionar

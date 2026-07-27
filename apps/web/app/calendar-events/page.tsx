@@ -68,7 +68,7 @@ export default function CalendarEventsPage() {
     <DashboardShell title="Activity">
       <PageHeader title="Calendário" description="Compromissos com Parties, adaptado do Salesforce Event." actions={<Button variant="secondary" size="sm" onClick={() => router.push("/activity")}>← Activity</Button>} />
 
-      <form onSubmit={handleCreate} style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
+      <form onSubmit={handleCreate} className="mb-6 flex flex-wrap gap-2">
         <Select value={partyId} onChange={(e) => setPartyId(e.target.value)} required>
           <option value="">Party</option>
           {parties.map((p) => (
@@ -86,22 +86,22 @@ export default function CalendarEventsPage() {
         </Button>
       </form>
 
-      {error && <p style={{ color: "var(--nov-danger)", fontSize: 13 }}>{error}</p>}
-      {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
+      {error && <p className="text-[13px] text-nov-danger">{error}</p>}
+      {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
       {!loading && events.length === 0 && <EmptyState message="Nenhum evento ainda." />}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="flex flex-col gap-2.5">
         {events.map((event) => (
           <Card key={event.id} padding={18}>
-            <div style={{ fontSize: 14, color: "var(--nov-s100)", fontWeight: 600 }}>{event.subject}</div>
-            <div style={{ fontSize: 12, color: "var(--nov-s500)", marginTop: 4, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+            <div className="text-sm font-semibold text-nov-s100">{event.subject}</div>
+            <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-nov-s500">
               <span>{partyName(event.partyId)}</span>
               <span>·</span>
               <span>
                 {new Date(event.startAt).toLocaleString("pt-BR")} — {new Date(event.endAt).toLocaleString("pt-BR")}
               </span>
               {event.location && (
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                <span className="inline-flex items-center gap-1">
                   <MapPin size={12} /> {event.location}
                 </span>
               )}

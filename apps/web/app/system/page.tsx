@@ -48,35 +48,24 @@ export default function SystemPage() {
     <DashboardShell title="System">
       <PageHeader title="Trilha de Auditoria" description="Registro imutável de alterações — cada entrada nasce automaticamente, sem criação manual." />
 
-      {error && <p style={{ color: "var(--nov-danger)", fontSize: 13 }}>{error}</p>}
-      {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
+      {error && <p className="text-[13px] text-nov-danger">{error}</p>}
+      {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
       {!loading && entries.length === 0 && <EmptyState message="Nenhuma entrada de auditoria ainda." />}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="flex flex-col gap-2.5">
         {entries.map((entry) => (
           <Card key={entry.id} padding={18}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ fontSize: 14, color: "var(--nov-s200)", display: "flex", alignItems: "center", gap: 8 }}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm text-nov-s200">
                 <Tag>{entry.action}</Tag> em <Tag tone="accent">{entry.targetType}</Tag>
               </div>
-              <div style={{ fontSize: 12, color: "var(--nov-s500)" }}>{formatDateTime(entry.occurredAt)}</div>
+              <div className="text-xs text-nov-s500">{formatDateTime(entry.occurredAt)}</div>
             </div>
-            <div style={{ fontSize: 12, color: "var(--nov-s500)", marginTop: 8 }}>
+            <div className="mt-2 text-xs text-nov-s500">
               Ator: {entry.actorId} · Origem: {entry.origin}
             </div>
             {entry.changeSet && (
-              <pre
-                style={{
-                  marginTop: 10,
-                  fontSize: 12,
-                  color: "var(--nov-s400)",
-                  background: "var(--nov-bg2)",
-                  border: "1px solid var(--nov-border)",
-                  padding: 10,
-                  borderRadius: "var(--radius-sm)",
-                  overflowX: "auto",
-                }}
-              >
+              <pre className="mt-2.5 overflow-x-auto rounded-nov-sm border border-nov-border bg-nov-bg2 p-2.5 text-xs text-nov-s400">
                 {JSON.stringify(entry.changeSet, null, 2)}
               </pre>
             )}

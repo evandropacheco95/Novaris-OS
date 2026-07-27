@@ -60,31 +60,31 @@ export default function RevenuePage() {
       />
 
       {!loading && revenues.length > 0 && (
-        <div style={{ display: "flex", gap: 10, marginBottom: 24, flexWrap: "wrap" }}>
+        <div className="mb-6 flex flex-wrap gap-2.5">
           {Object.entries(totalsByCurrency).map(([currency, total]) => (
-            <Card key={currency} padding={16} style={{ minWidth: 160 }}>
-              <div style={{ fontSize: 20, fontWeight: 700, fontFamily: "var(--ff-display)", color: "var(--nov-s50)" }}>
+            <Card key={currency} padding={16} className="min-w-[160px]">
+              <div className="font-nov-display text-xl font-bold text-nov-s50">
                 {currency} {total.toFixed(2)}
               </div>
-              <div style={{ fontSize: 11.5, color: "var(--nov-s500)", marginTop: 4 }}>Total reconhecido ({currency})</div>
+              <div className="mt-1 text-[11.5px] text-nov-s500">Total reconhecido ({currency})</div>
             </Card>
           ))}
         </div>
       )}
 
-      {error && <p style={{ color: "var(--nov-danger)", fontSize: 13 }}>{error}</p>}
-      {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
+      {error && <p className="text-[13px] text-nov-danger">{error}</p>}
+      {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
       {!loading && revenues.length === 0 && <EmptyState message="Nenhum Revenue ainda — reconheça um a partir de um Contract ativo." />}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="flex flex-col gap-2.5">
         {revenues.map((revenue) => (
           <Card key={revenue.id} padding={18}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <div style={{ fontSize: 14, color: "var(--nov-s100)", fontWeight: 600 }}>
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-1">
+                <div className="text-sm font-semibold text-nov-s100">
                   {revenue.currency} {revenue.amount.toFixed(2)}
                 </div>
-                <div style={{ fontSize: 11, color: "var(--nov-s500)" }}>Contract: {revenue.contractId.slice(0, 8)}</div>
+                <div className="text-[11px] text-nov-s500">Contract: {revenue.contractId.slice(0, 8)}</div>
               </div>
               <Tag>{formatDate(revenue.recognizedAt)}</Tag>
             </div>

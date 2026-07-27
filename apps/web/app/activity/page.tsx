@@ -102,11 +102,11 @@ export default function ActivityPage() {
         }
       />
 
-      {error && <p style={{ color: "var(--nov-danger)", fontSize: 13 }}>{error}</p>}
-      {loading && <p style={{ color: "var(--nov-s500)", fontSize: 13 }}>Carregando...</p>}
+      {error && <p className="text-[13px] text-nov-danger">{error}</p>}
+      {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
 
       {!loading && activities.length > 0 && (
-        <div style={{ maxWidth: 380, marginBottom: 24 }}>
+        <div className="mb-6 max-w-[380px]">
           <StatusDonut
             title="Activities por status"
             data={[
@@ -117,7 +117,7 @@ export default function ActivityPage() {
         </div>
       )}
 
-      <form onSubmit={handleCreate} style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
+      <form onSubmit={handleCreate} className="mb-6 flex flex-wrap gap-2">
         <Select value={partyId} onChange={(e) => setPartyId(e.target.value)} required>
           <option value="">Party</option>
           {parties.map((p) => (
@@ -133,29 +133,25 @@ export default function ActivityPage() {
             </option>
           ))}
         </Select>
-        <Input placeholder="Notas (opcional)" value={notes} onChange={(e) => setNotes(e.target.value)} style={{ flex: 1 }} />
+        <Input placeholder="Notas (opcional)" value={notes} onChange={(e) => setNotes(e.target.value)} className="flex-1" />
         <Button type="submit" icon={<PhoneCall size={15} />}>
           Nova Activity
         </Button>
       </form>
 
-      {!loading && parties.length === 0 && (
-        <p style={{ color: "var(--nov-s500)", fontSize: 13, marginBottom: 16 }}>Cadastre uma Party em Relationship antes de criar uma Activity.</p>
-      )}
+      {!loading && parties.length === 0 && <p className="mb-4 text-[13px] text-nov-s500">Cadastre uma Party em Relationship antes de criar uma Activity.</p>}
       {!loading && activities.length === 0 && <EmptyState message="Nenhuma Activity ainda." />}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="flex flex-col gap-2.5">
         {activities.map((activity) => (
-          <Card key={activity.id} padding={18} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Card key={activity.id} padding={18} className="flex items-center justify-between">
             <div>
-              <div style={{ fontSize: 14, color: "var(--nov-s200)", display: "flex", alignItems: "center", gap: 8 }}>
+              <div className="flex items-center gap-2 text-sm text-nov-s200">
                 {partyName(activity.partyId)} <Tag>{activity.type}</Tag>
               </div>
-              {activity.notes && <div style={{ fontSize: 12, color: "var(--nov-s400)", marginTop: 6 }}>{activity.notes}</div>}
-              <div style={{ marginTop: 8 }}>
-                <Tag tone={activity.status === "completed" ? "success" : "neutral"}>
-                  {activity.status === "completed" ? "Concluída" : "Aberta"}
-                </Tag>
+              {activity.notes && <div className="mt-1.5 text-xs text-nov-s400">{activity.notes}</div>}
+              <div className="mt-2">
+                <Tag tone={activity.status === "completed" ? "success" : "neutral"}>{activity.status === "completed" ? "Concluída" : "Aberta"}</Tag>
               </div>
             </div>
             {activity.status === "open" && (

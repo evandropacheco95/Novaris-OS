@@ -16,6 +16,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { clearSession, useCurrentUser } from "@/lib/api";
+import { cn } from "@/lib/utils";
 import { Tag } from "./tag";
 
 /**
@@ -28,6 +29,8 @@ import { Tag } from "./tag";
  * Quotations, Cases, Comments, etc.) navegam via links internos de cada
  * domínio, nunca ganham entrada própria aqui (decisão repetida em
  * `ENG-0143`-`0146`, preserva a contagem oficial de domínios).
+ *
+ * Migrado para Tailwind (`ENG-0157`) — mesmos valores visuais de `ENG-0147`.
  */
 const DOMAINS = [
   { label: "Sales", href: "/opportunities", live: true, icon: TrendingUp },
@@ -52,36 +55,14 @@ export function DashboardShell({ title, children }: { title: string; children: R
   }
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
-      <aside
-        style={{
-          width: 232,
-          flexShrink: 0,
-          background: "var(--nov-bg2)",
-          borderRight: "1px solid var(--nov-border)",
-          display: "flex",
-          flexDirection: "column",
-          padding: "22px 14px",
-          position: "sticky",
-          top: 0,
-          height: "100vh",
-        }}
-      >
-        <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 30, padding: "0 6px", textDecoration: "none" }}>
-          <div
-            style={{
-              width: 26,
-              height: 26,
-              borderRadius: 7,
-              background: "linear-gradient(135deg, var(--nov-b400), var(--nov-b700))",
-              boxShadow: "0 0 16px -2px var(--nov-bglow)",
-              flexShrink: 0,
-            }}
-          />
-          <span style={{ fontFamily: "var(--ff-display)", fontWeight: 700, fontSize: 14.5, letterSpacing: "0.15em", color: "var(--nov-s50)" }}>NOVARIS</span>
+    <div className="flex min-h-screen">
+      <aside className="sticky top-0 flex h-screen w-[232px] shrink-0 flex-col border-r border-nov-border bg-nov-bg2 px-3.5 py-[22px]">
+        <a href="/" className="mb-[30px] flex items-center gap-2.5 px-1.5 no-underline">
+          <div className="h-[26px] w-[26px] shrink-0 rounded-[7px] bg-gradient-to-br from-nov-b400 to-nov-b700 shadow-nov-glow" />
+          <span className="font-nov-display text-[14.5px] font-bold tracking-[0.15em] text-nov-s50">NOVARIS</span>
         </a>
 
-        <nav style={{ display: "flex", flexDirection: "column", gap: 2, flex: 1, overflowY: "auto" }}>
+        <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto">
           {DOMAINS.map((domain) => {
             const active = domain.live && domain.label === title;
             const Icon = domain.icon;
@@ -89,45 +70,16 @@ export function DashboardShell({ title, children }: { title: string; children: R
               <a
                 key={domain.label}
                 href={domain.live ? domain.href : undefined}
-                style={{
-                  position: "relative",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "9px 12px",
-                  borderRadius: "var(--radius)",
-                  fontSize: 13,
-                  fontWeight: active ? 600 : 500,
-                  textDecoration: "none",
-                  color: domain.live ? (active ? "var(--nov-s50)" : "var(--nov-s300)") : "var(--nov-s500)",
-                  background: active ? "var(--nov-bsoft)" : "transparent",
-                  cursor: domain.live ? "pointer" : "default",
-                  transition: "background var(--transition-fast), color var(--transition-fast)",
-                }}
-                onMouseEnter={(e) => {
-                  if (!active && domain.live) e.currentTarget.style.background = "var(--nov-surface2)";
-                }}
-                onMouseLeave={(e) => {
-                  if (!active) e.currentTarget.style.background = "transparent";
-                }}
-              >
-                {active && (
-                  <span
-                    style={{
-                      position: "absolute",
-                      left: -14,
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      width: 3,
-                      height: 16,
-                      borderRadius: 2,
-                      background: "var(--nov-b500)",
-                      boxShadow: "0 0 8px var(--nov-bglow)",
-                    }}
-                  />
+                className={cn(
+                  "relative flex items-center justify-between rounded-nov px-3 py-[9px] text-[13px] no-underline transition-[background,color] duration-nov-fast",
+                  active ? "bg-nov-bsoft font-semibold text-nov-s50" : "font-medium text-nov-s300 hover:bg-nov-surface2",
+                  !domain.live && "cursor-default text-nov-s500",
+                  domain.live && "cursor-pointer",
                 )}
-                <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <Icon size={16} strokeWidth={2} style={{ flexShrink: 0, opacity: domain.live ? 1 : 0.5 }} />
+              >
+                {active && <span className="absolute -left-3.5 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-sm bg-nov-b500 shadow-[0_0_8px_var(--nov-bglow)]" />}
+                <span className="flex items-center gap-2.5">
+                  <Icon size={16} strokeWidth={2} className={cn("shrink-0", !domain.live && "opacity-50")} />
                   {domain.label}
                 </span>
                 {!domain.live && <Tag tone="neutral">em breve</Tag>}
@@ -136,56 +88,18 @@ export function DashboardShell({ title, children }: { title: string; children: R
           })}
         </nav>
 
-        <div style={{ borderTop: "1px solid var(--nov-border)", paddingTop: 14, marginTop: 14 }}>
+        <div className="mt-3.5 border-t border-nov-border pt-3.5">
           {user && (
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12, padding: "0 2px" }}>
-              <div
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: "50%",
-                  background: "var(--nov-surface2)",
-                  border: "1px solid var(--nov-border2)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 12,
-                  fontWeight: 700,
-                  color: "var(--nov-b300)",
-                  flexShrink: 0,
-                }}
-              >
+            <div className="mb-3 flex items-center gap-2.5 px-0.5">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-nov-border2 bg-nov-surface2 text-xs font-bold text-nov-b300">
                 {user.email.charAt(0).toUpperCase()}
               </div>
-              <div style={{ fontSize: 12, color: "var(--nov-s400)", wordBreak: "break-all", lineHeight: 1.3 }}>{user.email}</div>
+              <div className="break-all text-xs leading-tight text-nov-s400">{user.email}</div>
             </div>
           )}
           <button
             onClick={handleLogout}
-            style={{
-              width: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
-              padding: "8px 12px",
-              borderRadius: "var(--radius)",
-              border: "1px solid var(--nov-border2)",
-              background: "transparent",
-              color: "var(--nov-s300)",
-              fontSize: 12.5,
-              fontWeight: 600,
-              cursor: "pointer",
-              transition: "background var(--transition-fast), color var(--transition-fast)",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "var(--nov-danger-soft)";
-              e.currentTarget.style.color = "var(--nov-danger)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "transparent";
-              e.currentTarget.style.color = "var(--nov-s300)";
-            }}
+            className="flex w-full items-center justify-center gap-2 rounded-nov border border-nov-border2 bg-transparent px-3 py-2 text-[12.5px] font-semibold text-nov-s300 transition-[background,color] duration-nov-fast hover:bg-nov-danger-soft hover:text-nov-danger"
           >
             <LogOut size={14} />
             Sair
@@ -193,9 +107,7 @@ export function DashboardShell({ title, children }: { title: string; children: R
         </div>
       </aside>
 
-      <main className="nov-animate-in" style={{ flex: 1, padding: "36px 44px", maxWidth: 1280 }}>
-        {children}
-      </main>
+      <main className="nov-animate-in max-w-[1280px] flex-1 px-11 py-9">{children}</main>
     </div>
   );
 }
