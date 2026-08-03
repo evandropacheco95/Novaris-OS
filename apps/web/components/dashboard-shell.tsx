@@ -31,18 +31,25 @@ import { Tag } from "./tag";
  * `ENG-0143`-`0146`, preserva a contagem oficial de domínios).
  *
  * Migrado para Tailwind (`ENG-0157`) — mesmos valores visuais de `ENG-0147`.
+ *
+ * `label` (exibido) traduzido para português (`ENG-0162`) — `key` preserva o
+ * nome técnico do Business Domain (inglês, igual ao `title` que cada
+ * `page.tsx` já passa para `DashboardShell`) só para casar o item ativo da
+ * sidebar; nunca renderizado. Nomenclatura de identidade técnica
+ * (Domain/Aggregate/Controller/rota) permanece em inglês — só o texto
+ * visível ao usuário final muda aqui.
  */
 const DOMAINS = [
-  { label: "Sales", href: "/opportunities", live: true, icon: TrendingUp },
-  { label: "Relationship", href: "/customer", live: true, icon: Users },
-  { label: "Activity", href: "/activity", live: true, icon: ActivityIcon },
-  { label: "Project", href: "/projects", live: true, icon: FolderKanban },
-  { label: "Marketing", href: "/marketing", live: true, icon: Megaphone },
-  { label: "Financial", href: "/financial", live: true, icon: Wallet },
-  { label: "Analytics", href: "/analytics", live: true, icon: BarChart3 },
-  { label: "Workspace", href: "/settings", live: true, icon: Building2 },
-  { label: "Identity", href: "/team", live: true, icon: UserCog },
-  { label: "System", href: "/system", live: true, icon: FileClock },
+  { key: "Sales", label: "Vendas", href: "/opportunities", live: true, icon: TrendingUp },
+  { key: "Relationship", label: "Relacionamento", href: "/customer", live: true, icon: Users },
+  { key: "Activity", label: "Atividades", href: "/activity", live: true, icon: ActivityIcon },
+  { key: "Project", label: "Projetos", href: "/projects", live: true, icon: FolderKanban },
+  { key: "Marketing", label: "Marketing", href: "/marketing", live: true, icon: Megaphone },
+  { key: "Financial", label: "Financeiro", href: "/financial", live: true, icon: Wallet },
+  { key: "Analytics", label: "Análises", href: "/analytics", live: true, icon: BarChart3 },
+  { key: "Workspace", label: "Empresa", href: "/settings", live: true, icon: Building2 },
+  { key: "Identity", label: "Equipe", href: "/team", live: true, icon: UserCog },
+  { key: "System", label: "Sistema", href: "/system", live: true, icon: FileClock },
 ];
 
 export function DashboardShell({ title, children }: { title: string; children: ReactNode }) {
@@ -64,11 +71,11 @@ export function DashboardShell({ title, children }: { title: string; children: R
 
         <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto">
           {DOMAINS.map((domain) => {
-            const active = domain.live && domain.label === title;
+            const active = domain.live && domain.key === title;
             const Icon = domain.icon;
             return (
               <a
-                key={domain.label}
+                key={domain.key}
                 href={domain.live ? domain.href : undefined}
                 className={cn(
                   "relative flex items-center justify-between rounded-nov px-3 py-[9px] text-[13px] no-underline transition-[background,color] duration-nov-fast",

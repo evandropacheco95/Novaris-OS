@@ -65,16 +65,16 @@ test.describe("NOVARIS — login", () => {
   test("sidebar mostra os 10 domínios, todos habilitados", async ({ page }) => {
     await login(page);
     const domainLabels = [
-      "Sales",
-      "Relationship",
-      "Activity",
-      "Project",
+      "Vendas",
+      "Relacionamento",
+      "Atividades",
+      "Projetos",
       "Marketing",
-      "Financial",
-      "Analytics",
-      "Workspace",
-      "Identity",
-      "System",
+      "Financeiro",
+      "Análises",
+      "Empresa",
+      "Equipe",
+      "Sistema",
     ];
     for (const label of domainLabels) {
       await expect(page.getByRole("link", { name: label, exact: true })).toBeVisible();
