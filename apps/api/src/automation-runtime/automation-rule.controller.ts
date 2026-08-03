@@ -1,5 +1,6 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Inject, Param, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, ForbiddenException, Get, HttpException, HttpStatus, Inject, Param, Post, Req, UseGuards } from "@nestjs/common";
 import type { Request } from "express";
+import { UniqueEntityId } from "@novaris/shared-kernel";
 import {
   CreateAutomationRuleCommand,
   CreateAutomationRuleHandler,
@@ -27,8 +28,9 @@ export interface AutomationRuleResponse {
 
 /**
  * AutomationRuleController — API de `automation-runtime` (`ADR-0041`,
- * `ENG-0142`). `POST`/`GET` seguem o mesmo isolamento de tenant reforçado em
- * código de todo Controller desta API.
+ * `ENG-0142`). Isolamento de tenant reforçado em código via
+ * `loadAndAssertOwnership` (mesmo padrão de `OpportunityController`),
+ * necessário para `:id/toggle` desde a mitigação do achado `ENG-0122`.
  */
 @Controller("automation-rules")
 @UseGuards(JwtAuthGuard, PermissionGuard)
@@ -72,12 +74,38 @@ export class AutomationRuleController {
   }
 
   @Post(":id/toggle")
-  async toggle(@Param("id") id: string, @Body() body: { enabled: boolean }): Promise<AutomationRuleResponse> {
+  async toggle(
+    @Param("id") id: string,
+    @Body() body: { enabled: boolean },
+    @Req() req: AuthenticatedRequest,
+  ): Promise<AutomationRuleResponse> {
+    await this.loadAndAssertOwnership(id, req.user);
+
     const result = await this.toggleHandler.execute(new ToggleAutomationRuleCommand({ ruleId: id, enabled: body.enabled }));
     if (result.isFailure) {
       throwHttpExceptionForDomainError(result.getError()!);
     }
     return toResponse(result.getValue()!);
+  }
+
+  /**
+   * Mitigação do achado `ENG-0122` (RLS bypass, `DATABASE_ARCHITECTURE.md` § 7)
+   * — mesmo padrão de `OpportunityController.loadAndAssertOwnership`.
+   */
+  private async loadAndAssertOwnership(id: string, user: AuthenticatedUser) {
+    const findResult = await this.repository.findById(new UniqueEntityId(id));
+    if (findResult.isFailure) {
+      throw new HttpException({ code: "INFRASTRUCTURE_ERROR", message: "Falha ao buscar AutomationRule" }, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    const option = findResult.getValue()!;
+    if (option.isNone) {
+      throw new ForbiddenException({ code: "NOT_FOUND_ERROR", message: `AutomationRule "${id}" não encontrada` });
+    }
+    const rule = option.getOrElse(null as never);
+    if (rule.organizationId.toString() !== user.organizationId) {
+      throw new ForbiddenException({ code: "NOT_FOUND_ERROR", message: `AutomationRule "${id}" não encontrada` });
+    }
+    return rule;
   }
 }
 

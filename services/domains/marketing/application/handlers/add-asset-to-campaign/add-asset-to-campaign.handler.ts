@@ -41,6 +41,10 @@ export class AddAssetToCampaignHandler {
     }
     const fileRecord = fileOption.getOrElse(null as never);
 
+    if (fileRecord.organizationId.toString() !== campaign.organizationId.toString()) {
+      return Result.fail(new NotFoundError(`FileRecord "${command.fileRecordId}" não encontrado`));
+    }
+
     campaign.addAsset(fileRecord.id);
 
     const saveResult = await this.campaignRepository.save(campaign);

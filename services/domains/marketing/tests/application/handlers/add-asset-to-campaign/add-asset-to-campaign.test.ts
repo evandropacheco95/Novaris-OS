@@ -58,9 +58,9 @@ class FakeFileRecordRepository implements FileRecordRepository {
   }
 }
 
-function buildFileRecord(): FileRecord {
+function buildFileRecord(organizationId: UniqueEntityId): FileRecord {
   return FileRecord.create({
-    organizationId: new UniqueEntityId(),
+    organizationId,
     filename: "banner.png",
     mimeType: "image/png",
     sizeBytes: 1024,
@@ -69,14 +69,15 @@ function buildFileRecord(): FileRecord {
 }
 
 describe("AddAssetToCampaignHandler", () => {
-  it("associa um FileRecord real a uma Campaign real", async () => {
+  it("associa um FileRecord real a uma Campaign real (mesma organizationId)", async () => {
     const campaignRepository = new FakeCampaignRepository();
     const fileRecordRepository = new FakeFileRecordRepository();
     const handler = new AddAssetToCampaignHandler(campaignRepository, fileRecordRepository);
 
-    const campaign = Campaign.create({ organizationId: new UniqueEntityId(), name: "Campanha" }).getValue()!;
+    const organizationId = new UniqueEntityId();
+    const campaign = Campaign.create({ organizationId, name: "Campanha" }).getValue()!;
     campaignRepository.add(campaign);
-    const fileRecord = buildFileRecord();
+    const fileRecord = buildFileRecord(organizationId);
     fileRecordRepository.add(fileRecord);
 
     const result = await handler.execute(new AddAssetToCampaignCommand({ campaignId: campaign.id.toString(), fileRecordId: fileRecord.id.toString() }));
@@ -86,12 +87,27 @@ describe("AddAssetToCampaignHandler", () => {
     assert.equal(updated.getAssets()[0]!.fileRecordId.equals(fileRecord.id), true);
   });
 
+  it("devolve NotFoundError quando o FileRecord pertence a outra Organization (cross-tenant)", async () => {
+    const campaignRepository = new FakeCampaignRepository();
+    const fileRecordRepository = new FakeFileRecordRepository();
+    const handler = new AddAssetToCampaignHandler(campaignRepository, fileRecordRepository);
+
+    const campaign = Campaign.create({ organizationId: new UniqueEntityId(), name: "Campanha" }).getValue()!;
+    campaignRepository.add(campaign);
+    const fileRecord = buildFileRecord(new UniqueEntityId());
+    fileRecordRepository.add(fileRecord);
+
+    const result = await handler.execute(new AddAssetToCampaignCommand({ campaignId: campaign.id.toString(), fileRecordId: fileRecord.id.toString() }));
+    assert.equal(result.isFailure, true);
+    assert.equal(result.getError()!.code, "NOT_FOUND_ERROR");
+  });
+
   it("devolve NotFoundError para campaignId inexistente", async () => {
     const campaignRepository = new FakeCampaignRepository();
     const fileRecordRepository = new FakeFileRecordRepository();
     const handler = new AddAssetToCampaignHandler(campaignRepository, fileRecordRepository);
 
-    const fileRecord = buildFileRecord();
+    const fileRecord = buildFileRecord(new UniqueEntityId());
     fileRecordRepository.add(fileRecord);
 
     const result = await handler.execute(new AddAssetToCampaignCommand({ campaignId: new UniqueEntityId().toString(), fileRecordId: fileRecord.id.toString() }));

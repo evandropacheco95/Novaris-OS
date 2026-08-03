@@ -1,5 +1,6 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Inject, Param, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, ForbiddenException, Get, HttpException, HttpStatus, Inject, Param, Post, Req, UseGuards } from "@nestjs/common";
 import type { Request } from "express";
+import { UniqueEntityId } from "@novaris/shared-kernel";
 import {
   CreateLeadCommand,
   CreateLeadHandler,
@@ -82,7 +83,13 @@ export class LeadController {
   }
 
   @Post(":id/status")
-  async updateStatus(@Param("id") id: string, @Body() body: { status: Exclude<LeadStatus, "converted"> }): Promise<LeadResponse> {
+  async updateStatus(
+    @Param("id") id: string,
+    @Body() body: { status: Exclude<LeadStatus, "converted"> },
+    @Req() req: AuthenticatedRequest,
+  ): Promise<LeadResponse> {
+    await this.loadAndAssertOwnership(id, req.user);
+
     const result = await this.updateStatusHandler.execute(new UpdateLeadStatusCommand({ leadId: id, status: body.status }));
     if (result.isFailure) {
       throwHttpExceptionForDomainError(result.getError()!);
@@ -94,7 +101,10 @@ export class LeadController {
   async convert(
     @Param("id") id: string,
     @Body() body: { partyType: string; createOpportunity?: boolean; pipelineId?: string; currentStageId?: string },
+    @Req() req: AuthenticatedRequest,
   ): Promise<LeadResponse> {
+    await this.loadAndAssertOwnership(id, req.user);
+
     const result = await this.convertHandler.execute(
       new ConvertLeadCommand({
         leadId: id,
@@ -108,6 +118,29 @@ export class LeadController {
       throwHttpExceptionForDomainError(result.getError()!);
     }
     return toResponse(result.getValue()!);
+  }
+
+  /**
+   * Mitigação do achado `ENG-0122` (RLS bypass, `DATABASE_ARCHITECTURE.md` § 7):
+   * `rolbypassrls = true` no role usado pela conexão Prisma faz as policies do
+   * Postgres não protegerem nada aqui — todo endpoint que opera sobre um Lead
+   * já existente precisa confirmar `organizationId` em código antes de agir.
+   * Mesmo padrão de `OpportunityController.loadAndAssertOwnership`.
+   */
+  private async loadAndAssertOwnership(id: string, user: AuthenticatedUser) {
+    const findResult = await this.repository.findById(new UniqueEntityId(id));
+    if (findResult.isFailure) {
+      throw new HttpException({ code: "INFRASTRUCTURE_ERROR", message: "Falha ao buscar Lead" }, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    const option = findResult.getValue()!;
+    if (option.isNone) {
+      throw new ForbiddenException({ code: "NOT_FOUND_ERROR", message: `Lead "${id}" não encontrado` });
+    }
+    const lead = option.getOrElse(null as never);
+    if (lead.organizationId.toString() !== user.organizationId) {
+      throw new ForbiddenException({ code: "NOT_FOUND_ERROR", message: `Lead "${id}" não encontrado` });
+    }
+    return lead;
   }
 }
 
