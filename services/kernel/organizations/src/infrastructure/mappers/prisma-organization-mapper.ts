@@ -4,6 +4,8 @@ import {
   Organization,
   type OrganizationProps,
   type OrganizationStatus,
+  type OrganizationPlan,
+  type OrganizationBillingStatus,
   type OrganizationAddress,
 } from "../../domain/aggregates/organization/organization.js";
 
@@ -27,6 +29,11 @@ export class PrismaOrganizationMapper {
       document: organization.document,
       address: organization.address as object,
       status: organization.status,
+      plan: organization.plan,
+      billingStatus: organization.billingStatus,
+      trialEnd: organization.trialEnd ?? null,
+      maxUsers: organization.maxUsers ?? null,
+      enabledDomains: organization.enabledDomains ?? [],
       metadata: organization.metadata as object,
     };
   }
@@ -39,6 +46,11 @@ export class PrismaOrganizationMapper {
       document: record.document,
       address: record.address as unknown as OrganizationAddress,
       status: record.status as OrganizationStatus,
+      plan: record.plan as OrganizationPlan,
+      billingStatus: record.billingStatus as OrganizationBillingStatus,
+      trialEnd: record.trialEnd ?? undefined,
+      maxUsers: record.maxUsers ?? undefined,
+      enabledDomains: record.enabledDomains.length > 0 ? record.enabledDomains : undefined,
       metadata: record.metadata as Record<string, unknown>,
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,

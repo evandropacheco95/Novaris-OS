@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { UniqueEntityId, Result, Option } from "@novaris/shared-kernel";
 import type { InfrastructureError, DomainEvent } from "@novaris/shared-kernel";
 import type { EventBus, EventHandler, Subscription } from "@novaris/event-bus";
+import { Organization, type OrganizationRepository } from "@novaris/organizations";
 import { User } from "../../../../src/domain/aggregates/user/user.js";
 import type { UserRepository } from "../../../../src/domain/repositories/user-repository.js";
 import { CreateUserHandler } from "../../../../src/application/handlers/create-user/create-user.handler.js";
@@ -48,6 +49,59 @@ class FakeUserRepository implements UserRepository {
   }
 }
 
+class FakeOrganizationRepository implements OrganizationRepository {
+  private readonly records = new Map<string, Organization>();
+
+  add(organization: Organization): void {
+    this.records.set(organization.id.toString(), organization);
+  }
+
+  async findById(id: UniqueEntityId): Promise<Result<Option<Organization>, InfrastructureError>> {
+    const found = this.records.get(id.toString());
+    return Result.ok(found ? Option.some(found) : Option.none<Organization>());
+  }
+
+  async findAll(): Promise<Result<Organization[], InfrastructureError>> {
+    return Result.ok(Array.from(this.records.values()));
+  }
+
+  async exists(id: UniqueEntityId): Promise<Result<boolean, InfrastructureError>> {
+    return Result.ok(this.records.has(id.toString()));
+  }
+
+  async save(entity: Organization): Promise<Result<void, InfrastructureError>> {
+    this.records.set(entity.id.toString(), entity);
+    return Result.ok(undefined);
+  }
+
+  async delete(id: UniqueEntityId): Promise<Result<void, InfrastructureError>> {
+    this.records.delete(id.toString());
+    return Result.ok(undefined);
+  }
+}
+
+function buildOrganization(overrides: { maxUsers?: number } = {}): Organization {
+  return Organization.create({
+    slug: `org-${Math.random().toString(36).slice(2)}`,
+    name: "Organization de teste",
+    legalName: "Organization de Teste Ltda.",
+    document: "00000000000000",
+    address: {
+      street: "Rua Teste",
+      number: "1",
+      district: "Centro",
+      city: "São Paulo",
+      state: "SP",
+      zipCode: "00000-000",
+      country: "Brasil",
+    },
+    status: "active",
+    plan: "starter",
+    billingStatus: "trialing",
+    maxUsers: overrides.maxUsers,
+  }).getValue()!;
+}
+
 class FakeEventBus implements EventBus {
   readonly published: DomainEvent[] = [];
 
@@ -64,9 +118,9 @@ class FakeEventBus implements EventBus {
   }
 }
 
-function buildHandler(userRepo = new FakeUserRepository(), eventBus = new FakeEventBus()) {
-  const handler = new CreateUserHandler(userRepo, eventBus);
-  return { handler, userRepo, eventBus };
+function buildHandler(userRepo = new FakeUserRepository(), eventBus = new FakeEventBus(), organizationRepo = new FakeOrganizationRepository()) {
+  const handler = new CreateUserHandler(userRepo, eventBus, organizationRepo);
+  return { handler, userRepo, eventBus, organizationRepo };
 }
 
 function buildCommand(overrides: Partial<{ organizationId: string; email: string; createdBy: string }> = {}) {
@@ -130,5 +184,61 @@ describe("CreateUserHandler — publicação via Event Bus (ADR-0037)", () => {
     const result = await handler.execute(buildCommand());
 
     assert.equal(result.getValue()!.domainEvents.length, 0);
+  });
+});
+
+describe("CreateUserHandler — limite de usuários por Organization (ENG-0164)", () => {
+  it("bloqueia com ConflictError quando o limite já foi atingido", async () => {
+    const organization = buildOrganization({ maxUsers: 1 });
+    const organizationRepo = new FakeOrganizationRepository();
+    organizationRepo.add(organization);
+    const userRepo = new FakeUserRepository();
+    const { handler } = buildHandler(userRepo, new FakeEventBus(), organizationRepo);
+
+    const firstResult = await handler.execute(buildCommand({ organizationId: organization.id.toString() }));
+    assert.equal(firstResult.isSuccess, true);
+
+    const secondResult = await handler.execute(
+      buildCommand({ organizationId: organization.id.toString(), email: "segundo.usuario@novaris.com.br" }),
+    );
+    assert.equal(secondResult.isFailure, true);
+    assert.equal(secondResult.getError()!.code, "CONFLICT_ERROR");
+    assert.equal((await userRepo.findAll()).getValue()!.length, 1);
+  });
+
+  it("permite criar enquanto estiver abaixo do limite", async () => {
+    const organization = buildOrganization({ maxUsers: 2 });
+    const organizationRepo = new FakeOrganizationRepository();
+    organizationRepo.add(organization);
+    const { handler, userRepo } = buildHandler(new FakeUserRepository(), new FakeEventBus(), organizationRepo);
+
+    const first = await handler.execute(buildCommand({ organizationId: organization.id.toString() }));
+    const second = await handler.execute(
+      buildCommand({ organizationId: organization.id.toString(), email: "segundo.usuario@novaris.com.br" }),
+    );
+
+    assert.equal(first.isSuccess, true);
+    assert.equal(second.isSuccess, true);
+    assert.equal((await userRepo.findAll()).getValue()!.length, 2);
+  });
+
+  it("sem maxUsers definido (undefined) — sem limite, comportamento preservado", async () => {
+    const organization = buildOrganization();
+    const organizationRepo = new FakeOrganizationRepository();
+    organizationRepo.add(organization);
+    const { handler } = buildHandler(new FakeUserRepository(), new FakeEventBus(), organizationRepo);
+
+    for (let i = 0; i < 5; i++) {
+      const result = await handler.execute(
+        buildCommand({ organizationId: organization.id.toString(), email: `usuario-${i}@novaris.com.br` }),
+      );
+      assert.equal(result.isSuccess, true);
+    }
+  });
+
+  it("Organization não encontrada no repositório — não bloqueia (mesmo comportamento de antes desta missão)", async () => {
+    const { handler } = buildHandler();
+    const result = await handler.execute(buildCommand());
+    assert.equal(result.isSuccess, true);
   });
 });

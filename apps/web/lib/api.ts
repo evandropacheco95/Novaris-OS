@@ -65,6 +65,26 @@ export function useCurrentUser(): AuthenticatedUser | null {
   return user;
 }
 
+/**
+ * `ENG-0164` — `enabledDomains` da própria Organization, para a sidebar
+ * (`DashboardShell`) esconder o que não está habilitado no plano. `null` =
+ * "sem restrição" (default seguro: primeiro render, enquanto o fetch não
+ * termina, ou quando o campo genuinamente não tem valor no backend — mesmo
+ * comportamento de toda Organization anterior a esta missão, nunca esconde
+ * nada por engano). Mesma disciplina SSR-safe de `useCurrentUser` — só busca
+ * depois de montado no cliente.
+ */
+export function useEnabledDomains(): string[] | null {
+  const [enabledDomains, setEnabledDomains] = useState<string[] | null>(null);
+  useEffect(() => {
+    if (!getToken()) return;
+    getMyOrganization()
+      .then((organization) => setEnabledDomains(organization.enabledDomains && organization.enabledDomains.length > 0 ? organization.enabledDomains : null))
+      .catch(() => setEnabledDomains(null));
+  }, []);
+  return enabledDomains;
+}
+
 export async function login(email: string, password: string): Promise<LoginResponse> {
   const response = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
@@ -290,6 +310,10 @@ export interface OrganizationAddress {
   country: string;
 }
 
+/** `plan`/`billingStatus` (`ENG-0164`) — ver `architecture/multi-tenancy.md` § "Tópicos a Documentar". */
+export type OrganizationPlan = "starter" | "professional" | "enterprise";
+export type OrganizationBillingStatus = "trialing" | "active" | "overdue" | "canceled";
+
 export interface OrganizationProfile {
   id: string;
   slug: string;
@@ -298,6 +322,11 @@ export interface OrganizationProfile {
   document: string;
   address: OrganizationAddress;
   status: string;
+  plan: OrganizationPlan;
+  billingStatus: OrganizationBillingStatus;
+  trialEnd?: string;
+  maxUsers?: number;
+  enabledDomains?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -311,6 +340,22 @@ export async function getMyOrganization(): Promise<OrganizationProfile> {
 export async function updateMyOrganization(patch: Partial<Pick<OrganizationProfile, "name" | "legalName" | "document">>): Promise<OrganizationProfile> {
   const response = await authenticatedFetch("/organizations/me", { method: "PATCH", body: JSON.stringify(patch) });
   return parseOrThrow<OrganizationProfile>(response, "Falha ao atualizar Organization");
+}
+
+/**
+ * `ENG-0164` — `PATCH /organizations/plan`, Permission distinta
+ * (`workspace.plan.manage`) da de perfil. `maxUsers: null`/`enabledDomains: null`
+ * removem o limite explicitamente (`undefined` = não enviado, não mexer).
+ */
+export async function updateOrganizationPlan(patch: {
+  plan?: OrganizationPlan;
+  billingStatus?: OrganizationBillingStatus;
+  trialEnd?: string | null;
+  maxUsers?: number | null;
+  enabledDomains?: string[] | null;
+}): Promise<OrganizationProfile> {
+  const response = await authenticatedFetch("/organizations/plan", { method: "PATCH", body: JSON.stringify(patch) });
+  return parseOrThrow<OrganizationProfile>(response, "Falha ao atualizar plano da Organization");
 }
 
 // Project Domain (`ENG-0129`)

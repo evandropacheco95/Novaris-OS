@@ -32,14 +32,26 @@ Existe (policies reais nas migrations), mas é **defesa em profundidade para um 
 
 Depois de criada, o único fluxo real de "entrada" para um usuário é `POST /auth/login` contra um `User` já existente e vinculado a essa `organizationId` — também não existe `POST /auth/register` (auto-cadastro).
 
+## Plano/Limites por Tenant (`ENG-0164`)
+
+`Organization` ganhou `plan` (`starter`/`professional`/`enterprise`, rótulo comercial — decisão direta do CTO), `billingStatus` (`trialing`/`active`/`overdue`/`canceled`, controle manual, sem gateway de pagamento real), `trialEnd` (informativo, sem bloqueio automático — decisão explícita do CTO), `maxUsers` e `enabledDomains` — estes 2 últimos **não** derivam de uma tabela fixa "plano→limite" (nenhum número/mapeamento foi inventado); são configuráveis por Organization, individualmente, via `PATCH /organizations/plan` (`workspace.plan.manage`, Permission distinta de `workspace.profile.manage`).
+
+**Enforcement real, não só o campo**:
+- `maxUsers` — `CreateUserHandler` (Identity) conta os `User`s existentes da Organization e bloqueia com `ConflictError` (`400`) se o limite já foi atingido. `undefined` = sem limite (comportamento de toda Organization anterior a esta missão, preservado).
+- `enabledDomains` — a sidebar (`DashboardShell`, frontend) esconde os domínios não incluídos na lista. `undefined`/vazio = todos os 10 domínios visíveis (mesmo comportamento anterior).
+
+**Limitação real, documentada e não escondida**: o enforcement de `enabledDomains` existe hoje **só no frontend** (a sidebar não mostra o link) — não há um Guard de backend bloqueando `GET/POST` direto num domínio fora do plano de uma Organization (ex.: chamar `POST /campaigns` mesmo sem `Marketing` em `enabledDomains` funcionaria hoje). Isso é diferente do isolamento entre Organizations (§ "Modelo de Isolamento" acima, que é real em toda camada) — aqui é só uma restrição de navegação, não de dado. Fechar isso exigiria um `PlanGuard` novo aplicado aos ~30 Controllers de domínio de negócio, deliberadamente fora do escopo desta missão (mesmo critério de nunca expandir escopo sem necessidade concreta já demonstrada).
+
+`billingStatus` **não tem cobrança automática** — mesmo padrão estrutural de `integration-hub`/`ai-runtime` (`ADR-0040`/`ADR-0041`): nenhuma credencial de gateway de pagamento existe hoje, então nenhuma cobrança real acontece; o campo só reflete o que um humano define via API.
+
 ## Tópicos a Documentar
 
-Estes 3 itens são o que falta para NOVARIS se tornar um SaaS multi-tenant "completo" no sentido Salesforce (Edições/Licenças) — nenhum tem decisão de produto tomada ainda, por isso seguem como `TODO` explícito, não implementados por invenção:
+Restam 2 itens (o 3º, plano/limites, foi fechado em `ENG-0164` acima) para NOVARIS se tornar um SaaS multi-tenant "completo" no sentido Salesforce (Edições/Licenças):
 
-- **Plano/limites por tenant** — `Organization` **deliberadamente não tem** `plan`/`billingStatus`/`trialEnd`/`maxUsers`/`maxStorage`/`storageUsed`/`featureFlags`/`settings` (excluídos conscientemente da primeira implementação, comentário em `services/kernel/organizations/src/domain/aggregates/organization/organization.ts:41-50` — "nenhum tem valor ou forma de criação definida por nenhuma fonte"). `Organization.status` (`active`/`suspended`/`trial`/`blocked`/`archived`) já existe e cobre o ciclo de vida básico, mas sem plano/tier associado, todo tenant é funcionalmente idêntico hoje.
-- **Estratégia de billing por tenant** — ver [docs/12-negocio/billing-e-assinaturas.md](../docs/12-negocio/billing-e-assinaturas.md). `services/domains/financial` (`Invoice`/`Subscription`) existe como Domain Layer per-cliente-do-cliente (a própria Organization vende para os *seus* clientes via CRM/Financial) — não é o mesmo conceito de "NOVARIS cobra a Organization pelo uso da plataforma", que ainda não tem nenhum objeto de domínio.
+- **Cobrança real (gateway de pagamento)** — ver [docs/12-negocio/billing-e-assinaturas.md](../docs/12-negocio/billing-e-assinaturas.md). `services/domains/financial` (`Invoice`/`Subscription`) existe como Domain Layer per-cliente-do-cliente (a própria Organization vende para os *seus* clientes via CRM/Financial) — não é o mesmo conceito de "NOVARIS cobra a Organization pelo uso da plataforma", que segue sem gateway real (`billingStatus` é manual, ver acima).
 - **Migração/exportação de dados de um tenant** — nenhum endpoint ou processo existe hoje para exportar/portar os dados de uma Organization.
+- **`PlanGuard` de backend** (novo, identificado em `ENG-0164`) — fechar o enforcement de `enabledDomains` também nas rotas de API, não só na sidebar.
 
 ## Status
 
-🟡 Documentado o que existe de verdade (`ENG-0162`) — isolamento real via `loadAndAssertOwnership`, RLS como defesa em profundidade inerte, provisionamento só por seed. Os 3 tópicos pendentes acima permanecem sem decisão de produto — não inventados aqui.
+🟡 Documentado o que existe de verdade (`ENG-0162`/`ENG-0164`) — isolamento entre Organizations real em toda camada via `loadAndAssertOwnership`; plano/limites (`maxUsers` real, `enabledDomains` só frontend) configuráveis por Organization, sem número/mapeamento inventado; RLS como defesa em profundidade inerte; provisionamento só por seed. Os itens pendentes acima permanecem sem decisão de produto ou fora de escopo — não inventados aqui.

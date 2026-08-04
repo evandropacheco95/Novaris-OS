@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
 import { prisma } from "@novaris/database";
-import { createOrganizationRepository, UpdateOrganizationProfileHandler } from "@novaris/organizations";
+import { createOrganizationRepository, UpdateOrganizationProfileHandler, UpdateOrganizationPlanHandler } from "@novaris/organizations";
 import { CreateAuditEntryHandler } from "@novaris/audit";
 import { AuthModule } from "../auth/auth.module.js";
 import { AuditModule } from "../audit/audit.module.js";
@@ -23,6 +23,12 @@ const ORGANIZATION_REPOSITORY = "ORGANIZATION_REPOSITORY";
       provide: UpdateOrganizationProfileHandler,
       useFactory: (repository: ReturnType<typeof createOrganizationRepository>, createAuditEntryHandler: CreateAuditEntryHandler) =>
         new UpdateOrganizationProfileHandler(repository, createAuditEntryHandler),
+      inject: [ORGANIZATION_REPOSITORY, CreateAuditEntryHandler],
+    },
+    {
+      provide: UpdateOrganizationPlanHandler,
+      useFactory: (repository: ReturnType<typeof createOrganizationRepository>, createAuditEntryHandler: CreateAuditEntryHandler) =>
+        new UpdateOrganizationPlanHandler(repository, createAuditEntryHandler),
       inject: [ORGANIZATION_REPOSITORY, CreateAuditEntryHandler],
     },
     { provide: "OrganizationRepository", useExisting: ORGANIZATION_REPOSITORY },

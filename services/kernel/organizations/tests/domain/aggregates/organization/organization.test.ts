@@ -23,6 +23,8 @@ function buildCreateInput() {
     document: "00.000.000/0001-00",
     address: ADDRESS,
     status: "trial" as const,
+    plan: "starter" as const,
+    billingStatus: "trialing" as const,
   };
 }
 
@@ -87,6 +89,8 @@ describe("Organization.reconstitute", () => {
         document: created.document,
         address: created.address,
         status: "active",
+        plan: "starter",
+        billingStatus: "trialing",
         metadata: {},
         createdAt: created.createdAt,
         updatedAt: created.updatedAt,
@@ -150,5 +154,95 @@ describe("Organization.updateProfile", () => {
   it("nunca lança exceção", () => {
     const organization = Organization.create(buildCreateInput()).getValue()!;
     assert.doesNotThrow(() => organization.updateProfile({ name: "" }));
+  });
+});
+
+describe("Organization.create — plan/billingStatus/trialEnd/maxUsers/enabledDomains (ENG-0164)", () => {
+  it("aceita plan/billingStatus válidos, sem limite por padrão", () => {
+    const organization = Organization.create(buildCreateInput()).getValue()!;
+    assert.equal(organization.plan, "starter");
+    assert.equal(organization.billingStatus, "trialing");
+    assert.equal(organization.maxUsers, undefined);
+    assert.equal(organization.enabledDomains, undefined);
+    assert.equal(organization.trialEnd, undefined);
+  });
+
+  it("rejeita plan fora da união conhecida", () => {
+    const result = Organization.create({ ...buildCreateInput(), plan: "inexistente" as never });
+    assert.equal(result.isFailure, true);
+    assert.equal(result.getError() instanceof ValidationError, true);
+  });
+
+  it("rejeita billingStatus fora da união conhecida", () => {
+    const result = Organization.create({ ...buildCreateInput(), billingStatus: "inexistente" as never });
+    assert.equal(result.isFailure, true);
+    assert.equal(result.getError() instanceof ValidationError, true);
+  });
+
+  it("rejeita maxUsers menor que 1 quando fornecido", () => {
+    const result = Organization.create({ ...buildCreateInput(), maxUsers: 0 });
+    assert.equal(result.isFailure, true);
+    assert.equal(result.getError() instanceof ValidationError, true);
+  });
+
+  it("aceita maxUsers/enabledDomains/trialEnd explícitos", () => {
+    const trialEnd = new Date("2026-12-31T00:00:00Z");
+    const organization = Organization.create({
+      ...buildCreateInput(),
+      maxUsers: 5,
+      enabledDomains: ["Sales", "Relationship"],
+      trialEnd,
+    }).getValue()!;
+    assert.equal(organization.maxUsers, 5);
+    assert.deepEqual(organization.enabledDomains, ["Sales", "Relationship"]);
+    assert.equal(organization.trialEnd?.getTime(), trialEnd.getTime());
+  });
+});
+
+describe("Organization.updatePlan (ENG-0164)", () => {
+  it("atualiza plan/billingStatus quando fornecidos", () => {
+    const organization = Organization.create(buildCreateInput()).getValue()!;
+    const result = organization.updatePlan({ plan: "enterprise", billingStatus: "active" });
+
+    assert.equal(result.isSuccess, true);
+    assert.equal(organization.plan, "enterprise");
+    assert.equal(organization.billingStatus, "active");
+  });
+
+  it("atualiza só os campos fornecidos, preservando os demais", () => {
+    const organization = Organization.create({ ...buildCreateInput(), maxUsers: 3 }).getValue()!;
+    organization.updatePlan({ plan: "professional" });
+
+    assert.equal(organization.plan, "professional");
+    assert.equal(organization.maxUsers, 3);
+  });
+
+  it("null remove o limite explicitamente (distinto de undefined = não mexer)", () => {
+    const organization = Organization.create({ ...buildCreateInput(), maxUsers: 3, enabledDomains: ["Sales"] }).getValue()!;
+
+    organization.updatePlan({ maxUsers: null, enabledDomains: null });
+
+    assert.equal(organization.maxUsers, undefined);
+    assert.equal(organization.enabledDomains, undefined);
+  });
+
+  it("undefined não altera o campo (omitido do input)", () => {
+    const organization = Organization.create({ ...buildCreateInput(), maxUsers: 3 }).getValue()!;
+    organization.updatePlan({ plan: "enterprise" });
+    assert.equal(organization.maxUsers, 3);
+  });
+
+  it("rejeita plan/billingStatus/maxUsers inválidos", () => {
+    const organization = Organization.create(buildCreateInput()).getValue()!;
+    assert.equal(organization.updatePlan({ plan: "invalido" as never }).isFailure, true);
+    assert.equal(organization.updatePlan({ billingStatus: "invalido" as never }).isFailure, true);
+    assert.equal(organization.updatePlan({ maxUsers: 0 }).isFailure, true);
+  });
+
+  it("nunca dispara Domain Event — mesmo critério de updateProfile()", () => {
+    const organization = Organization.create(buildCreateInput()).getValue()!;
+    organization.updatePlan({ plan: "enterprise" });
+    assert.equal(organization.domainEvents.length, 1);
+    assert.equal(organization.domainEvents[0] instanceof OrganizationCreated, true);
   });
 });

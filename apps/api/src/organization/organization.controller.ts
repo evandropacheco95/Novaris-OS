@@ -4,8 +4,12 @@ import { UniqueEntityId } from "@novaris/shared-kernel";
 import {
   UpdateOrganizationProfileCommand,
   UpdateOrganizationProfileHandler,
+  UpdateOrganizationPlanCommand,
+  UpdateOrganizationPlanHandler,
   type OrganizationRepository,
   type OrganizationAddress,
+  type OrganizationPlan,
+  type OrganizationBillingStatus,
 } from "@novaris/organizations";
 import { JwtAuthGuard, type AuthenticatedUser } from "../auth/jwt-auth.guard.js";
 import { PermissionGuard } from "../auth/permission.guard.js";
@@ -22,6 +26,11 @@ export interface OrganizationResponse {
   document: string;
   address: OrganizationAddress;
   status: string;
+  plan: string;
+  billingStatus: string;
+  trialEnd?: string;
+  maxUsers?: number;
+  enabledDomains?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -38,6 +47,7 @@ export interface OrganizationResponse {
 export class OrganizationController {
   constructor(
     private readonly updateHandler: UpdateOrganizationProfileHandler,
+    private readonly updatePlanHandler: UpdateOrganizationPlanHandler,
     @Inject("OrganizationRepository") private readonly repository: OrganizationRepository,
   ) {}
 
@@ -67,6 +77,43 @@ export class OrganizationController {
     return toResponse(result.getValue()!);
   }
 
+  /**
+   * `ENG-0164` — plano/billing/limites, deliberadamente sob uma Permission
+   * distinta (`workspace.plan.manage`) da de perfil (`workspace.profile.manage`),
+   * via override em nível de método (`PermissionGuard` já lê com
+   * `getAllAndOverride` — primeiro uso real dessa granularidade nesta API,
+   * mecanismo já suportado, nunca antes necessário até este Controller
+   * ganhar 2 concerns de sensibilidade diferente).
+   */
+  @Patch("plan")
+  @RequirePermission("workspace.plan.manage")
+  async updatePlan(
+    @Body()
+    body: {
+      plan?: OrganizationPlan;
+      billingStatus?: OrganizationBillingStatus;
+      trialEnd?: string | null;
+      maxUsers?: number | null;
+      enabledDomains?: string[] | null;
+    },
+    @Req() req: AuthenticatedRequest,
+  ): Promise<OrganizationResponse> {
+    const command = new UpdateOrganizationPlanCommand({
+      organizationId: req.user.organizationId,
+      actorId: req.user.userId,
+      plan: body.plan,
+      billingStatus: body.billingStatus,
+      trialEnd: body.trialEnd === undefined ? undefined : body.trialEnd === null ? null : new Date(body.trialEnd),
+      maxUsers: body.maxUsers,
+      enabledDomains: body.enabledDomains,
+    });
+    const result = await this.updatePlanHandler.execute(command);
+    if (result.isFailure) {
+      throwHttpExceptionForDomainError(result.getError()!);
+    }
+    return toResponse(result.getValue()!);
+  }
+
   private async loadOwnOrganization(user: AuthenticatedUser) {
     const findResult = await this.repository.findById(new UniqueEntityId(user.organizationId));
     if (findResult.isFailure) {
@@ -88,6 +135,11 @@ function toResponse(organization: {
   document: string;
   address: OrganizationAddress;
   status: string;
+  plan: string;
+  billingStatus: string;
+  trialEnd?: Date;
+  maxUsers?: number;
+  enabledDomains?: string[];
   createdAt: Date;
   updatedAt: Date;
 }): OrganizationResponse {
@@ -99,6 +151,11 @@ function toResponse(organization: {
     document: organization.document,
     address: organization.address,
     status: organization.status,
+    plan: organization.plan,
+    billingStatus: organization.billingStatus,
+    trialEnd: organization.trialEnd?.toISOString(),
+    maxUsers: organization.maxUsers,
+    enabledDomains: organization.enabledDomains,
     createdAt: organization.createdAt.toISOString(),
     updatedAt: organization.updatedAt.toISOString(),
   };

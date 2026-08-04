@@ -13,6 +13,7 @@
   "dependencies": {
     "@novaris/database": "workspace:^",
     "@novaris/event-bus": "workspace:*",
+    "@novaris/organizations": "workspace:*",
     "@novaris/shared-kernel": "workspace:*",
     "bcryptjs": "^3.0.3"
   },

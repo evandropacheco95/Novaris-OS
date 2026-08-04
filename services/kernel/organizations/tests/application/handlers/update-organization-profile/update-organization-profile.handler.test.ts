@@ -89,6 +89,8 @@ async function seedOrganization(repository: OrganizationRepository): Promise<Org
     document: "00.000.000/0001-00",
     address: buildAddress(),
     status: "trial",
+    plan: "starter",
+    billingStatus: "trialing",
   }).getValue()!;
   await repository.save(organization);
   return organization;

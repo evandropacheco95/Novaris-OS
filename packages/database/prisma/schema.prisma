@@ -124,6 +124,11 @@ model Organization {
   document   String    @db.VarChar(32)
   address    Json
   status     String    @db.VarChar(10) // "active" | "suspended" | "trial" | "blocked" | "archived" — CHECK constraint na migration
+  plan            String    @default("starter") @db.VarChar(20) // "starter" | "professional" | "enterprise" — CHECK constraint na migration (ENG-0164)
+  billingStatus   String    @default("trialing") @map("billing_status") @db.VarChar(20) // "trialing" | "active" | "overdue" | "canceled" — CHECK constraint na migration (ENG-0164)
+  trialEnd        DateTime? @map("trial_end") @db.Timestamptz
+  maxUsers        Int?      @map("max_users") // null = sem limite (ENG-0164)
+  enabledDomains  String[]  @default([]) @map("enabled_domains") // vazio = todos os 10 domínios habilitados (ENG-0164)
   metadata   Json      @default("{}")
   createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz

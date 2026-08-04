@@ -18,6 +18,30 @@ export type OrganizationStatus = "active" | "suspended" | "trial" | "blocked" | 
 
 const VALID_ORGANIZATION_STATUSES: readonly OrganizationStatus[] = ["active", "suspended", "trial", "blocked", "archived"];
 
+/**
+ * 3 tiers (`ENG-0164`, decisão direta do CTO — Starter/Professional/Enterprise,
+ * mesmo padrão de nomenclatura das Edições do Salesforce). Diferente de
+ * `maxUsers`/`enabledDomains` (limites reais, configuráveis por Organization,
+ * sem número/mapeamento inventado — decisão explícita do CTO de não fixar
+ * "Starter = N usuários" sem fonte), `plan` é só o rótulo comercial do tier;
+ * o que cada tier concretamente limita é decidido caso a caso via
+ * `maxUsers`/`enabledDomains` de cada Organization, não derivado do nome do
+ * plano.
+ */
+export type OrganizationPlan = "starter" | "professional" | "enterprise";
+
+const VALID_ORGANIZATION_PLANS: readonly OrganizationPlan[] = ["starter", "professional", "enterprise"];
+
+/**
+ * Controle manual, sem gateway de pagamento real (`ENG-0164` — mesmo padrão
+ * estrutural de `integration-hub`/`ai-runtime`, `ADR-0040`/`ADR-0041`:
+ * nenhuma credencial de terceiro existe, então nenhuma cobrança automática
+ * acontece; `billingStatus` só reflete o que um humano define via API).
+ */
+export type OrganizationBillingStatus = "trialing" | "active" | "overdue" | "canceled";
+
+const VALID_BILLING_STATUSES: readonly OrganizationBillingStatus[] = ["trialing", "active", "overdue", "canceled"];
+
 /** Mesma justificativa de `UserMetadata` (Identity, ENG-0002.7) — forma não definida por nenhuma fonte. */
 export type OrganizationMetadata = Record<string, unknown>;
 
@@ -39,15 +63,18 @@ export interface OrganizationAddress {
 }
 
 /**
- * Estado interno desta primeira implementação — subconjunto de
- * `ORGANIZATION_TECHNICAL_BLUEPRINT.md § 3`. `branding`, `plan`,
- * `billingStatus`, `trialEnd`, `maxUsers`, `maxStorage`, `storageUsed`,
- * `featureFlags`, `settings` foram deliberadamente excluídos — nenhum tem
- * valor ou forma de criação definida por nenhuma fonte (mesma categoria de
+ * Estado interno — subconjunto de `ORGANIZATION_TECHNICAL_BLUEPRINT.md § 3`.
+ * `plan`/`billingStatus`/`trialEnd`/`maxUsers`/`enabledDomains` adicionados
+ * em `ENG-0164` (decisão direta do CTO, ver `architecture/multi-tenancy.md`
+ * § "Tópicos a Documentar"). `branding`, `maxStorage`, `storageUsed`,
+ * `settings` **continuam deliberadamente excluídos** — nenhum tem valor ou
+ * forma de criação definida por nenhuma fonte ainda (mesma categoria de
  * lacuna já registrada para o valor inicial de `status`,
- * ORGANIZATION_AGGREGATE_DESIGN_FREEZE.md § 16); incluí-los exigiria inventar
- * um default ou uma forma não congelada. Uma futura missão pode estendê-los
- * quando essas decisões existirem.
+ * ORGANIZATION_AGGREGATE_DESIGN_FREEZE.md § 16). `maxUsers`/`enabledDomains`
+ * são `undefined` por padrão (= sem limite / todos os domínios habilitados,
+ * preserva o comportamento de toda Organization já existente antes desta
+ * missão) — nenhum valor numérico ou mapeamento plano→limite foi inventado;
+ * cada Organization tem seu próprio limite configurado individualmente.
  */
 export interface OrganizationProps {
   slug: string;
@@ -56,6 +83,11 @@ export interface OrganizationProps {
   document: string;
   address: OrganizationAddress;
   status: OrganizationStatus;
+  plan: OrganizationPlan;
+  billingStatus: OrganizationBillingStatus;
+  trialEnd?: Date;
+  maxUsers?: number;
+  enabledDomains?: string[];
   metadata: OrganizationMetadata;
   createdAt: Date;
   updatedAt: Date;
@@ -69,6 +101,11 @@ export interface CreateOrganizationInput {
   document: string;
   address: OrganizationAddress;
   status: OrganizationStatus;
+  plan: OrganizationPlan;
+  billingStatus: OrganizationBillingStatus;
+  trialEnd?: Date;
+  maxUsers?: number;
+  enabledDomains?: string[];
   metadata?: OrganizationMetadata;
 }
 
@@ -77,6 +114,21 @@ export interface UpdateOrganizationProfileInput {
   legalName?: string;
   document?: string;
   address?: OrganizationAddress;
+}
+
+/**
+ * Todos os campos opcionais — `PATCH` parcial, mesmo padrão de
+ * `UpdateOrganizationProfileInput`. `maxUsers: null`/`enabledDomains: null`
+ * removem o limite explicitamente (undefined = "não mudar este campo",
+ * null = "define como sem limite/todos habilitados" — distinção necessária
+ * porque ambos são opcionais e `undefined` já significa "não enviado").
+ */
+export interface UpdateOrganizationPlanInput {
+  plan?: OrganizationPlan;
+  billingStatus?: OrganizationBillingStatus;
+  trialEnd?: Date | null;
+  maxUsers?: number | null;
+  enabledDomains?: string[] | null;
 }
 
 /**
@@ -114,6 +166,15 @@ export class Organization
     if (!VALID_ORGANIZATION_STATUSES.includes(input.status)) {
       return Result.fail(new ValidationError(`"status" inválido: "${input.status}" — valores aceitos: ${VALID_ORGANIZATION_STATUSES.join(", ")}`));
     }
+    if (!VALID_ORGANIZATION_PLANS.includes(input.plan)) {
+      return Result.fail(new ValidationError(`"plan" inválido: "${input.plan}" — valores aceitos: ${VALID_ORGANIZATION_PLANS.join(", ")}`));
+    }
+    if (!VALID_BILLING_STATUSES.includes(input.billingStatus)) {
+      return Result.fail(new ValidationError(`"billingStatus" inválido: "${input.billingStatus}" — valores aceitos: ${VALID_BILLING_STATUSES.join(", ")}`));
+    }
+    if (input.maxUsers !== undefined && input.maxUsers < 1) {
+      return Result.fail(new ValidationError('"maxUsers" deve ser maior que zero quando definido'));
+    }
     if (input.name.trim().length === 0) {
       return Result.fail(new ValidationError('"name" é obrigatório'));
     }
@@ -129,6 +190,11 @@ export class Organization
       document: input.document,
       address: input.address,
       status: input.status,
+      plan: input.plan,
+      billingStatus: input.billingStatus,
+      trialEnd: input.trialEnd,
+      maxUsers: input.maxUsers,
+      enabledDomains: input.enabledDomains,
       metadata: input.metadata ?? {},
       createdAt: now,
       updatedAt: now,
@@ -169,6 +235,41 @@ export class Organization
     return Result.ok(undefined);
   }
 
+  /**
+   * Atualiza plano/billing/limites (`ENG-0164`). Sem Domain Event dedicado
+   * pelo mesmo motivo de `updateProfile()` — `OrganizationUpdated` continua
+   * candidato, não aprovado (`ENS-0003 § 15`).
+   */
+  updatePlan(input: UpdateOrganizationPlanInput): Result<void, DomainError> {
+    if (input.plan !== undefined) {
+      if (!VALID_ORGANIZATION_PLANS.includes(input.plan)) {
+        return Result.fail(new ValidationError(`"plan" inválido: "${input.plan}" — valores aceitos: ${VALID_ORGANIZATION_PLANS.join(", ")}`));
+      }
+      this.props.plan = input.plan;
+    }
+    if (input.billingStatus !== undefined) {
+      if (!VALID_BILLING_STATUSES.includes(input.billingStatus)) {
+        return Result.fail(new ValidationError(`"billingStatus" inválido: "${input.billingStatus}" — valores aceitos: ${VALID_BILLING_STATUSES.join(", ")}`));
+      }
+      this.props.billingStatus = input.billingStatus;
+    }
+    if (input.trialEnd !== undefined) {
+      this.props.trialEnd = input.trialEnd ?? undefined;
+    }
+    if (input.maxUsers !== undefined) {
+      if (input.maxUsers !== null && input.maxUsers < 1) {
+        return Result.fail(new ValidationError('"maxUsers" deve ser maior que zero quando definido'));
+      }
+      this.props.maxUsers = input.maxUsers ?? undefined;
+    }
+    if (input.enabledDomains !== undefined) {
+      this.props.enabledDomains = input.enabledDomains ?? undefined;
+    }
+
+    this.props.updatedAt = new Date();
+    return Result.ok(undefined);
+  }
+
   get slug(): string {
     return this.props.slug;
   }
@@ -191,6 +292,26 @@ export class Organization
 
   get status(): OrganizationStatus {
     return this.props.status;
+  }
+
+  get plan(): OrganizationPlan {
+    return this.props.plan;
+  }
+
+  get billingStatus(): OrganizationBillingStatus {
+    return this.props.billingStatus;
+  }
+
+  get trialEnd(): Date | undefined {
+    return this.props.trialEnd;
+  }
+
+  get maxUsers(): number | undefined {
+    return this.props.maxUsers;
+  }
+
+  get enabledDomains(): string[] | undefined {
+    return this.props.enabledDomains;
   }
 
   get metadata(): OrganizationMetadata {

@@ -33,7 +33,7 @@ test.describe("NOVARIS — QA visual real dos 10 Business Domains", () => {
     { path: "/marketing", title: "Marketing", screenshot: "05-marketing.png" },
     { path: "/financial", title: "Financial", screenshot: "06-financial.png" },
     { path: "/analytics", title: "Analytics", screenshot: "07-analytics.png" },
-    { path: "/settings", title: "Workspace", screenshot: "08-workspace.png" },
+    { path: "/settings", title: "Empresa", screenshot: "08-workspace.png" },
     { path: "/team", title: "Identity", screenshot: "09-identity.png" },
     { path: "/system", title: "Trilha de Auditoria", screenshot: "10-system.png" },
   ];
@@ -81,5 +81,33 @@ test.describe("NOVARIS — login", () => {
     }
     await expect(page.getByText("Carregando...")).toHaveCount(0);
     await page.screenshot({ path: "e2e/screenshots/00-sidebar.png", fullPage: true });
+  });
+
+  test("sidebar esconde domínios fora de enabledDomains (ENG-0164)", async ({ page, request, baseURL }) => {
+    const apiURL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+    const loginResponse = await request.post(`${apiURL}/auth/login`, {
+      data: { email: TEST_EMAIL, password: TEST_PASSWORD },
+    });
+    const { accessToken } = (await loginResponse.json()) as { accessToken: string };
+
+    try {
+      const patchResponse = await request.patch(`${apiURL}/organizations/plan`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        data: { enabledDomains: ["Sales", "Relationship"] },
+      });
+      expect(patchResponse.ok()).toBe(true);
+
+      await login(page);
+      await expect(page.getByRole("link", { name: "Vendas", exact: true })).toBeVisible();
+      await expect(page.getByRole("link", { name: "Relacionamento", exact: true })).toBeVisible();
+      await expect(page.getByRole("link", { name: "Financeiro", exact: true })).toHaveCount(0);
+      await expect(page.getByRole("link", { name: "Equipe", exact: true })).toHaveCount(0);
+    } finally {
+      // Reset — nunca deixar a Organization de dev/seed restrita depois do teste.
+      await request.patch(`${apiURL}/organizations/plan`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        data: { enabledDomains: null },
+      });
+    }
   });
 });

@@ -529,6 +529,9 @@ importers:
       '@novaris/event-bus':
         specifier: workspace:*
         version: link:../event-bus
+      '@novaris/organizations':
+        specifier: workspace:*
+        version: link:../organizations
       '@novaris/shared-kernel':
         specifier: workspace:*
         version: link:../../../packages/shared-kernel

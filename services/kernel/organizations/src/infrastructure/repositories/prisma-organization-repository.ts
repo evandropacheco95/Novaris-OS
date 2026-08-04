@@ -57,6 +57,11 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
           document: data.document,
           address: data.address,
           status: data.status,
+          plan: data.plan,
+          billingStatus: data.billingStatus,
+          trialEnd: data.trialEnd,
+          maxUsers: data.maxUsers,
+          enabledDomains: data.enabledDomains,
           metadata: data.metadata,
         },
       });

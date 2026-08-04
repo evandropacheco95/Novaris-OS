@@ -14,12 +14,14 @@ import {
   RevokeRoleHandler,
   RoleAssignmentDomainService,
 } from "@novaris/identity";
+import { createOrganizationRepository } from "@novaris/organizations";
 import { AuthModule } from "../auth/auth.module.js";
 import { UserController } from "./user.controller.js";
 import { RoleController } from "./role.controller.js";
 
 const USER_REPOSITORY = "IDENTITY_CRUD_USER_REPOSITORY";
 const ROLE_REPOSITORY = "IDENTITY_CRUD_ROLE_REPOSITORY";
+const ORGANIZATION_REPOSITORY = "IDENTITY_ORGANIZATION_REPOSITORY";
 
 /**
  * IdentityModule — Composition Root do ciclo de vida de User/Role
@@ -38,10 +40,14 @@ const ROLE_REPOSITORY = "IDENTITY_CRUD_ROLE_REPOSITORY";
   providers: [
     { provide: USER_REPOSITORY, useFactory: () => createUserRepository(prisma) },
     { provide: ROLE_REPOSITORY, useFactory: () => createRoleRepository(prisma) },
+    { provide: ORGANIZATION_REPOSITORY, useFactory: () => createOrganizationRepository(prisma) },
     {
       provide: CreateUserHandler,
-      useFactory: (repository: ReturnType<typeof createUserRepository>) => new CreateUserHandler(repository, eventBus),
-      inject: [USER_REPOSITORY],
+      useFactory: (
+        repository: ReturnType<typeof createUserRepository>,
+        organizationRepository: ReturnType<typeof createOrganizationRepository>,
+      ) => new CreateUserHandler(repository, eventBus, organizationRepository),
+      inject: [USER_REPOSITORY, ORGANIZATION_REPOSITORY],
     },
     {
       provide: ActivateUserHandler,

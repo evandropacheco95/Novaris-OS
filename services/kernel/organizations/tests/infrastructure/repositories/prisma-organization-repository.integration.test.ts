@@ -39,6 +39,8 @@ describe("PrismaOrganizationRepository — integração real (Supabase)", () => 
       document: "00.000.000/0001-00",
       address: ADDRESS,
       status: "trial" as const,
+      plan: "starter" as const,
+      billingStatus: "trialing" as const,
       ...overrides,
     };
   }
@@ -69,6 +71,30 @@ describe("PrismaOrganizationRepository — integração real (Supabase)", () => 
     const fetched = (await repository.findById(organization.id)).getValue()!.getOrElse(null as never);
     assert.equal(fetched.name, "Nome Atualizado");
     assert.equal(fetched.legalName, "Org Teste Ltda", "campos não tocados não deveriam mudar");
+  });
+
+  it("persiste plan/billingStatus/trialEnd/maxUsers/enabledDomains (ENG-0164) e reflete no re-fetch", async () => {
+    const trialEnd = new Date("2026-12-31T00:00:00Z");
+    const organization = Organization.create(
+      buildInput({ plan: "professional", billingStatus: "active", trialEnd, maxUsers: 10, enabledDomains: ["Sales", "Marketing"] }),
+    ).getValue()!;
+    createdIds.push(organization.id.toString());
+    await repository.save(organization);
+
+    const fetched = (await repository.findById(organization.id)).getValue()!.getOrElse(null as never);
+    assert.equal(fetched.plan, "professional");
+    assert.equal(fetched.billingStatus, "active");
+    assert.equal(fetched.trialEnd?.getTime(), trialEnd.getTime());
+    assert.equal(fetched.maxUsers, 10);
+    assert.deepEqual(fetched.enabledDomains, ["Sales", "Marketing"]);
+
+    fetched.updatePlan({ maxUsers: null, enabledDomains: null, plan: "enterprise" });
+    await repository.save(fetched);
+
+    const refetched = (await repository.findById(organization.id)).getValue()!.getOrElse(null as never);
+    assert.equal(refetched.plan, "enterprise");
+    assert.equal(refetched.maxUsers, undefined, "null deve remover o limite (undefined = sem limite)");
+    assert.equal(refetched.enabledDomains, undefined, "null deve remover a restrição (undefined = todos habilitados)");
   });
 
   it("delete() é soft — exists()/findById() respeitam deletedAt IS NULL", async () => {

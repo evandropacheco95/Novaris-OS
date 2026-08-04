@@ -41,6 +41,7 @@ const FULL_PERMISSION_CATALOG = [
   "identity.users.manage",
   "identity.roles.manage",
   "workspace.profile.manage",
+  "workspace.plan.manage",
   "project.projects.manage",
   "financial.invoices.manage",
   "financial.subscriptions.manage",
@@ -105,6 +106,8 @@ async function main(): Promise<void> {
         country: "Brasil",
       },
       status: "active",
+      plan: "enterprise",
+      billingStatus: "active",
     }).getValue()!;
     await organizationRepository.save(organization);
     console.log(`Organization criada: ${organization.slug} (${organization.id.toString()})`);

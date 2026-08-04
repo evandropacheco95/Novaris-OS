@@ -15,7 +15,7 @@ import {
   FileClock,
   LogOut,
 } from "lucide-react";
-import { clearSession, useCurrentUser } from "@/lib/api";
+import { clearSession, useCurrentUser, useEnabledDomains } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { Tag } from "./tag";
 
@@ -55,6 +55,9 @@ const DOMAINS = [
 export function DashboardShell({ title, children }: { title: string; children: ReactNode }) {
   const router = useRouter();
   const user = useCurrentUser();
+  // `ENG-0164` — `null` = sem restrição (default seguro, ver `useEnabledDomains`).
+  const enabledDomains = useEnabledDomains();
+  const visibleDomains = enabledDomains ? DOMAINS.filter((domain) => enabledDomains.includes(domain.key)) : DOMAINS;
 
   function handleLogout(): void {
     clearSession();
@@ -70,7 +73,7 @@ export function DashboardShell({ title, children }: { title: string; children: R
         </a>
 
         <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto">
-          {DOMAINS.map((domain) => {
+          {visibleDomains.map((domain) => {
             const active = domain.live && domain.key === title;
             const Icon = domain.icon;
             return (
