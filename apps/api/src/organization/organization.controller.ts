@@ -40,6 +40,15 @@ export interface OrganizationResponse {
  * própria Organization do usuário autenticado — sem `POST /organizations`
  * (criar um novo tenant não é uma operação de usuário logado nesta fase;
  * hoje só o seed de bootstrap cria Organizations, `apps/api/src/seed.ts`).
+ *
+ * **Deliberadamente sem `@RequireDomain()`/`PlanGuard`** (`ENG-0164`,
+ * achado real durante a verificação ao vivo): se `Workspace` não estivesse
+ * na própria lista de `enabledDomains`, ninguém — nem o dono da Organization
+ * — conseguiria chamar `PATCH /organizations/plan` para corrigir isso,
+ * um lockout sem saída. Gerenciar o próprio plano precisa continuar
+ * acessível independente do que o plano restringe, mesmo princípio de
+ * uma tela de billing/conta continuar acessível mesmo com a assinatura
+ * suspensa em qualquer SaaS real.
  */
 @Controller("organizations")
 @UseGuards(JwtAuthGuard, PermissionGuard)

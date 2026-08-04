@@ -14,7 +14,9 @@ import {
 } from "@novaris/activity";
 import { JwtAuthGuard, type AuthenticatedUser } from "../auth/jwt-auth.guard.js";
 import { PermissionGuard } from "../auth/permission.guard.js";
+import { PlanGuard } from "../auth/plan.guard.js";
 import { RequirePermission } from "../auth/require-permission.decorator.js";
+import { RequireDomain } from "../auth/require-domain.decorator.js";
 import { throwHttpExceptionForDomainError } from "../shared/http-error-mapper.js";
 
 type AuthenticatedRequest = Request & { user: AuthenticatedUser };
@@ -32,8 +34,9 @@ export interface CaseResponse {
 
 /** CaseController — API do `Case` (`ADR-0043`), Activity Domain, adaptado do Salesforce Service Cloud. */
 @Controller("cases")
-@UseGuards(JwtAuthGuard, PermissionGuard)
+@UseGuards(JwtAuthGuard, PermissionGuard, PlanGuard)
 @RequirePermission("activity.cases.manage")
+@RequireDomain("Activity")
 export class CaseController {
   constructor(
     private readonly createHandler: CreateCaseHandler,

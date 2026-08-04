@@ -4,7 +4,9 @@ import { UniqueEntityId } from "@novaris/shared-kernel";
 import type { RevenueRepository } from "@novaris/sales";
 import { JwtAuthGuard, type AuthenticatedUser } from "../auth/jwt-auth.guard.js";
 import { PermissionGuard } from "../auth/permission.guard.js";
+import { PlanGuard } from "../auth/plan.guard.js";
 import { RequirePermission } from "../auth/require-permission.decorator.js";
+import { RequireDomain } from "../auth/require-domain.decorator.js";
 
 type AuthenticatedRequest = Request & { user: AuthenticatedUser };
 
@@ -25,8 +27,9 @@ export interface RevenueResponse {
  * princípio de `Contract` não ter criação avulsa.
  */
 @Controller("revenues")
-@UseGuards(JwtAuthGuard, PermissionGuard)
+@UseGuards(JwtAuthGuard, PermissionGuard, PlanGuard)
 @RequirePermission("sales.revenues.manage")
+@RequireDomain("Sales")
 export class RevenueController {
   constructor(@Inject("RevenueRepository") private readonly repository: RevenueRepository) {}
 

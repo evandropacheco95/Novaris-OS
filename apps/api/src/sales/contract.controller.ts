@@ -13,7 +13,9 @@ import {
 } from "@novaris/sales";
 import { JwtAuthGuard, type AuthenticatedUser } from "../auth/jwt-auth.guard.js";
 import { PermissionGuard } from "../auth/permission.guard.js";
+import { PlanGuard } from "../auth/plan.guard.js";
 import { RequirePermission } from "../auth/require-permission.decorator.js";
+import { RequireDomain } from "../auth/require-domain.decorator.js";
 import { throwHttpExceptionForDomainError } from "../shared/http-error-mapper.js";
 import type { RevenueResponse } from "./revenue.controller.js";
 
@@ -35,8 +37,9 @@ export interface ContractResponse {
  * criado avulso (mesmo princípio de `AuditEntry` não ter `POST`).
  */
 @Controller("contracts")
-@UseGuards(JwtAuthGuard, PermissionGuard)
+@UseGuards(JwtAuthGuard, PermissionGuard, PlanGuard)
 @RequirePermission("sales.contracts.manage")
+@RequireDomain("Sales")
 export class ContractController {
   constructor(
     private readonly activateHandler: ActivateContractHandler,

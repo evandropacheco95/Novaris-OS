@@ -4,7 +4,9 @@ import { UniqueEntityId } from "@novaris/shared-kernel";
 import type { AuditEntryRepository } from "@novaris/audit";
 import { JwtAuthGuard, type AuthenticatedUser } from "../auth/jwt-auth.guard.js";
 import { PermissionGuard } from "../auth/permission.guard.js";
+import { PlanGuard } from "../auth/plan.guard.js";
 import { RequirePermission } from "../auth/require-permission.decorator.js";
+import { RequireDomain } from "../auth/require-domain.decorator.js";
 
 type AuthenticatedRequest = Request & { user: AuthenticatedUser };
 
@@ -29,8 +31,9 @@ export interface AuditEntryResponse {
  * (`ADR-0035`), nunca de uma chamada HTTP direta.
  */
 @Controller("audit-entries")
-@UseGuards(JwtAuthGuard, PermissionGuard)
+@UseGuards(JwtAuthGuard, PermissionGuard, PlanGuard)
 @RequirePermission("system.audit-entries.read")
+@RequireDomain("System")
 export class AuditEntryController {
   constructor(@Inject("AuditEntryRepository") private readonly repository: AuditEntryRepository) {}
 

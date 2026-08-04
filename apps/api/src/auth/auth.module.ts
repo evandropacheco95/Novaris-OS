@@ -9,13 +9,16 @@ import {
   createRoleRepository,
   createPasswordVerifier,
 } from "@novaris/identity";
+import { createOrganizationRepository } from "@novaris/organizations";
 import { AuthController } from "./auth.controller.js";
 import { JwtAuthGuard } from "./jwt-auth.guard.js";
 import { PermissionGuard } from "./permission.guard.js";
+import { PlanGuard } from "./plan.guard.js";
 
 const USER_REPOSITORY = "IDENTITY_USER_REPOSITORY";
 const ROLE_REPOSITORY = "IDENTITY_AUTH_ROLE_REPOSITORY";
 const PASSWORD_VERIFIER = "IDENTITY_PASSWORD_VERIFIER";
+const PLAN_GUARD_ORGANIZATION_REPOSITORY = "PLAN_GUARD_ORGANIZATION_REPOSITORY";
 
 /**
  * AuthModule — Composition Root da autenticação/autorização (`ENG-0122`,
@@ -27,9 +30,10 @@ const PASSWORD_VERIFIER = "IDENTITY_PASSWORD_VERIFIER";
  * — mesma instância de `PrismaRoleRepository` por trás (`prisma` é singleton),
  * só evita reexportar um provider privado de outro módulo.
  *
- * Exporta `JwtAuthGuard`, `PermissionGuard` e `JwtModule` para que qualquer
- * outro módulo proteja suas rotas com `@UseGuards(JwtAuthGuard, PermissionGuard)`
- * sem duplicar configuração de JWT nem a montagem de `AuthorizationDomainService`.
+ * Exporta `JwtAuthGuard`, `PermissionGuard`, `PlanGuard` (`ENG-0164`) e
+ * `JwtModule` para que qualquer outro módulo proteja suas rotas com
+ * `@UseGuards(JwtAuthGuard, PermissionGuard, PlanGuard)` sem duplicar
+ * configuração de JWT nem a montagem de `AuthorizationDomainService`.
  */
 @Module({
   imports: [
@@ -79,9 +83,14 @@ const PASSWORD_VERIFIER = "IDENTITY_PASSWORD_VERIFIER";
         new AuthorizationDomainService(userRepository, roleRepository),
       inject: [USER_REPOSITORY, ROLE_REPOSITORY],
     },
+    {
+      provide: PLAN_GUARD_ORGANIZATION_REPOSITORY,
+      useFactory: () => createOrganizationRepository(prisma),
+    },
     JwtAuthGuard,
     PermissionGuard,
+    PlanGuard,
   ],
-  exports: [JwtAuthGuard, PermissionGuard, AuthorizationDomainService, JwtModule],
+  exports: [JwtAuthGuard, PermissionGuard, PlanGuard, AuthorizationDomainService, PLAN_GUARD_ORGANIZATION_REPOSITORY, JwtModule],
 })
 export class AuthModule {}

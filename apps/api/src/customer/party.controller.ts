@@ -5,7 +5,9 @@ import { CreatePartyCommand, CreatePartyHandler, type PartyRepository } from "@n
 import type { SearchIndex, SearchResult } from "@novaris/search";
 import { JwtAuthGuard, type AuthenticatedUser } from "../auth/jwt-auth.guard.js";
 import { PermissionGuard } from "../auth/permission.guard.js";
+import { PlanGuard } from "../auth/plan.guard.js";
 import { RequirePermission } from "../auth/require-permission.decorator.js";
+import { RequireDomain } from "../auth/require-domain.decorator.js";
 import { throwHttpExceptionForDomainError } from "../shared/http-error-mapper.js";
 
 type AuthenticatedRequest = Request & { user: AuthenticatedUser };
@@ -30,8 +32,9 @@ export interface PartyResponse {
  * código (RLS não protege nada nesta API, ver `DATABASE_ARCHITECTURE.md § 7`).
  */
 @Controller("parties")
-@UseGuards(JwtAuthGuard, PermissionGuard)
+@UseGuards(JwtAuthGuard, PermissionGuard, PlanGuard)
 @RequirePermission("relationship.parties.manage")
+@RequireDomain("Relationship")
 export class PartyController {
   constructor(
     private readonly createHandler: CreatePartyHandler,

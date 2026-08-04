@@ -26,7 +26,9 @@ import {
 } from "@novaris/sales";
 import { JwtAuthGuard, type AuthenticatedUser } from "../auth/jwt-auth.guard.js";
 import { PermissionGuard } from "../auth/permission.guard.js";
+import { PlanGuard } from "../auth/plan.guard.js";
 import { RequirePermission } from "../auth/require-permission.decorator.js";
+import { RequireDomain } from "../auth/require-domain.decorator.js";
 import { throwHttpExceptionForDomainError } from "../shared/http-error-mapper.js";
 
 type AuthenticatedRequest = Request & { user: AuthenticatedUser };
@@ -61,8 +63,9 @@ type AuthenticatedRequest = Request & { user: AuthenticatedUser };
  * engenharia).
  */
 @Controller("opportunities")
-@UseGuards(JwtAuthGuard, PermissionGuard)
+@UseGuards(JwtAuthGuard, PermissionGuard, PlanGuard)
 @RequirePermission("sales.opportunities.manage")
+@RequireDomain("Sales")
 export class OpportunityController {
   constructor(
     private readonly createHandler: CreateOpportunityHandler,

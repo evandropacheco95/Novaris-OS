@@ -4,7 +4,9 @@ import { UniqueEntityId } from "@novaris/shared-kernel";
 import { CreateInvoiceCommand, CreateInvoiceHandler, MarkInvoicePaidCommand, MarkInvoicePaidHandler, type InvoiceRepository } from "@novaris/financial";
 import { JwtAuthGuard, type AuthenticatedUser } from "../auth/jwt-auth.guard.js";
 import { PermissionGuard } from "../auth/permission.guard.js";
+import { PlanGuard } from "../auth/plan.guard.js";
 import { RequirePermission } from "../auth/require-permission.decorator.js";
+import { RequireDomain } from "../auth/require-domain.decorator.js";
 import { throwHttpExceptionForDomainError } from "../shared/http-error-mapper.js";
 
 type AuthenticatedRequest = Request & { user: AuthenticatedUser };
@@ -26,8 +28,9 @@ export interface InvoiceResponse {
  * (Customer) e `ProjectController` (Project).
  */
 @Controller("invoices")
-@UseGuards(JwtAuthGuard, PermissionGuard)
+@UseGuards(JwtAuthGuard, PermissionGuard, PlanGuard)
 @RequirePermission("financial.invoices.manage")
+@RequireDomain("Financial")
 export class InvoiceController {
   constructor(
     private readonly createHandler: CreateInvoiceHandler,

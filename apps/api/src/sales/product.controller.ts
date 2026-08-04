@@ -14,7 +14,9 @@ import {
 } from "@novaris/sales";
 import { JwtAuthGuard, type AuthenticatedUser } from "../auth/jwt-auth.guard.js";
 import { PermissionGuard } from "../auth/permission.guard.js";
+import { PlanGuard } from "../auth/plan.guard.js";
 import { RequirePermission } from "../auth/require-permission.decorator.js";
+import { RequireDomain } from "../auth/require-domain.decorator.js";
 import { throwHttpExceptionForDomainError } from "../shared/http-error-mapper.js";
 
 type AuthenticatedRequest = Request & { user: AuthenticatedUser };
@@ -31,8 +33,9 @@ export interface ProductResponse {
 
 /** ProductController — API do `Product` (`ADR-0043`), catálogo do Sales Domain, adaptado do Salesforce Product2. */
 @Controller("products")
-@UseGuards(JwtAuthGuard, PermissionGuard)
+@UseGuards(JwtAuthGuard, PermissionGuard, PlanGuard)
 @RequirePermission("sales.products.manage")
+@RequireDomain("Sales")
 export class ProductController {
   constructor(
     private readonly createHandler: CreateProductHandler,

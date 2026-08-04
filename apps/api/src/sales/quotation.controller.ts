@@ -19,7 +19,9 @@ import {
 } from "@novaris/sales";
 import { JwtAuthGuard, type AuthenticatedUser } from "../auth/jwt-auth.guard.js";
 import { PermissionGuard } from "../auth/permission.guard.js";
+import { PlanGuard } from "../auth/plan.guard.js";
 import { RequirePermission } from "../auth/require-permission.decorator.js";
+import { RequireDomain } from "../auth/require-domain.decorator.js";
 import { throwHttpExceptionForDomainError } from "../shared/http-error-mapper.js";
 import type { ContractResponse } from "./contract.controller.js";
 
@@ -48,8 +50,9 @@ export interface QuotationResponse {
  * estrutural reservada desde `ADR-0020`, adaptado do Salesforce Quote.
  */
 @Controller("quotations")
-@UseGuards(JwtAuthGuard, PermissionGuard)
+@UseGuards(JwtAuthGuard, PermissionGuard, PlanGuard)
 @RequirePermission("sales.quotations.manage")
+@RequireDomain("Sales")
 export class QuotationController {
   constructor(
     private readonly createHandler: CreateQuotationHandler,

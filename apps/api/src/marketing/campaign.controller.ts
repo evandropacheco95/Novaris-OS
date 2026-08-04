@@ -4,7 +4,9 @@ import { UniqueEntityId } from "@novaris/shared-kernel";
 import { CreateCampaignCommand, CreateCampaignHandler, AddAssetToCampaignCommand, AddAssetToCampaignHandler, type CampaignRepository } from "@novaris/marketing";
 import { JwtAuthGuard, type AuthenticatedUser } from "../auth/jwt-auth.guard.js";
 import { PermissionGuard } from "../auth/permission.guard.js";
+import { PlanGuard } from "../auth/plan.guard.js";
 import { RequirePermission } from "../auth/require-permission.decorator.js";
+import { RequireDomain } from "../auth/require-domain.decorator.js";
 import { throwHttpExceptionForDomainError } from "../shared/http-error-mapper.js";
 
 type AuthenticatedRequest = Request & { user: AuthenticatedUser };
@@ -32,8 +34,9 @@ export interface CampaignResponse {
  * `ADR-0033`) + `POST /:id/assets` (associação com `FileRecord`, `ADR-0048`).
  */
 @Controller("campaigns")
-@UseGuards(JwtAuthGuard, PermissionGuard)
+@UseGuards(JwtAuthGuard, PermissionGuard, PlanGuard)
 @RequirePermission("marketing.campaigns.manage")
+@RequireDomain("Marketing")
 export class CampaignController {
   constructor(
     private readonly createHandler: CreateCampaignHandler,

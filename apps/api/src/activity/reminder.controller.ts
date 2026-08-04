@@ -4,7 +4,9 @@ import { UniqueEntityId } from "@novaris/shared-kernel";
 import { CreateReminderCommand, CreateReminderHandler, DismissReminderCommand, DismissReminderHandler, type ReminderRepository } from "@novaris/activity";
 import { JwtAuthGuard, type AuthenticatedUser } from "../auth/jwt-auth.guard.js";
 import { PermissionGuard } from "../auth/permission.guard.js";
+import { PlanGuard } from "../auth/plan.guard.js";
 import { RequirePermission } from "../auth/require-permission.decorator.js";
+import { RequireDomain } from "../auth/require-domain.decorator.js";
 import { throwHttpExceptionForDomainError } from "../shared/http-error-mapper.js";
 
 type AuthenticatedRequest = Request & { user: AuthenticatedUser };
@@ -21,8 +23,9 @@ export interface ReminderResponse {
 
 /** ReminderController — API do `Reminder` (`ADR-0045`), Activity Domain, adaptado do Salesforce Reminder. */
 @Controller("reminders")
-@UseGuards(JwtAuthGuard, PermissionGuard)
+@UseGuards(JwtAuthGuard, PermissionGuard, PlanGuard)
 @RequirePermission("activity.reminders.manage")
+@RequireDomain("Activity")
 export class ReminderController {
   constructor(
     private readonly createHandler: CreateReminderHandler,

@@ -10,7 +10,9 @@ import {
 } from "@novaris/activity";
 import { JwtAuthGuard, type AuthenticatedUser } from "../auth/jwt-auth.guard.js";
 import { PermissionGuard } from "../auth/permission.guard.js";
+import { PlanGuard } from "../auth/plan.guard.js";
 import { RequirePermission } from "../auth/require-permission.decorator.js";
+import { RequireDomain } from "../auth/require-domain.decorator.js";
 import { throwHttpExceptionForDomainError } from "../shared/http-error-mapper.js";
 
 type AuthenticatedRequest = Request & { user: AuthenticatedUser };
@@ -28,8 +30,9 @@ export interface CalendarEventResponse {
 
 /** CalendarEventController — API do `CalendarEvent` (`ADR-0045`), Activity Domain, adaptado do Salesforce Event. */
 @Controller("calendar-events")
-@UseGuards(JwtAuthGuard, PermissionGuard)
+@UseGuards(JwtAuthGuard, PermissionGuard, PlanGuard)
 @RequirePermission("activity.calendar-events.manage")
+@RequireDomain("Activity")
 export class CalendarEventController {
   constructor(
     private readonly createHandler: CreateCalendarEventHandler,

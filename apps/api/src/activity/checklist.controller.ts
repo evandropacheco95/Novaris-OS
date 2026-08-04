@@ -12,7 +12,9 @@ import {
 } from "@novaris/activity";
 import { JwtAuthGuard, type AuthenticatedUser } from "../auth/jwt-auth.guard.js";
 import { PermissionGuard } from "../auth/permission.guard.js";
+import { PlanGuard } from "../auth/plan.guard.js";
 import { RequirePermission } from "../auth/require-permission.decorator.js";
+import { RequireDomain } from "../auth/require-domain.decorator.js";
 import { throwHttpExceptionForDomainError } from "../shared/http-error-mapper.js";
 
 type AuthenticatedRequest = Request & { user: AuthenticatedUser };
@@ -34,8 +36,9 @@ export interface ChecklistResponse {
 
 /** ChecklistController — API do `Checklist` (`ADR-0045`), Activity Domain. */
 @Controller("checklists")
-@UseGuards(JwtAuthGuard, PermissionGuard)
+@UseGuards(JwtAuthGuard, PermissionGuard, PlanGuard)
 @RequirePermission("activity.checklists.manage")
+@RequireDomain("Activity")
 export class ChecklistController {
   constructor(
     private readonly createHandler: CreateChecklistHandler,

@@ -3,7 +3,9 @@ import type { Request } from "express";
 import { CreateSubscriptionCommand, CreateSubscriptionHandler, type SubscriptionRepository } from "@novaris/financial";
 import { JwtAuthGuard, type AuthenticatedUser } from "../auth/jwt-auth.guard.js";
 import { PermissionGuard } from "../auth/permission.guard.js";
+import { PlanGuard } from "../auth/plan.guard.js";
 import { RequirePermission } from "../auth/require-permission.decorator.js";
+import { RequireDomain } from "../auth/require-domain.decorator.js";
 import { throwHttpExceptionForDomainError } from "../shared/http-error-mapper.js";
 
 type AuthenticatedRequest = Request & { user: AuthenticatedUser };
@@ -18,8 +20,9 @@ export interface SubscriptionResponse {
 
 /** SubscriptionController — API do Financial Domain (`ENG-0131`). Mesma receita de `InvoiceController`. */
 @Controller("subscriptions")
-@UseGuards(JwtAuthGuard, PermissionGuard)
+@UseGuards(JwtAuthGuard, PermissionGuard, PlanGuard)
 @RequirePermission("financial.subscriptions.manage")
+@RequireDomain("Financial")
 export class SubscriptionController {
   constructor(
     private readonly createHandler: CreateSubscriptionHandler,

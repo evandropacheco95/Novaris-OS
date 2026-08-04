@@ -56,8 +56,11 @@ export function DashboardShell({ title, children }: { title: string; children: R
   const router = useRouter();
   const user = useCurrentUser();
   // `ENG-0164` — `null` = sem restrição (default seguro, ver `useEnabledDomains`).
+  // `Workspace` ("Empresa") sempre visível, mesmo fora de `enabledDomains` —
+  // achado real (lockout sem saída, ver `OrganizationController`): sem isso,
+  // ninguém acharia a tela de plano pra corrigir a própria restrição.
   const enabledDomains = useEnabledDomains();
-  const visibleDomains = enabledDomains ? DOMAINS.filter((domain) => enabledDomains.includes(domain.key)) : DOMAINS;
+  const visibleDomains = enabledDomains ? DOMAINS.filter((domain) => domain.key === "Workspace" || enabledDomains.includes(domain.key)) : DOMAINS;
 
   function handleLogout(): void {
     clearSession();
