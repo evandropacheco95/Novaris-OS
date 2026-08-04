@@ -711,14 +711,38 @@ export async function convertLead(id: string, partyType: string, createOpportuni
 
 // Product (`ADR-0043`) — catálogo do Sales Domain, adaptado do Salesforce Product2.
 
+/** `ncm`...`externalId` = perfil fiscal-logístico (`ENG-0166`, opcional, referência real: Winnet — indústria+e-commerce). */
 export interface Product {
   id: string;
   name: string;
   sku?: string;
   unitPrice: number;
   active: boolean;
+  ncm?: string;
+  cfop?: string;
+  unit?: string;
+  weightKg?: number;
+  lengthCm?: number;
+  widthCm?: number;
+  heightCm?: number;
+  parentProductId?: string;
+  variantLabel?: string;
+  externalId?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface FiscalLogisticsProfile {
+  ncm?: string | null;
+  cfop?: string | null;
+  unit?: string | null;
+  weightKg?: number | null;
+  lengthCm?: number | null;
+  widthCm?: number | null;
+  heightCm?: number | null;
+  parentProductId?: string | null;
+  variantLabel?: string | null;
+  externalId?: string | null;
 }
 
 export async function listProducts(): Promise<Product[]> {
@@ -727,14 +751,30 @@ export async function listProducts(): Promise<Product[]> {
   return (await response.json()) as Product[];
 }
 
-export async function createProduct(name: string, unitPrice: number, sku?: string): Promise<Product> {
-  const response = await authenticatedFetch("/products", { method: "POST", body: JSON.stringify({ name, unitPrice, sku }) });
+export async function createProduct(
+  name: string,
+  unitPrice: number,
+  sku?: string,
+  fiscalLogisticsProfile?: FiscalLogisticsProfile,
+): Promise<Product> {
+  const response = await authenticatedFetch("/products", {
+    method: "POST",
+    body: JSON.stringify({ name, unitPrice, sku, ...fiscalLogisticsProfile }),
+  });
   return parseOrThrow<Product>(response, "Falha ao criar Product");
 }
 
 export async function updateProductPrice(id: string, unitPrice: number): Promise<Product> {
   const response = await authenticatedFetch(`/products/${id}/price`, { method: "POST", body: JSON.stringify({ unitPrice }) });
   return parseOrThrow<Product>(response, "Falha ao atualizar preço do Product");
+}
+
+export async function updateProductFiscalLogisticsProfile(id: string, profile: FiscalLogisticsProfile): Promise<Product> {
+  const response = await authenticatedFetch(`/products/${id}/fiscal-logistics-profile`, {
+    method: "POST",
+    body: JSON.stringify(profile),
+  });
+  return parseOrThrow<Product>(response, "Falha ao atualizar perfil fiscal-logístico do Product");
 }
 
 export async function deactivateProduct(id: string): Promise<Product> {

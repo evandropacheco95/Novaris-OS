@@ -360,6 +360,8 @@ Proposta comercial.
 Item de catálogo interno, adaptado do Salesforce Product2.
 
 > **Nota de Extensão (`ADR-0043`, `ENG-0144`)**: objeto novo, adicionado por autorização direta do CTO. Owner de domínio: `SALES DOMAIN` (suporta `Quotation` via linha de item). Campos mínimos: `name` (obrigatório), `sku` (opcional), `unitPrice` (obrigatório, `>= 0`), `active` (padrão `true`). Um único preço por Product — sem múltiplos Price Books nomeados, sem evidência de necessidade.
+>
+> **Nota de Extensão (`ENG-0166`)**: perfil fiscal-logístico opcional — `ncm`/`cfop`/`unit`/`weightKg`/`lengthCm`/`widthCm`/`heightCm`/`parentProductId`/`variantLabel`/`externalId`, todos sem efeito em Product de serviço/software. Primeira frente do eixo de indústria/e-commerce (`NOVARIS_OS.md § 9` já lista "Indústrias"/"Distribuidores" como público-alvo), grounded no schema real de um cliente da Elite Negócios (Winnet) — nenhum campo inventado. `parentProductId`/`variantLabel` modelam variação (cor/tamanho) de um Product principal, mesmo padrão de referência-por-id sem FK já usado no resto do domínio.
 
 ---
 

@@ -14,6 +14,16 @@ export class CreateProductHandler {
       name: command.name,
       sku: command.sku,
       unitPrice: command.unitPrice,
+      ncm: command.ncm,
+      cfop: command.cfop,
+      unit: command.unit,
+      weightKg: command.weightKg,
+      lengthCm: command.lengthCm,
+      widthCm: command.widthCm,
+      heightCm: command.heightCm,
+      parentProductId: command.parentProductId ? new UniqueEntityId(command.parentProductId) : undefined,
+      variantLabel: command.variantLabel,
+      externalId: command.externalId,
     });
     if (createResult.isFailure) {
       return Result.fail(createResult.getError()!);

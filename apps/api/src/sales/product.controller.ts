@@ -10,6 +10,8 @@ import {
   DeactivateProductHandler,
   ActivateProductCommand,
   ActivateProductHandler,
+  UpdateFiscalLogisticsProfileCommand,
+  UpdateFiscalLogisticsProfileHandler,
   type ProductRepository,
 } from "@novaris/sales";
 import { JwtAuthGuard, type AuthenticatedUser } from "../auth/jwt-auth.guard.js";
@@ -27,6 +29,16 @@ export interface ProductResponse {
   sku?: string;
   unitPrice: number;
   active: boolean;
+  ncm?: string;
+  cfop?: string;
+  unit?: string;
+  weightKg?: number;
+  lengthCm?: number;
+  widthCm?: number;
+  heightCm?: number;
+  parentProductId?: string;
+  variantLabel?: string;
+  externalId?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -42,13 +54,47 @@ export class ProductController {
     private readonly updatePriceHandler: UpdateProductPriceHandler,
     private readonly deactivateHandler: DeactivateProductHandler,
     private readonly activateHandler: ActivateProductHandler,
+    private readonly updateFiscalLogisticsProfileHandler: UpdateFiscalLogisticsProfileHandler,
     @Inject("ProductRepository") private readonly repository: ProductRepository,
   ) {}
 
   @Post()
-  async create(@Body() body: { name: string; sku?: string; unitPrice: number }, @Req() req: AuthenticatedRequest): Promise<ProductResponse> {
+  async create(
+    @Body()
+    body: {
+      name: string;
+      sku?: string;
+      unitPrice: number;
+      ncm?: string;
+      cfop?: string;
+      unit?: string;
+      weightKg?: number;
+      lengthCm?: number;
+      widthCm?: number;
+      heightCm?: number;
+      parentProductId?: string;
+      variantLabel?: string;
+      externalId?: string;
+    },
+    @Req() req: AuthenticatedRequest,
+  ): Promise<ProductResponse> {
     const result = await this.createHandler.execute(
-      new CreateProductCommand({ organizationId: req.user.organizationId, name: body.name, sku: body.sku, unitPrice: body.unitPrice }),
+      new CreateProductCommand({
+        organizationId: req.user.organizationId,
+        name: body.name,
+        sku: body.sku,
+        unitPrice: body.unitPrice,
+        ncm: body.ncm,
+        cfop: body.cfop,
+        unit: body.unit,
+        weightKg: body.weightKg,
+        lengthCm: body.lengthCm,
+        widthCm: body.widthCm,
+        heightCm: body.heightCm,
+        parentProductId: body.parentProductId,
+        variantLabel: body.variantLabel,
+        externalId: body.externalId,
+      }),
     );
     if (result.isFailure) {
       throwHttpExceptionForDomainError(result.getError()!);
@@ -100,6 +146,35 @@ export class ProductController {
     return toResponse(result.getValue()!);
   }
 
+  /** `ENG-0166` — perfil fiscal-logístico, `null` remove o valor, `undefined` não mexe. */
+  @Post(":id/fiscal-logistics-profile")
+  async updateFiscalLogisticsProfile(
+    @Param("id") id: string,
+    @Body()
+    body: {
+      ncm?: string | null;
+      cfop?: string | null;
+      unit?: string | null;
+      weightKg?: number | null;
+      lengthCm?: number | null;
+      widthCm?: number | null;
+      heightCm?: number | null;
+      parentProductId?: string | null;
+      variantLabel?: string | null;
+      externalId?: string | null;
+    },
+    @Req() req: AuthenticatedRequest,
+  ): Promise<ProductResponse> {
+    await this.loadAndAssertOwnership(id, req.user);
+    const result = await this.updateFiscalLogisticsProfileHandler.execute(
+      new UpdateFiscalLogisticsProfileCommand({ productId: id, ...body }),
+    );
+    if (result.isFailure) {
+      throwHttpExceptionForDomainError(result.getError()!);
+    }
+    return toResponse(result.getValue()!);
+  }
+
   /** Achado real (`ENG-0155`): `updatePrice` nunca verificava organizationId antes desta missão — qualquer usuário autenticado de qualquer Organization podia alterar o preço de um Product de outra empresa. */
   private async loadAndAssertOwnership(id: string, user: AuthenticatedUser) {
     const findResult = await this.repository.findById(new UniqueEntityId(id));
@@ -124,6 +199,16 @@ function toResponse(product: {
   sku?: string;
   unitPrice: number;
   active: boolean;
+  ncm?: string;
+  cfop?: string;
+  unit?: string;
+  weightKg?: number;
+  lengthCm?: number;
+  widthCm?: number;
+  heightCm?: number;
+  parentProductId?: { toString(): string };
+  variantLabel?: string;
+  externalId?: string;
   createdAt: Date;
   updatedAt: Date;
 }): ProductResponse {
@@ -133,6 +218,16 @@ function toResponse(product: {
     sku: product.sku,
     unitPrice: product.unitPrice,
     active: product.active,
+    ncm: product.ncm,
+    cfop: product.cfop,
+    unit: product.unit,
+    weightKg: product.weightKg,
+    lengthCm: product.lengthCm,
+    widthCm: product.widthCm,
+    heightCm: product.heightCm,
+    parentProductId: product.parentProductId?.toString(),
+    variantLabel: product.variantLabel,
+    externalId: product.externalId,
     createdAt: product.createdAt.toISOString(),
     updatedAt: product.updatedAt.toISOString(),
   };

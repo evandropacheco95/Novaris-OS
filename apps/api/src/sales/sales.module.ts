@@ -26,6 +26,7 @@ import {
   UpdateProductPriceHandler,
   DeactivateProductHandler,
   ActivateProductHandler,
+  UpdateFiscalLogisticsProfileHandler,
   CreateQuotationHandler,
   AddQuotationLineItemHandler,
   SendQuotationHandler,
@@ -208,6 +209,11 @@ const REVENUE_REPOSITORY = "REVENUE_REPOSITORY";
     {
       provide: ActivateProductHandler,
       useFactory: (repository: ReturnType<typeof createProductRepository>) => new ActivateProductHandler(repository),
+      inject: [PRODUCT_REPOSITORY],
+    },
+    {
+      provide: UpdateFiscalLogisticsProfileHandler,
+      useFactory: (repository: ReturnType<typeof createProductRepository>) => new UpdateFiscalLogisticsProfileHandler(repository),
       inject: [PRODUCT_REPOSITORY],
     },
     {

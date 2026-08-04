@@ -54,7 +54,12 @@ export type { LeadRepository } from "../domain/repositories/lead-repository.js";
 
 // Product + Quotation (`ADR-0043`) — adaptados do Salesforce Product2/Quote,
 // preenchendo a lacuna de `Quotation` já reservada desde `ADR-0020`.
-export { Product, type ProductProps, type CreateProductInput } from "../domain/aggregates/product/product.js";
+export {
+  Product,
+  type ProductProps,
+  type CreateProductInput,
+  type UpdateFiscalLogisticsProfileInput,
+} from "../domain/aggregates/product/product.js";
 export type { ProductRepository } from "../domain/repositories/product-repository.js";
 
 export { Quotation, type QuotationProps, type QuotationStatus, type CreateQuotationInput } from "../domain/aggregates/quotation/quotation.js";
@@ -123,6 +128,9 @@ export { CreateProductCommand } from "../application/commands/create-product/cre
 export { CreateProductHandler } from "../application/handlers/create-product/create-product.handler.js";
 export { UpdateProductPriceCommand } from "../application/commands/update-product-price/update-product-price.command.js";
 export { UpdateProductPriceHandler } from "../application/handlers/update-product-price/update-product-price.handler.js";
+// ENG-0166 — perfil fiscal-logístico (NCM/CFOP/peso/dimensões/variação), referência real: Winnet.
+export { UpdateFiscalLogisticsProfileCommand } from "../application/commands/update-fiscal-logistics-profile/update-fiscal-logistics-profile.command.js";
+export { UpdateFiscalLogisticsProfileHandler } from "../application/handlers/update-fiscal-logistics-profile/update-fiscal-logistics-profile.handler.js";
 export { DeactivateProductCommand } from "../application/commands/deactivate-product/deactivate-product.command.js";
 export { DeactivateProductHandler } from "../application/handlers/deactivate-product/deactivate-product.handler.js";
 export { ActivateProductCommand } from "../application/commands/activate-product/activate-product.command.js";

@@ -521,11 +521,23 @@ model Product {
   sku            String?  @db.VarChar(100)
   unitPrice      Decimal  @map("unit_price") @db.Decimal(12, 2)
   active         Boolean  @default(true)
+  // Perfil fiscal-logístico (ENG-0166, opcional — referência real: Winnet, produtos)
+  ncm            String?  @db.VarChar(8)
+  cfop           String?  @db.VarChar(4)
+  unit           String?  @db.VarChar(20)
+  weightKg       Decimal? @map("weight_kg") @db.Decimal(10, 3)
+  lengthCm       Decimal? @map("length_cm") @db.Decimal(10, 2)
+  widthCm        Decimal? @map("width_cm") @db.Decimal(10, 2)
+  heightCm       Decimal? @map("height_cm") @db.Decimal(10, 2)
+  parentProductId String? @map("parent_product_id") @db.Uuid
+  variantLabel   String?  @map("variant_label") @db.VarChar(100)
+  externalId     String?  @map("external_id") @db.VarChar(100)
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   @@map("products")
   @@index([organizationId])
+  @@index([parentProductId])
 }
 
 /// Quotation — Aggregate Root do Sales Domain (`ADR-0043`), preenche a lacuna
