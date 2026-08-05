@@ -26,6 +26,7 @@ export class PrismaOpportunityMapper {
       partyId: opportunity.partyId.toString(),
       pipelineId: opportunity.pipelineId?.toString() ?? null,
       currentStageId: opportunity.currentStageId?.toString() ?? null,
+      salesChannelId: opportunity.salesChannelId?.toString() ?? null,
       status: opportunity.status,
     };
   }
@@ -45,6 +46,7 @@ export class PrismaOpportunityMapper {
       partyId: new UniqueEntityId(record.partyId),
       pipelineId: record.pipelineId ? new UniqueEntityId(record.pipelineId) : undefined,
       currentStageId: record.currentStageId ? new UniqueEntityId(record.currentStageId) : undefined,
+      salesChannelId: record.salesChannelId ? new UniqueEntityId(record.salesChannelId) : undefined,
       status: record.status as OpportunityStatus,
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,

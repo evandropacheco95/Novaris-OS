@@ -40,6 +40,7 @@ model Opportunity {
   partyId         String    @map("party_id") @db.Uuid
   pipelineId      String?   @map("pipeline_id") @db.Uuid
   currentStageId  String?   @map("current_stage_id") @db.Uuid
+  salesChannelId  String?   @map("sales_channel_id") @db.Uuid // ADR-0052, opcional
   status          String    @db.VarChar(10) // "open" | "won" | "lost" — CHECK constraint na migration
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz
@@ -51,6 +52,21 @@ model Opportunity {
   @@index([organizationId])
   @@index([partyId])
   @@index([pipelineId])
+  @@index([salesChannelId])
+}
+
+/// SalesChannel — ADR-0052, canal de venda como conceito de 1a classe (referência real: Winnet, ENG-0166).
+model SalesChannel {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  name           String   @db.VarChar(255)
+  type           String   @db.VarChar(20) // "direct" | "distributor" | "marketplace" | "online_store" — CHECK constraint na migration
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("sales_channels")
+  @@index([organizationId])
 }
 
 /// Pipeline — Aggregate Root do Sales Domain (Configuration Aggregate).

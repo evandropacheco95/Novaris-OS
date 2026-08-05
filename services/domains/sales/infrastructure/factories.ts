@@ -6,6 +6,7 @@ import type { ProductRepository } from "../domain/repositories/product-repositor
 import type { QuotationRepository } from "../domain/repositories/quotation-repository.js";
 import type { ContractRepository } from "../domain/repositories/contract-repository.js";
 import type { RevenueRepository } from "../domain/repositories/revenue-repository.js";
+import type { SalesChannelRepository } from "../domain/repositories/sales-channel-repository.js";
 import { PrismaOpportunityRepository } from "./repositories/prisma-opportunity-repository.js";
 import { PrismaPipelineRepository } from "./repositories/prisma-pipeline-repository.js";
 import { PrismaLeadRepository } from "./repositories/prisma-lead-repository.js";
@@ -13,6 +14,7 @@ import { PrismaProductRepository } from "./repositories/prisma-product-repositor
 import { PrismaQuotationRepository } from "./repositories/prisma-quotation-repository.js";
 import { PrismaContractRepository } from "./repositories/prisma-contract-repository.js";
 import { PrismaRevenueRepository } from "./repositories/prisma-revenue-repository.js";
+import { PrismaSalesChannelRepository } from "./repositories/prisma-sales-channel-repository.js";
 
 /**
  * Factories de Composition Root — único ponto público de acesso às
@@ -37,6 +39,10 @@ export function createLeadRepository(client: PrismaClient): LeadRepository {
 
 export function createProductRepository(client: PrismaClient): ProductRepository {
   return new PrismaProductRepository(client);
+}
+
+export function createSalesChannelRepository(client: PrismaClient): SalesChannelRepository {
+  return new PrismaSalesChannelRepository(client);
 }
 
 export function createQuotationRepository(client: PrismaClient): QuotationRepository {

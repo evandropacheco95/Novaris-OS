@@ -71,6 +71,7 @@ export class PrismaOpportunityRepository implements OpportunityRepository {
           update: {
             pipelineId: data.pipelineId,
             currentStageId: data.currentStageId,
+            salesChannelId: data.salesChannelId,
             status: data.status,
           },
         }),

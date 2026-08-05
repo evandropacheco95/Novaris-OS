@@ -119,6 +119,8 @@ export interface Opportunity {
   updatedAt: string;
   pipelineId?: string;
   currentStageId?: string;
+  /** `ADR-0052` — canal de venda, opcional. `undefined` = canal direto implícito. */
+  salesChannelId?: string;
 }
 
 export async function listOpportunities(): Promise<Opportunity[]> {
@@ -129,10 +131,10 @@ export async function listOpportunities(): Promise<Opportunity[]> {
   return (await response.json()) as Opportunity[];
 }
 
-export async function createOpportunity(partyId: string, organizationId: string): Promise<Opportunity> {
+export async function createOpportunity(partyId: string, organizationId: string, salesChannelId?: string): Promise<Opportunity> {
   const response = await authenticatedFetch("/opportunities", {
     method: "POST",
-    body: JSON.stringify({ organizationId, partyId }),
+    body: JSON.stringify({ organizationId, partyId, salesChannelId }),
   });
   const body = (await response.json()) as Opportunity | ApiError;
   if (!response.ok) {
@@ -668,6 +670,45 @@ export async function renameStage(pipelineId: string, stageId: string, name: str
     body: JSON.stringify({ name }),
   });
   return parseOrThrow<Pipeline>(response, "Falha ao renomear Stage");
+}
+
+// SalesChannel (`ADR-0052`) — canal de venda como conceito de 1ª classe, referência real: Winnet (`ENG-0166`).
+
+export type SalesChannelType = "direct" | "distributor" | "marketplace" | "online_store";
+
+export interface SalesChannel {
+  id: string;
+  name: string;
+  type: SalesChannelType;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function listSalesChannels(): Promise<SalesChannel[]> {
+  const response = await authenticatedFetch("/sales-channels");
+  if (!response.ok) throw new Error("Falha ao listar canais de venda");
+  return (await response.json()) as SalesChannel[];
+}
+
+export async function createSalesChannel(name: string, type: SalesChannelType): Promise<SalesChannel> {
+  const response = await authenticatedFetch("/sales-channels", { method: "POST", body: JSON.stringify({ name, type }) });
+  return parseOrThrow<SalesChannel>(response, "Falha ao criar canal de venda");
+}
+
+export async function renameSalesChannel(id: string, name: string): Promise<SalesChannel> {
+  const response = await authenticatedFetch(`/sales-channels/${id}`, { method: "PATCH", body: JSON.stringify({ name }) });
+  return parseOrThrow<SalesChannel>(response, "Falha ao renomear canal de venda");
+}
+
+export async function deactivateSalesChannel(id: string): Promise<SalesChannel> {
+  const response = await authenticatedFetch(`/sales-channels/${id}/deactivate`, { method: "POST" });
+  return parseOrThrow<SalesChannel>(response, "Falha ao desativar canal de venda");
+}
+
+export async function activateSalesChannel(id: string): Promise<SalesChannel> {
+  const response = await authenticatedFetch(`/sales-channels/${id}/activate`, { method: "POST" });
+  return parseOrThrow<SalesChannel>(response, "Falha ao reativar canal de venda");
 }
 
 // Lead (`ADR-0042`, `ENG-0143`) — adaptado do Lead-to-Convert do Salesforce.

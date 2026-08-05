@@ -65,6 +65,8 @@ export interface OpportunityProps {
   partyId: UniqueEntityId;
   pipelineId?: UniqueEntityId;
   currentStageId?: UniqueEntityId;
+  /** `ADR-0052` — canal de venda, opcional (`undefined` = canal direto implícito, comportamento preservado). Referência por id, mesmo padrão de `pipelineId`; sem mecanismo de troca após a criação, mesmo critério de `pipelineId`/`currentStageId` (Needs Evidence). */
+  salesChannelId?: UniqueEntityId;
   status: OpportunityStatus;
   createdAt: Date;
   updatedAt: Date;
@@ -75,6 +77,7 @@ export interface CreateOpportunityInput {
   partyId: UniqueEntityId;
   pipelineId?: UniqueEntityId;
   currentStageId?: UniqueEntityId;
+  salesChannelId?: UniqueEntityId;
 }
 
 export class Opportunity extends AggregateRoot<OpportunityProps> implements Timestamped {
@@ -99,6 +102,7 @@ export class Opportunity extends AggregateRoot<OpportunityProps> implements Time
       partyId: input.partyId,
       pipelineId: input.pipelineId,
       currentStageId: input.currentStageId,
+      salesChannelId: input.salesChannelId,
       status: "open",
       createdAt: now,
       updatedAt: now,
@@ -280,6 +284,10 @@ export class Opportunity extends AggregateRoot<OpportunityProps> implements Time
 
   get pipelineId(): UniqueEntityId | undefined {
     return this.props.pipelineId;
+  }
+
+  get salesChannelId(): UniqueEntityId | undefined {
+    return this.props.salesChannelId;
   }
 
   get currentStageId(): UniqueEntityId | undefined {

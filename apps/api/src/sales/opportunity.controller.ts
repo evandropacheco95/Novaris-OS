@@ -34,6 +34,17 @@ import { throwHttpExceptionForDomainError } from "../shared/http-error-mapper.js
 type AuthenticatedRequest = Request & { user: AuthenticatedUser };
 
 /**
+ * `ADR-0052` — `salesChannelId` acrescentado **fora** de `CreateOpportunityRequest`/
+ * `CreateOpportunityResponse` (Contracts Layer formalmente congelada,
+ * `SALES_CONTRACTS_FREEZE_V2.md` § 11 — qualquer alteração exige a sequência
+ * completa de etapas, não feita nesta missão). `apps/api` não faz parte do
+ * escopo do Freeze (que cobre só `services/domains/sales/contracts/`), então
+ * a extensão fica só na fronteira HTTP, por interseção de tipo — o contrato
+ * congelado em si nunca é tocado.
+ */
+type OpportunityApiResponse = CreateOpportunityResponse & { salesChannelId?: string };
+
+/**
  * Primeiro Controller real da NOVARIS — prova a arquitetura de ponta a ponta:
  * HTTP → Contracts → Application (Command/Handler) → `Opportunity`/`Proposal`
  * (Domain) → `PrismaOpportunityRepository` (Infrastructure) → Postgres real
@@ -78,7 +89,10 @@ export class OpportunityController {
   ) {}
 
   @Post()
-  async create(@Body() body: CreateOpportunityRequest, @Req() req: AuthenticatedRequest): Promise<CreateOpportunityResponse> {
+  async create(
+    @Body() body: CreateOpportunityRequest & { salesChannelId?: string },
+    @Req() req: AuthenticatedRequest,
+  ): Promise<OpportunityApiResponse> {
     if (body.organizationId !== req.user.organizationId) {
       throw new ForbiddenException({ code: "AUTHORIZATION_ERROR", message: "organizationId do corpo não corresponde ao token" });
     }
@@ -88,6 +102,7 @@ export class OpportunityController {
       partyId: body.partyId,
       pipelineId: body.pipelineId,
       currentStageId: body.currentStageId,
+      salesChannelId: body.salesChannelId,
     });
 
     const result = await this.createHandler.execute(command);
@@ -109,7 +124,7 @@ export class OpportunityController {
    * mutação, sem regra de negócio).
    */
   @Get()
-  async list(@Req() req: AuthenticatedRequest): Promise<CreateOpportunityResponse[]> {
+  async list(@Req() req: AuthenticatedRequest): Promise<OpportunityApiResponse[]> {
     const findResult = await this.repository.findAll();
     if (findResult.isFailure) {
       throw new HttpException({ code: "INFRASTRUCTURE_ERROR", message: "Falha ao listar Opportunities" }, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -121,7 +136,7 @@ export class OpportunityController {
   }
 
   @Get(":id")
-  async findById(@Param("id") id: string, @Req() req: AuthenticatedRequest): Promise<CreateOpportunityResponse> {
+  async findById(@Param("id") id: string, @Req() req: AuthenticatedRequest): Promise<OpportunityApiResponse> {
     const opportunity = await this.loadAndAssertOwnership(id, req.user);
     return toResponse(opportunity);
   }
@@ -218,7 +233,7 @@ export class OpportunityController {
   }
 }
 
-/** Mapeia o Aggregate real para `CreateOpportunityResponse` — mesma tradução já congelada por `CREATE_OPPORTUNITY_RESPONSE_SPECIFICATION.md`. */
+/** Mapeia o Aggregate real para `CreateOpportunityResponse` — mesma tradução já congelada por `CREATE_OPPORTUNITY_RESPONSE_SPECIFICATION.md` — mais `salesChannelId` (`ADR-0052`, fora do Freeze, ver `OpportunityApiResponse`). */
 function toResponse(opportunity: {
   id: { toString(): string };
   organizationId: { toString(): string };
@@ -228,7 +243,8 @@ function toResponse(opportunity: {
   updatedAt: Date;
   pipelineId?: { toString(): string };
   currentStageId?: { toString(): string };
-}): CreateOpportunityResponse {
+  salesChannelId?: { toString(): string };
+}): OpportunityApiResponse {
   return {
     id: opportunity.id.toString(),
     organizationId: opportunity.organizationId.toString(),
@@ -238,6 +254,7 @@ function toResponse(opportunity: {
     updatedAt: opportunity.updatedAt.toISOString(),
     pipelineId: opportunity.pipelineId?.toString(),
     currentStageId: opportunity.currentStageId?.toString(),
+    salesChannelId: opportunity.salesChannelId?.toString(),
   };
 }
 

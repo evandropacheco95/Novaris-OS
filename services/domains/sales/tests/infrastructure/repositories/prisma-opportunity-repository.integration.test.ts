@@ -50,6 +50,21 @@ describe("PrismaOpportunityRepository — integração real (Supabase)", () => {
     assert.equal(fetched.status, "open");
   });
 
+  it("persiste salesChannelId (ADR-0052) e reflete no re-fetch", async () => {
+    const salesChannelId = new UniqueEntityId();
+    const opportunity = Opportunity.create({
+      organizationId: new UniqueEntityId(),
+      partyId: new UniqueEntityId(),
+      salesChannelId,
+    }).getValue()!;
+    createdIds.push(opportunity.id.toString());
+
+    await repository.save(opportunity);
+
+    const fetched = (await repository.findById(opportunity.id)).getValue()!.getOrElse(null as never);
+    assert.equal(fetched.salesChannelId?.toString(), salesChannelId.toString());
+  });
+
   it("persiste Proposal como Internal Entity, via a coleção da Opportunity", async () => {
     const opportunity = Opportunity.create({
       organizationId: new UniqueEntityId(),

@@ -62,6 +62,15 @@ export {
 } from "../domain/aggregates/product/product.js";
 export type { ProductRepository } from "../domain/repositories/product-repository.js";
 
+// SalesChannel (`ADR-0052`) — canal de venda como conceito de 1ª classe, referência real: Winnet (`ENG-0166`).
+export {
+  SalesChannel,
+  type SalesChannelProps,
+  type SalesChannelType,
+  type CreateSalesChannelInput,
+} from "../domain/aggregates/sales-channel/sales-channel.js";
+export type { SalesChannelRepository } from "../domain/repositories/sales-channel-repository.js";
+
 export { Quotation, type QuotationProps, type QuotationStatus, type CreateQuotationInput } from "../domain/aggregates/quotation/quotation.js";
 export {
   QuotationLineItem,
@@ -136,6 +145,15 @@ export { DeactivateProductHandler } from "../application/handlers/deactivate-pro
 export { ActivateProductCommand } from "../application/commands/activate-product/activate-product.command.js";
 export { ActivateProductHandler } from "../application/handlers/activate-product/activate-product.handler.js";
 
+export { CreateSalesChannelCommand } from "../application/commands/create-sales-channel/create-sales-channel.command.js";
+export { CreateSalesChannelHandler } from "../application/handlers/create-sales-channel/create-sales-channel.handler.js";
+export { RenameSalesChannelCommand } from "../application/commands/rename-sales-channel/rename-sales-channel.command.js";
+export { RenameSalesChannelHandler } from "../application/handlers/rename-sales-channel/rename-sales-channel.handler.js";
+export { ActivateSalesChannelCommand } from "../application/commands/activate-sales-channel/activate-sales-channel.command.js";
+export { ActivateSalesChannelHandler } from "../application/handlers/activate-sales-channel/activate-sales-channel.handler.js";
+export { DeactivateSalesChannelCommand } from "../application/commands/deactivate-sales-channel/deactivate-sales-channel.command.js";
+export { DeactivateSalesChannelHandler } from "../application/handlers/deactivate-sales-channel/deactivate-sales-channel.handler.js";
+
 export { CreateQuotationCommand } from "../application/commands/create-quotation/create-quotation.command.js";
 export { CreateQuotationHandler } from "../application/handlers/create-quotation/create-quotation.handler.js";
 export { AddQuotationLineItemCommand } from "../application/commands/add-quotation-line-item/add-quotation-line-item.command.js";
@@ -173,4 +191,5 @@ export {
   createQuotationRepository,
   createContractRepository,
   createRevenueRepository,
+  createSalesChannelRepository,
 } from "../infrastructure/factories.js";

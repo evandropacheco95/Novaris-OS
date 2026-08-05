@@ -8,6 +8,11 @@ import {
   createQuotationRepository,
   createContractRepository,
   createRevenueRepository,
+  createSalesChannelRepository,
+  CreateSalesChannelHandler,
+  RenameSalesChannelHandler,
+  ActivateSalesChannelHandler,
+  DeactivateSalesChannelHandler,
   CreateOpportunityHandler,
   AdvanceOpportunityStageHandler,
   SubmitProposalHandler,
@@ -42,6 +47,7 @@ import { AuthModule } from "../auth/auth.module.js";
 import { CustomerModule } from "../customer/customer.module.js";
 import { OpportunityController } from "./opportunity.controller.js";
 import { PipelineController } from "./pipeline.controller.js";
+import { SalesChannelController } from "./sales-channel.controller.js";
 import { LeadController } from "./lead.controller.js";
 import { ProductController } from "./product.controller.js";
 import { QuotationController } from "./quotation.controller.js";
@@ -50,6 +56,7 @@ import { RevenueController } from "./revenue.controller.js";
 
 const OPPORTUNITY_REPOSITORY = "OPPORTUNITY_REPOSITORY";
 const PIPELINE_REPOSITORY = "PIPELINE_REPOSITORY";
+const SALES_CHANNEL_REPOSITORY = "SALES_CHANNEL_REPOSITORY";
 const LEAD_REPOSITORY = "LEAD_REPOSITORY";
 const PRODUCT_REPOSITORY = "PRODUCT_REPOSITORY";
 const QUOTATION_REPOSITORY = "QUOTATION_REPOSITORY";
@@ -74,6 +81,7 @@ const REVENUE_REPOSITORY = "REVENUE_REPOSITORY";
   controllers: [
     OpportunityController,
     PipelineController,
+    SalesChannelController,
     LeadController,
     ProductController,
     QuotationController,
@@ -154,6 +162,34 @@ const REVENUE_REPOSITORY = "REVENUE_REPOSITORY";
     {
       provide: "PipelineRepository",
       useExisting: PIPELINE_REPOSITORY,
+    },
+    {
+      provide: SALES_CHANNEL_REPOSITORY,
+      useFactory: () => createSalesChannelRepository(prisma),
+    },
+    {
+      provide: CreateSalesChannelHandler,
+      useFactory: (repository: ReturnType<typeof createSalesChannelRepository>) => new CreateSalesChannelHandler(repository),
+      inject: [SALES_CHANNEL_REPOSITORY],
+    },
+    {
+      provide: RenameSalesChannelHandler,
+      useFactory: (repository: ReturnType<typeof createSalesChannelRepository>) => new RenameSalesChannelHandler(repository),
+      inject: [SALES_CHANNEL_REPOSITORY],
+    },
+    {
+      provide: ActivateSalesChannelHandler,
+      useFactory: (repository: ReturnType<typeof createSalesChannelRepository>) => new ActivateSalesChannelHandler(repository),
+      inject: [SALES_CHANNEL_REPOSITORY],
+    },
+    {
+      provide: DeactivateSalesChannelHandler,
+      useFactory: (repository: ReturnType<typeof createSalesChannelRepository>) => new DeactivateSalesChannelHandler(repository),
+      inject: [SALES_CHANNEL_REPOSITORY],
+    },
+    {
+      provide: "SalesChannelRepository",
+      useExisting: SALES_CHANNEL_REPOSITORY,
     },
     {
       provide: LEAD_REPOSITORY,

@@ -2,8 +2,20 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, GitBranch, Handshake } from "lucide-react";
-import { createOpportunity, getToken, useCurrentUser, listOpportunities, listParties, markLost, markWon, type Opportunity, type Party } from "@/lib/api";
+import { ArrowUpRight, GitBranch, Handshake, Radio } from "lucide-react";
+import {
+  createOpportunity,
+  getToken,
+  useCurrentUser,
+  listOpportunities,
+  listParties,
+  listSalesChannels,
+  markLost,
+  markWon,
+  type Opportunity,
+  type Party,
+  type SalesChannel,
+} from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Tag } from "@/components/tag";
@@ -46,7 +58,9 @@ export default function OpportunitiesPage() {
   const router = useRouter();
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [parties, setParties] = useState<Party[]>([]);
+  const [salesChannels, setSalesChannels] = useState<SalesChannel[]>([]);
   const [partyId, setPartyId] = useState("");
+  const [salesChannelId, setSalesChannelId] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const user = useCurrentUser();
@@ -62,9 +76,10 @@ export default function OpportunitiesPage() {
   async function refresh(): Promise<void> {
     setLoading(true);
     try {
-      const [opportunityList, partyList] = await Promise.all([listOpportunities(), listParties()]);
+      const [opportunityList, partyList, salesChannelList] = await Promise.all([listOpportunities(), listParties(), listSalesChannels()]);
       setOpportunities(opportunityList);
       setParties(partyList);
+      setSalesChannels(salesChannelList);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao carregar");
     } finally {
@@ -76,13 +91,19 @@ export default function OpportunitiesPage() {
     return parties.find((p) => p.id === id)?.name ?? id;
   }
 
+  function salesChannelName(id?: string): string | undefined {
+    if (!id) return undefined;
+    return salesChannels.find((c) => c.id === id)?.name ?? id;
+  }
+
   async function handleCreate(event: FormEvent): Promise<void> {
     event.preventDefault();
     if (!user) return;
     setError(null);
     try {
-      await createOpportunity(partyId, user.organizationId);
+      await createOpportunity(partyId, user.organizationId, salesChannelId || undefined);
       setPartyId("");
+      setSalesChannelId("");
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao criar");
@@ -109,6 +130,9 @@ export default function OpportunitiesPage() {
             <Button variant="secondary" size="sm" icon={<GitBranch size={14} />} onClick={() => router.push("/pipelines")}>
               Configurar Pipelines
             </Button>
+            <Button variant="secondary" size="sm" icon={<Radio size={14} />} onClick={() => router.push("/sales-channels")}>
+              Canais de Venda
+            </Button>
             <Button variant="secondary" size="sm" icon={<ArrowUpRight size={14} />} onClick={() => router.push("/leads")}>
               Leads
             </Button>
@@ -127,6 +151,16 @@ export default function OpportunitiesPage() {
               {p.name}
             </option>
           ))}
+        </Select>
+        <Select value={salesChannelId} onChange={(e) => setSalesChannelId(e.target.value)} className="w-[200px]">
+          <option value="">Canal (opcional)</option>
+          {salesChannels
+            .filter((c) => c.active)
+            .map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
         </Select>
         <Button type="submit" icon={<Handshake size={15} />}>
           Nova Opportunity
@@ -174,6 +208,9 @@ export default function OpportunitiesPage() {
                         <div className="flex flex-col gap-2">
                           <div className="font-mono text-[11px] text-nov-s500">{opportunity.id.slice(0, 8)}</div>
                           <div className="text-sm font-semibold text-nov-s100">{partyName(opportunity.partyId)}</div>
+                          {salesChannelName(opportunity.salesChannelId) && (
+                            <div className="text-xs text-nov-s500">{salesChannelName(opportunity.salesChannelId)}</div>
+                          )}
                           {opportunity.status === "open" && (
                             <div className="mt-1 flex gap-2">
                               <Button size="sm" onClick={() => handleClose(opportunity.id, "won")}>

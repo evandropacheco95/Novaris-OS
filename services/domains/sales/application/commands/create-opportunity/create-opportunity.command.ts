@@ -44,6 +44,8 @@ export interface CreateOpportunityCommandInput {
   readonly partyId: string;
   readonly pipelineId?: string;
   readonly currentStageId?: string;
+  /** `ADR-0052` — canal de venda, opcional (`undefined` = canal direto implícito). */
+  readonly salesChannelId?: string;
 }
 
 export class CreateOpportunityCommand {
@@ -51,12 +53,14 @@ export class CreateOpportunityCommand {
   readonly partyId: string;
   readonly pipelineId?: string;
   readonly currentStageId?: string;
+  readonly salesChannelId?: string;
 
   constructor(input: CreateOpportunityCommandInput) {
     this.organizationId = input.organizationId;
     this.partyId = input.partyId;
     this.pipelineId = input.pipelineId;
     this.currentStageId = input.currentStageId;
+    this.salesChannelId = input.salesChannelId;
     Object.freeze(this);
   }
 }

@@ -61,6 +61,7 @@ export type {
   AutomationRule,
   Lead,
   Product,
+  SalesChannel,
   Quotation,
   QuotationLineItem,
   Case,

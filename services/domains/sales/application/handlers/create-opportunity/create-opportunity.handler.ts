@@ -57,6 +57,7 @@ export class CreateOpportunityHandler {
       partyId: new UniqueEntityId(command.partyId),
       pipelineId: command.pipelineId ? new UniqueEntityId(command.pipelineId) : undefined,
       currentStageId: command.currentStageId ? new UniqueEntityId(command.currentStageId) : undefined,
+      salesChannelId: command.salesChannelId ? new UniqueEntityId(command.salesChannelId) : undefined,
     };
 
     const result = Opportunity.create(input);
