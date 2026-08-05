@@ -653,6 +653,10 @@ model Contract {
   status         String    @db.VarChar(10) // "draft" | "active" | "terminated" — CHECK constraint na migration
   startDate      DateTime? @map("start_date") @db.Timestamptz
   endDate        DateTime? @map("end_date") @db.Timestamptz
+  /// Documento Fiscal (`ENG-0169`, `ADR-0053`) — input manual, sem integração real com API fiscal/Bling.
+  fiscalDocumentNumber    String?   @map("fiscal_document_number") @db.VarChar(20)
+  fiscalDocumentAccessKey String?   @map("fiscal_document_access_key") @db.VarChar(44)
+  fiscalDocumentIssuedAt  DateTime? @map("fiscal_document_issued_at") @db.Timestamptz
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz
 

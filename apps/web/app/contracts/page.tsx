@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { activateContract, generateRevenueFromContract, getToken, listContracts, terminateContract, type Contract, type ContractStatus } from "@/lib/api";
+import { activateContract, generateRevenueFromContract, getToken, listContracts, terminateContract, updateContractFiscalDocument, type Contract, type ContractStatus } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Tag } from "@/components/tag";
@@ -49,6 +49,10 @@ export default function ContractsPage() {
   const [recognizingId, setRecognizingId] = useState<string | null>(null);
   const [revenueAmount, setRevenueAmount] = useState("");
   const [revenueCurrency, setRevenueCurrency] = useState("BRL");
+  const [editingFiscalId, setEditingFiscalId] = useState<string | null>(null);
+  const [fiscalNumber, setFiscalNumber] = useState("");
+  const [fiscalAccessKey, setFiscalAccessKey] = useState("");
+  const [fiscalIssuedAt, setFiscalIssuedAt] = useState("");
 
   useEffect(() => {
     if (!getToken()) {
@@ -77,6 +81,28 @@ export default function ContractsPage() {
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao atualizar Contract");
+    }
+  }
+
+  function openFiscalEditor(contract: Contract): void {
+    setEditingFiscalId(editingFiscalId === contract.id ? null : contract.id);
+    setFiscalNumber(contract.fiscalDocumentNumber ?? "");
+    setFiscalAccessKey(contract.fiscalDocumentAccessKey ?? "");
+    setFiscalIssuedAt(contract.fiscalDocumentIssuedAt ? contract.fiscalDocumentIssuedAt.slice(0, 10) : "");
+  }
+
+  async function handleSaveFiscalDocument(contractId: string): Promise<void> {
+    setError(null);
+    try {
+      await updateContractFiscalDocument(contractId, {
+        fiscalDocumentNumber: fiscalNumber || undefined,
+        fiscalDocumentAccessKey: fiscalAccessKey || undefined,
+        fiscalDocumentIssuedAt: fiscalIssuedAt ? new Date(fiscalIssuedAt).toISOString() : undefined,
+      });
+      setEditingFiscalId(null);
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Falha ao salvar Documento Fiscal");
     }
   }
 
@@ -144,6 +170,22 @@ export default function ContractsPage() {
                       <div className="flex flex-col gap-1.5">
                         <div className="text-[11px] text-nov-s500">Opp: {contract.opportunityId.slice(0, 8)}</div>
                         <div className="text-[11px] text-nov-s500">Quotation: {contract.quotationId.slice(0, 8)}</div>
+                        {contract.fiscalDocumentNumber && (
+                          <div className="text-[11px] text-nov-s500">NFe: {contract.fiscalDocumentNumber}</div>
+                        )}
+                        <Button size="sm" variant="secondary" onClick={() => openFiscalEditor(contract)}>
+                          {contract.fiscalDocumentNumber ? "Editar Documento Fiscal" : "+ Documento Fiscal"}
+                        </Button>
+                        {editingFiscalId === contract.id && (
+                          <div className="mt-0.5 flex flex-col gap-1.5 border-t border-nov-border pt-2">
+                            <Input placeholder="Número da NFe" value={fiscalNumber} onChange={(e) => setFiscalNumber(e.target.value)} />
+                            <Input placeholder="Chave de acesso (44 dígitos)" value={fiscalAccessKey} onChange={(e) => setFiscalAccessKey(e.target.value)} />
+                            <Input type="date" value={fiscalIssuedAt} onChange={(e) => setFiscalIssuedAt(e.target.value)} />
+                            <Button size="sm" onClick={() => handleSaveFiscalDocument(contract.id)}>
+                              Salvar
+                            </Button>
+                          </div>
+                        )}
                         {contract.status === "draft" && (
                           <Button size="sm" onClick={() => handleTransition(contract.id, "activate")}>
                             Ativar

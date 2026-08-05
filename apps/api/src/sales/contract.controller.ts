@@ -8,6 +8,8 @@ import {
   TerminateContractHandler,
   GenerateRevenueFromContractCommand,
   GenerateRevenueFromContractHandler,
+  UpdateFiscalDocumentCommand,
+  UpdateFiscalDocumentHandler,
   type ContractRepository,
   type ContractStatus,
 } from "@novaris/sales";
@@ -26,6 +28,9 @@ export interface ContractResponse {
   opportunityId: string;
   quotationId: string;
   status: ContractStatus;
+  fiscalDocumentNumber?: string;
+  fiscalDocumentAccessKey?: string;
+  fiscalDocumentIssuedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -45,6 +50,7 @@ export class ContractController {
     private readonly activateHandler: ActivateContractHandler,
     private readonly terminateHandler: TerminateContractHandler,
     private readonly generateRevenueHandler: GenerateRevenueFromContractHandler,
+    private readonly updateFiscalDocumentHandler: UpdateFiscalDocumentHandler,
     @Inject("ContractRepository") private readonly repository: ContractRepository,
   ) {}
 
@@ -108,6 +114,33 @@ export class ContractController {
     return toRevenueResponse(result.getValue()!);
   }
 
+  /** Documento Fiscal (`ENG-0169`) — input manual, sem integração real com API fiscal/Bling. */
+  @Post(":id/fiscal-document")
+  async updateFiscalDocument(
+    @Param("id") id: string,
+    @Body()
+    body: {
+      fiscalDocumentNumber?: string | null;
+      fiscalDocumentAccessKey?: string | null;
+      fiscalDocumentIssuedAt?: string | null;
+    },
+    @Req() req: AuthenticatedRequest,
+  ): Promise<ContractResponse> {
+    await this.loadAndAssertOwnership(id, req.user);
+    const result = await this.updateFiscalDocumentHandler.execute(
+      new UpdateFiscalDocumentCommand({
+        contractId: id,
+        fiscalDocumentNumber: body.fiscalDocumentNumber,
+        fiscalDocumentAccessKey: body.fiscalDocumentAccessKey,
+        fiscalDocumentIssuedAt: body.fiscalDocumentIssuedAt === undefined ? undefined : body.fiscalDocumentIssuedAt === null ? null : new Date(body.fiscalDocumentIssuedAt),
+      }),
+    );
+    if (result.isFailure) {
+      throwHttpExceptionForDomainError(result.getError()!);
+    }
+    return toResponse(result.getValue()!);
+  }
+
   private async loadAndAssertOwnership(id: string, user: AuthenticatedUser) {
     const findResult = await this.repository.findById(new UniqueEntityId(id));
     if (findResult.isFailure) {
@@ -150,6 +183,9 @@ function toResponse(contract: {
   opportunityId: { toString(): string };
   quotationId: { toString(): string };
   status: ContractStatus;
+  fiscalDocumentNumber?: string;
+  fiscalDocumentAccessKey?: string;
+  fiscalDocumentIssuedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }): ContractResponse {
@@ -158,6 +194,9 @@ function toResponse(contract: {
     opportunityId: contract.opportunityId.toString(),
     quotationId: contract.quotationId.toString(),
     status: contract.status,
+    fiscalDocumentNumber: contract.fiscalDocumentNumber,
+    fiscalDocumentAccessKey: contract.fiscalDocumentAccessKey,
+    fiscalDocumentIssuedAt: contract.fiscalDocumentIssuedAt?.toISOString(),
     createdAt: contract.createdAt.toISOString(),
     updatedAt: contract.updatedAt.toISOString(),
   };

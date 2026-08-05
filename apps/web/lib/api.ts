@@ -964,6 +964,9 @@ export interface Contract {
   opportunityId: string;
   quotationId: string;
   status: ContractStatus;
+  fiscalDocumentNumber?: string;
+  fiscalDocumentAccessKey?: string;
+  fiscalDocumentIssuedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -987,6 +990,18 @@ export async function activateContract(id: string): Promise<Contract> {
 export async function terminateContract(id: string): Promise<Contract> {
   const response = await authenticatedFetch(`/contracts/${id}/terminate`, { method: "POST" });
   return parseOrThrow<Contract>(response, "Falha ao encerrar Contract");
+}
+
+/** Documento Fiscal (`ENG-0169`) — input manual, sem integração real com API fiscal/Bling. */
+export async function updateContractFiscalDocument(
+  id: string,
+  fiscalDocument: { fiscalDocumentNumber?: string; fiscalDocumentAccessKey?: string; fiscalDocumentIssuedAt?: string },
+): Promise<Contract> {
+  const response = await authenticatedFetch(`/contracts/${id}/fiscal-document`, {
+    method: "POST",
+    body: JSON.stringify(fiscalDocument),
+  });
+  return parseOrThrow<Contract>(response, "Falha ao salvar Documento Fiscal");
 }
 
 // Revenue (`ADR-0047`) — gerado a partir de um Contract active, sem estados (registro pontual).

@@ -46,6 +46,9 @@ export class PrismaContractRepository implements ContractRepository {
           status: data.status,
           startDate: data.startDate,
           endDate: data.endDate,
+          fiscalDocumentNumber: data.fiscalDocumentNumber,
+          fiscalDocumentAccessKey: data.fiscalDocumentAccessKey,
+          fiscalDocumentIssuedAt: data.fiscalDocumentIssuedAt,
           updatedAt: data.updatedAt,
         },
       });

@@ -1,4 +1,4 @@
-import { AggregateRoot, Result, ConflictError } from "@novaris/shared-kernel";
+import { AggregateRoot, Result, ValidationError, ConflictError } from "@novaris/shared-kernel";
 import type { UniqueEntityId, DomainError, Timestamped } from "@novaris/shared-kernel";
 import { ContractCreated } from "../../events/contract-created.js";
 import { ContractActivated } from "../../events/contract-activated.js";
@@ -10,6 +10,14 @@ import { ContractTerminated } from "../../events/contract-terminated.js";
  * `GenerateContractFromQuotationHandler`). `quotationId` é rastreabilidade
  * (de qual Quotation este Contract se origina); `opportunityId` é referência
  * direta, mesmo padrão de `Quotation.opportunityId`.
+ *
+ * **Documento Fiscal** (`ENG-0169`, `ADR-0053`) — `fiscalDocumentNumber` a
+ * `fiscalDocumentIssuedAt` são opcionais, input manual (sem integração real
+ * com API fiscal/Bling — decisão explícita do CTO, estrutura primeiro). Por
+ * decisão do CTO, escopo deliberadamente contido ao Contract: sem
+ * reconciliação automática com o Financial Domain (`Invoice` não referencia
+ * `Contract` hoje) — o dado fica disponível para consulta manual do time
+ * financeiro.
  */
 
 export type ContractStatus = "draft" | "active" | "terminated";
@@ -21,6 +29,11 @@ export interface ContractProps {
   status: ContractStatus;
   startDate?: Date;
   endDate?: Date;
+  /** Número da Nota Fiscal Eletrônica associada a este Contract. */
+  fiscalDocumentNumber?: string;
+  /** Chave de acesso da NFe — 44 dígitos, padrão nacional (SEFAZ). */
+  fiscalDocumentAccessKey?: string;
+  fiscalDocumentIssuedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -31,6 +44,27 @@ export interface CreateContractInput {
   quotationId: UniqueEntityId;
   startDate?: Date;
   endDate?: Date;
+}
+
+/**
+ * Todos os campos opcionais — `PATCH` parcial, mesmo padrão de
+ * `Product.updateFiscalLogisticsProfile()` (`ENG-0166`). `undefined` = não
+ * mexer; `null` = remover o valor explicitamente.
+ */
+export interface UpdateFiscalDocumentInput {
+  fiscalDocumentNumber?: string | null;
+  fiscalDocumentAccessKey?: string | null;
+  fiscalDocumentIssuedAt?: Date | null;
+}
+
+const FISCAL_DOCUMENT_ACCESS_KEY_PATTERN = /^\d{44}$/;
+
+/** Chave de acesso de NFe tem exatamente 44 dígitos — padrão nacional (SEFAZ), fato técnico estável. */
+function validateFiscalDocument(input: { fiscalDocumentAccessKey?: string }): ValidationError | undefined {
+  if (input.fiscalDocumentAccessKey !== undefined && !FISCAL_DOCUMENT_ACCESS_KEY_PATTERN.test(input.fiscalDocumentAccessKey)) {
+    return new ValidationError('"fiscalDocumentAccessKey" deve ter exatamente 44 dígitos');
+  }
+  return undefined;
 }
 
 export class Contract extends AggregateRoot<ContractProps> implements Timestamped {
@@ -82,6 +116,23 @@ export class Contract extends AggregateRoot<ContractProps> implements Timestampe
     return Result.ok(undefined);
   }
 
+  /** `ENG-0169` — ver nota de topo do arquivo. `null` remove o valor, `undefined` não mexe. Sem Domain Event — mesmo critério de `Product.updateFiscalLogisticsProfile()`. */
+  updateFiscalDocument(input: UpdateFiscalDocumentInput): Result<void, DomainError> {
+    const validationError = validateFiscalDocument({
+      fiscalDocumentAccessKey: input.fiscalDocumentAccessKey ?? undefined,
+    });
+    if (validationError) {
+      return Result.fail(validationError);
+    }
+
+    if (input.fiscalDocumentNumber !== undefined) this.props.fiscalDocumentNumber = input.fiscalDocumentNumber ?? undefined;
+    if (input.fiscalDocumentAccessKey !== undefined) this.props.fiscalDocumentAccessKey = input.fiscalDocumentAccessKey ?? undefined;
+    if (input.fiscalDocumentIssuedAt !== undefined) this.props.fiscalDocumentIssuedAt = input.fiscalDocumentIssuedAt ?? undefined;
+
+    this.props.updatedAt = new Date();
+    return Result.ok(undefined);
+  }
+
   get organizationId(): UniqueEntityId {
     return this.props.organizationId;
   }
@@ -104,6 +155,18 @@ export class Contract extends AggregateRoot<ContractProps> implements Timestampe
 
   get endDate(): Date | undefined {
     return this.props.endDate;
+  }
+
+  get fiscalDocumentNumber(): string | undefined {
+    return this.props.fiscalDocumentNumber;
+  }
+
+  get fiscalDocumentAccessKey(): string | undefined {
+    return this.props.fiscalDocumentAccessKey;
+  }
+
+  get fiscalDocumentIssuedAt(): Date | undefined {
+    return this.props.fiscalDocumentIssuedAt;
   }
 
   get createdAt(): Date {

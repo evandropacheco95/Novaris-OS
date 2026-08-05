@@ -39,6 +39,7 @@ import {
   RejectQuotationHandler,
   GenerateContractFromQuotationHandler,
   ActivateContractHandler,
+  UpdateFiscalDocumentHandler,
   TerminateContractHandler,
   GenerateRevenueFromContractHandler,
 } from "@novaris/sales";
@@ -318,6 +319,11 @@ const REVENUE_REPOSITORY = "REVENUE_REPOSITORY";
     {
       provide: TerminateContractHandler,
       useFactory: (repository: ReturnType<typeof createContractRepository>) => new TerminateContractHandler(repository),
+      inject: [CONTRACT_REPOSITORY],
+    },
+    {
+      provide: UpdateFiscalDocumentHandler,
+      useFactory: (repository: ReturnType<typeof createContractRepository>) => new UpdateFiscalDocumentHandler(repository),
       inject: [CONTRACT_REPOSITORY],
     },
     {

@@ -12,6 +12,9 @@ export class PrismaContractMapper {
       status: record.status as ContractStatus,
       startDate: record.startDate ?? undefined,
       endDate: record.endDate ?? undefined,
+      fiscalDocumentNumber: record.fiscalDocumentNumber ?? undefined,
+      fiscalDocumentAccessKey: record.fiscalDocumentAccessKey ?? undefined,
+      fiscalDocumentIssuedAt: record.fiscalDocumentIssuedAt ?? undefined,
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
     };
@@ -27,6 +30,9 @@ export class PrismaContractMapper {
       status: contract.status,
       startDate: contract.startDate ?? null,
       endDate: contract.endDate ?? null,
+      fiscalDocumentNumber: contract.fiscalDocumentNumber ?? null,
+      fiscalDocumentAccessKey: contract.fiscalDocumentAccessKey ?? null,
+      fiscalDocumentIssuedAt: contract.fiscalDocumentIssuedAt ?? null,
       createdAt: contract.createdAt,
       updatedAt: contract.updatedAt,
     };

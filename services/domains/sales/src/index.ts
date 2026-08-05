@@ -83,7 +83,13 @@ export { QuotationRejected } from "../domain/events/quotation-rejected.js";
 export type { QuotationRepository } from "../domain/repositories/quotation-repository.js";
 
 // Contract (`ADR-0044`) — gerado a partir de uma Quotation `accepted`.
-export { Contract, type ContractProps, type ContractStatus, type CreateContractInput } from "../domain/aggregates/contract/contract.js";
+export {
+  Contract,
+  type ContractProps,
+  type ContractStatus,
+  type CreateContractInput,
+  type UpdateFiscalDocumentInput,
+} from "../domain/aggregates/contract/contract.js";
 export { ContractCreated } from "../domain/events/contract-created.js";
 export { ContractActivated } from "../domain/events/contract-activated.js";
 export { ContractTerminated } from "../domain/events/contract-terminated.js";
@@ -173,6 +179,8 @@ export { TerminateContractCommand } from "../application/commands/terminate-cont
 export { TerminateContractHandler } from "../application/handlers/terminate-contract/terminate-contract.handler.js";
 export { GenerateRevenueFromContractCommand } from "../application/commands/generate-revenue-from-contract/generate-revenue-from-contract.command.js";
 export { GenerateRevenueFromContractHandler } from "../application/handlers/generate-revenue-from-contract/generate-revenue-from-contract.handler.js";
+export { UpdateFiscalDocumentCommand } from "../application/commands/update-fiscal-document/update-fiscal-document.command.js";
+export { UpdateFiscalDocumentHandler } from "../application/handlers/update-fiscal-document/update-fiscal-document.handler.js";
 
 // Contracts Layer — Root Barrel já congelado (SALES_CONTRACTS_FREEZE_V2.md),
 // reexportado aqui sem alteração.

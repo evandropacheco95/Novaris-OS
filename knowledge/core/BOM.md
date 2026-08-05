@@ -391,6 +391,8 @@ Eventos:
 Contrato.
 
 > **Nota de Extensão (`ADR-0044`, `ENG-0145`)**: implementado como Aggregate Root do `SALES DOMAIN`, gerado exclusivamente a partir de uma `Quotation` `accepted` (nunca automático). Estados: `Draft → Active → Terminated` (sem reversão). Campos mínimos: `opportunityId`, `quotationId` (rastreabilidade), `status`. Último objeto oficial do Sales Domain com posição resolvida — só `Revenue` permanece sem forma definida.
+>
+> **Nota de Extensão (`ADR-0053`, `ENG-0169`)**: campos opcionais de Documento Fiscal — `fiscalDocumentNumber`, `fiscalDocumentAccessKey` (44 dígitos, padrão NFe/SEFAZ), `fiscalDocumentIssuedAt`. Input manual (sem integração real com API fiscal/Bling). Decisão explícita do CTO: sem reconciliação automática com o Financial Domain (`Invoice`/`Subscription` não referenciam `Contract`).
 
 ---
 

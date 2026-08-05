@@ -43,6 +43,21 @@ describe("PrismaContractRepository — integração real (Supabase)", () => {
     assert.equal(found.status, "terminated");
   });
 
+  it("persiste updateFiscalDocument() (ENG-0169) e reflete no re-fetch", async () => {
+    const contract = Contract.create({ organizationId: new UniqueEntityId(), opportunityId: new UniqueEntityId(), quotationId: new UniqueEntityId() }).getValue()!;
+    createdIds.push(contract.id.toString());
+    await repository.save(contract);
+
+    const issuedAt = new Date("2026-08-01T00:00:00Z");
+    contract.updateFiscalDocument({ fiscalDocumentNumber: "123456", fiscalDocumentAccessKey: "3".repeat(44), fiscalDocumentIssuedAt: issuedAt });
+    await repository.save(contract);
+
+    const found = (await repository.findById(contract.id)).getValue()!.getOrElse(null as never);
+    assert.equal(found.fiscalDocumentNumber, "123456");
+    assert.equal(found.fiscalDocumentAccessKey, "3".repeat(44));
+    assert.equal(found.fiscalDocumentIssuedAt?.getTime(), issuedAt.getTime());
+  });
+
   it("exists()/delete() funcionam contra o banco real", async () => {
     const contract = Contract.create({ organizationId: new UniqueEntityId(), opportunityId: new UniqueEntityId(), quotationId: new UniqueEntityId() }).getValue()!;
     await repository.save(contract);
