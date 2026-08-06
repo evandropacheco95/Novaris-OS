@@ -98,9 +98,17 @@ export async function login(email: string, password: string): Promise<LoginRespo
   return body as LoginResponse;
 }
 
+/**
+ * `401` (JWT expirado — TTL de 8h no backend, `apps/api/src/auth`) limpa a
+ * sessão e redireciona para `/login` — sem isso, toda tela de listagem
+ * derrubava um "Unhandled Runtime Error" genérico em vez de levar o usuário
+ * de volta ao login (achado real: sessão de navegador aberta além do TTL).
+ * `window.location.href` (não `useRouter`) porque este módulo roda fora da
+ * árvore de componentes React.
+ */
 async function authenticatedFetch(path: string, init: RequestInit = {}): Promise<Response> {
   const token = getToken();
-  return fetch(`${API_URL}${path}`, {
+  const response = await fetch(`${API_URL}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
@@ -108,6 +116,11 @@ async function authenticatedFetch(path: string, init: RequestInit = {}): Promise
       ...init.headers,
     },
   });
+  if (response.status === 401 && typeof window !== "undefined") {
+    clearSession();
+    window.location.href = "/login";
+  }
+  return response;
 }
 
 export interface Opportunity {
