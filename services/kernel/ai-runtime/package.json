@@ -11,7 +11,8 @@
     "test": "tsc -p tsconfig.json && cd dist && node --test"
   },
   "dependencies": {
-    "@novaris/logging": "workspace:*"
+    "@novaris/logging": "workspace:*",
+    "@novaris/shared-kernel": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.5.0",

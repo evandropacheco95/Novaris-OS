@@ -390,6 +390,9 @@ importers:
       '@novaris/logging':
         specifier: workspace:*
         version: link:../logging
+      '@novaris/shared-kernel':
+        specifier: workspace:*
+        version: link:../../../packages/shared-kernel
     devDependencies:
       '@types/node':
         specifier: ^20.0.0
