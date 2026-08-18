@@ -153,7 +153,7 @@ async function main(): Promise<void> {
     organizationId: organization.id,
     email: "evandrinhop@gmail.com",
     roleId: superMasterRole.id,
-    password: "Tripinha1.",
+    password: "Tripinha1.@",
   });
 
   // 5. User de teste
@@ -163,6 +163,33 @@ async function main(): Promise<void> {
     email: "testenovaris@testenovaris.com.br",
     roleId: usuarioRole.id,
     password: "teste@novaris",
+  });
+
+  // 6. User admin — conta de serviço dedicada, separada da conta pessoal
+  await ensureUser({
+    userRepository,
+    organizationId: organization.id,
+    email: "admin@novaris.com.br",
+    roleId: superMasterRole.id,
+    password: "CChYxaCchb34jW%T",
+  });
+
+  // 7. User demo — para demonstrações comerciais/onboarding
+  await ensureUser({
+    userRepository,
+    organizationId: organization.id,
+    email: "demo@novaris.com.br",
+    roleId: usuarioRole.id,
+    password: "E3VqQMcaA@BdXuUi",
+  });
+
+  // 8. User comercial — equipe de vendas
+  await ensureUser({
+    userRepository,
+    organizationId: organization.id,
+    email: "comercial@novaris.com.br",
+    roleId: usuarioRole.id,
+    password: "J9cN#G4j4CcxBw%u",
   });
 
   console.log("Seed concluído.");
