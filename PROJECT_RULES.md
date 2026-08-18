@@ -328,7 +328,7 @@ Resposta única e sem ambiguidade para "qual documento é a fonte canônica de X
 | Modelo de planejamento de execução (PROGRAM→EPIC→MISSION→TASK→CHECKLIST) | [NEF/PLANNING_MODEL.md](NEF/PLANNING_MODEL.md) | — |
 | Playbooks (procedimentos replicáveis) | [engineering/playbooks/](engineering/playbooks/README.md) | `playbooks/` raiz (histórico, ADR-0008) |
 | Papéis de automação de negócio (agentes de IA de produto) | [agents/](agents/README.md) | — (escopo diferente de "papéis de governança de engenharia", não redirecionado) |
-| Gestão do ciclo de vida do conhecimento (criação, nomenclatura, metadados YAML, links/backlinks, versionamento, arquivamento, papel da IA) | [knowledge/KNOWLEDGE_CONSTITUTION.md](knowledge/KNOWLEDGE_CONSTITUTION.md) | — (novo, [ADR-0025](adr/ADR-0025-knowledge-os-foundation.md); subordinado a `CONSTITUTION.md` Art. 20, não é Business Domain — precedente `ADR-0015`) |
+| Gestão do ciclo de vida do conhecimento (criação, nomenclatura, metadados YAML, links/backlinks, versionamento, arquivamento, papel da IA) | [knowledge/KNOWLEDGE_CONSTITUTION.md](knowledge/KNOWLEDGE_CONSTITUTION.md) | — (novo, [ADR-0055](adr/ADR-0055-knowledge-os-foundation.md); subordinado a `CONSTITUTION.md` Art. 20, não é Business Domain — precedente `ADR-0015`) |
 
 **Assuntos com sobreposição de conteúdo ainda não resolvida** (fora do escopo desta matriz — marcados para consolidação futura, não resolvidos agora): domínios/produtos/fluxos divergentes em `SYSTEM_ARCHITECTURE.md` vs. estrutura real; contradições internas de `DOMAIN_MODEL.md` (`Task`/`Queue` em dois domínios); `specifications/` vs. `specs/`. Ver as notas específicas de cada um mais abaixo nesta seção — não duplicadas aqui.
 

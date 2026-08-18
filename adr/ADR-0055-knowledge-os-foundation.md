@@ -1,4 +1,6 @@
-# ADR-0025 — Fundação do NOVARIS Knowledge OS
+# ADR-0055 — Fundação do NOVARIS Knowledge OS
+
+> Renumerado de ADR-0025 para ADR-0055 em 2026-08-18 (PROJECT_AUDIT_V2) — número original colidia com ADR-0025-party-minimum-fields.md, já registrado no MISSION_REGISTRY.md sob esse ID.
 
 ## Problema
 

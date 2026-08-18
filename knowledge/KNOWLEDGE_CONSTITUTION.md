@@ -1,7 +1,7 @@
 # KNOWLEDGE CONSTITUTION
 
 Versão: 1.0.0
-Status: Oficial ([ADR-0025](../adr/ADR-0025-knowledge-os-foundation.md))
+Status: Oficial ([ADR-0055](../adr/ADR-0055-knowledge-os-foundation.md))
 Autoridade: subordinado a [CONSTITUTION.md § Artigo 20](core/CONSTITUTION.md) (Inteligência Coletiva / Knowledge Driven Engineering)
 Última atualização: 2026-07-23
 
@@ -108,7 +108,7 @@ Esta Constituição só pode ser alterada mediante ADR, seguindo o mesmo process
 ## Relação com Outros Módulos
 
 - [CONSTITUTION.md § Artigo 20](core/CONSTITUTION.md) — mandato constitucional implementado por este documento
-- [ADR-0025-knowledge-os-foundation.md](../adr/ADR-0025-knowledge-os-foundation.md) — ADR que autoriza e cria este documento
+- [ADR-0055-knowledge-os-foundation.md](../adr/ADR-0055-knowledge-os-foundation.md) — ADR que autoriza e cria este documento
 - [ADR-0014](../adr/ADR-0014-ai-architectural-position.md) / [ADR-0015](../adr/ADR-0015-knowledge-domain-position.md) — posição arquitetural do Knowledge OS (Camada Transversal de IA, não Business Domain)
 - [PROJECT_RULES.md § Matriz de Autoridade Documental](../PROJECT_RULES.md) — registro deste documento como fonte canônica
 - [knowledge/README.md](README.md) — índice geral, aponta para esta Constituição

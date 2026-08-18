@@ -8,7 +8,7 @@ Memória permanente da NOVARIS, organizada por categoria e, dentro dela, por dom
 
 ## Gestão do Conhecimento (Knowledge OS)
 
-📜 [KNOWLEDGE_CONSTITUTION.md](KNOWLEDGE_CONSTITUTION.md) — regras operacionais de criação, nomenclatura, metadados, links, versionamento, arquivamento e papel da IA para todo conhecimento registrado aqui ([ADR-0025](../adr/ADR-0025-knowledge-os-foundation.md), subordinado a `CONSTITUTION.md` Art. 20).
+📜 [KNOWLEDGE_CONSTITUTION.md](KNOWLEDGE_CONSTITUTION.md) — regras operacionais de criação, nomenclatura, metadados, links, versionamento, arquivamento e papel da IA para todo conhecimento registrado aqui ([ADR-0055](../adr/ADR-0055-knowledge-os-foundation.md), subordinado a `CONSTITUTION.md` Art. 20).
 
 - [_moc/](_moc/DASHBOARD.md) — Maps of Content por categoria (navegação) e Dashboard
 - [_templates/](_templates/atomic-note.md) — templates de nota atômica, decisão, aprendizado, referência e MOC

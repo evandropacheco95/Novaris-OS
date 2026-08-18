@@ -57,12 +57,27 @@ Registrar **todo** Mission-ID já usado no repositório NOVARIS, para que qualqu
 | ADR-0035 | Mecanismo de enriquecimento do Audit Domain — chamada direta via DI, origem por campo, falha não reverte operação primária; primeira integração real em `UpdateOrganizationProfileHandler` |
 | ADR-0036 | RBAC — catálogo de 13 Permissions (um por Controller) + `PermissionGuard`/`RequirePermission()` reaproveitando `AuthorizationDomainService` já existente; seed atualizado para conceder o catálogo completo a ambas as Roles, preservando paridade já existente |
 | ADR-ORG-001 | Estratégia de estado do Aggregate `Organization` |
+| ADR-0037 | Event Bus: mecanismo in-process e escopo da primeira integração real |
+| ADR-0038 | Configuration/Feature Flag: resolução do "discovery required" e campos mínimos |
+| ADR-0039 | Fases D/E/F/G do Kernel: adapters mínimos reais, fornecedor/complexidade adiados |
+| ADR-0040 | Integration Hub: estrutura real, credenciais deliberadamente adiadas |
+| ADR-0041 | Automation Runtime (Salesforce Flow) e AI Runtime (Salesforce Einstein): referência de estrutura |
+| ADR-0042 | `Lead`: novo Aggregate no Sales Domain, adaptado do Salesforce |
+| ADR-0043 | `Case`, `Product`/`Quotation` e `Comment`: 3 novas adaptações do Salesforce |
+| ADR-0044 | `Contract`: gerado a partir de uma `Quotation` aceita |
+| ADR-0045 | `CalendarEvent`, `Reminder` e `Checklist`: campos mínimos (Activity Domain) |
+| ADR-0046 | Arquitetura de deploy — Vercel (web) + Railway (api) + Supabase (dados) |
+| ADR-0047 | `Revenue`: campos mínimos e origem |
+| ADR-0048 | `Asset`: reaproveita `FileRecord` (Kernel), associado a `Campaign` |
+| ADR-0049 | `Widget`: tipos de visualização e campos mínimos |
+| ADR-0050 | Migração de `apps/web` para Tailwind CSS + shadcn/ui (convenções; sem lib shadcn real instalada) |
 | ADR-0051 | `Pipeline` ganha `name`, `Stage` ganha `order` — multi-pipeline nomeado por Organização + reorder de Stage via drag-and-drop (`ENG-0160`) |
 | ADR-0052 | `SalesChannel` como conceito de 1ª classe do Sales Domain — Direto/Distribuidor/Marketplace/Loja própria online (`ENG-0168`) |
 | ADR-0053 | Documento Fiscal opcional no `Contract` — `fiscalDocumentNumber`/`AccessKey`/`IssuedAt`, sem reconciliação automática com Financial (`ENG-0169`) |
 | ADR-0054 | `TextToSqlPort` estrutural + SQL Guard real (`validateReadOnlySql`) — sem credencial de IA, allowlist de tabelas exclui Identity/Workspace/Financial (`ENG-0170`) |
+| ADR-0055 | Fundação do NOVARIS Knowledge OS (renumerado de `ADR-0025`, que colidia com `ADR-0025-party-minimum-fields.md`; `PROJECT_AUDIT_V2`) |
 
-**Próximo livre: `ADR-0055`.** ⚠️ Tabela incompleta entre `ADR-0037` e `ADR-0050` — os arquivos reais existem em `adr/` (confirmados até `ADR-0050`, missão `ENG-0156`-`0159`) mas nunca foram adicionados a este registro; não presumir nenhum desses números livre sem checar o diretório `adr/` diretamente primeiro (mesmo cuidado já registrado para `ENG-0023`-`ENG-0031` abaixo).
+**Próximo livre: `ADR-0056`.** ✅ Gap `ADR-0037`–`ADR-0050` fechado (`PROJECT_AUDIT_V2`, 2026-08-18) — todas as 14 entradas adicionadas acima. `ADR-0055` foi usado para resolver a duplicidade de numeração de `ADR-0025` (ver nota abaixo).
 
 ### `ADM-` — Índice/Consolidação de Decisões
 
