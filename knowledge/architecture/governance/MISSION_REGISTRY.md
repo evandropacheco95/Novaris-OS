@@ -95,7 +95,7 @@ Registrar **todo** Mission-ID já usado no repositório NOVARIS, para que qualqu
 | ENS-0001 | Aggregate Implementation Standard |
 | ENS-0002 | Architecture Review Gate Standard |
 | ENS-0003 | Domain Service Implementation Standard |
-| ENS-0004 | Git Workflow — branches, commits, merge, CI mínimo e branch protection reais no GitHub |
+| ENS-0004 | Git Workflow — branches, commits, merge, CI mínimo e branch protection reais no GitHub. ✅ Concluída (Emenda 76, `PROJECT_RULES.md`): CI corrigido (Secret `DIRECT_URL` faltante), repositório tornado público (decisão do CTO), branch protection real ativa em `master` (PR + `build-lint-test` obrigatórios, 0 aprovações, `enforce_admins: false`) e confirmada via API. |
 
 **Próximo livre: `ENS-0005`.**
 
