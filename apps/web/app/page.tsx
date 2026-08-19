@@ -108,7 +108,7 @@ export default function HomePage() {
       </div>
 
       {loading ? (
-        <div className="mb-8 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
+        <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6">
           <span className="sr-only">Carregando painel...</span>
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-[104px]" />
@@ -116,7 +116,7 @@ export default function HomePage() {
         </div>
       ) : (
         <>
-          <div className="mb-8 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
+          <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6">
             {[
               { label: "Oportunidades abertas", value: openOpportunities, icon: <TrendingUp size={18} />, href: "/opportunities", tone: "accent" as const },
               { label: "Leads em qualificação", value: newLeads, icon: <Sparkles size={18} />, href: "/leads", tone: "accent" as const },
@@ -141,7 +141,7 @@ export default function HomePage() {
                 <div className="mb-4 flex items-center justify-between">
                   <h3 className="m-0 text-sm font-bold text-nov-s100">Acessos rápidos</h3>
                 </div>
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2.5">
+                <div className="grid grid-cols-3 gap-2.5">
                   {[
                     { label: "Leads", href: "/leads" },
                     { label: "Quotations", href: "/quotations" },
@@ -156,7 +156,7 @@ export default function HomePage() {
                     <a
                       key={link.href}
                       href={link.href}
-                      className="flex items-center justify-between rounded-nov border border-nov-border bg-nov-bg2 px-3.5 py-2.5 text-[13px] font-medium text-nov-s300 no-underline transition-[border-color,color] duration-nov-fast hover:border-nov-b700 hover:text-nov-s100"
+                      className="flex items-center justify-between rounded-nov border border-nov-border bg-nov-bg2 px-3.5 py-2.5 text-[13px] font-medium text-nov-s300 no-underline transition-[border-color,color,transform,box-shadow] duration-nov-fast hover:-translate-y-0.5 hover:border-nov-b700 hover:text-nov-s100 hover:shadow-nov-sm"
                     >
                       {link.label}
                       <ArrowUpRight size={14} />
