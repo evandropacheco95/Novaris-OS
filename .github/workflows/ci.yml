@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DIRECT_URL }}
     steps:
       - uses: actions/checkout@v4
 
@@ -25,7 +26,9 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Write packages/database/.env
-        run: echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > packages/database/.env
+        run: |
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > packages/database/.env
+          echo "DIRECT_URL=${{ secrets.DIRECT_URL }}" >> packages/database/.env
 
       - name: Build
         run: pnpm build
