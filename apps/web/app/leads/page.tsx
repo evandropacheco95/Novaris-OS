@@ -120,7 +120,7 @@ export default function LeadsPage() {
 
   return (
     <DashboardShell title="Sales">
-      <PageHeader title="Leads" description="Contatos em qualificação, adaptado do Lead-to-Convert do Salesforce." actions={<Button variant="secondary" size="sm" onClick={() => router.push("/opportunities")}>← Opportunities</Button>} />
+      <PageHeader title="Leads" description="Contatos em qualificação, adaptado do Lead-to-Convert do Salesforce." actions={<Button variant="secondary" size="sm" onClick={() => router.push("/opportunities")}>← Oportunidades</Button>} />
 
       <form onSubmit={handleCreate} className="mb-6 flex flex-wrap gap-2">
         <Input id="lead-name-input" placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} required />
@@ -189,8 +189,8 @@ export default function LeadsPage() {
                         )}
                         {lead.status === "converted" && (
                           <div className="text-[11px] text-nov-s500">
-                            Party: {lead.convertedPartyId?.slice(0, 8)}
-                            {lead.convertedOpportunityId && <> · Opp: {lead.convertedOpportunityId.slice(0, 8)}</>}
+                            Contato: {lead.convertedPartyId?.slice(0, 8)}
+                            {lead.convertedOpportunityId && <> · Oportunidade: {lead.convertedOpportunityId.slice(0, 8)}</>}
                           </div>
                         )}
 
@@ -202,7 +202,7 @@ export default function LeadsPage() {
                             </Select>
                             <label className="flex items-center gap-1.5 text-xs text-nov-s300">
                               <input type="checkbox" checked={createOpportunityToo} onChange={(e) => setCreateOpportunityToo(e.target.checked)} />
-                              Criar Opportunity também
+                              Criar Oportunidade também
                             </label>
                             <Button size="sm" onClick={() => handleConvert(lead.id)}>
                               Confirmar conversão

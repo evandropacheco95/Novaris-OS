@@ -149,7 +149,7 @@ export default function ProductsPage() {
       setShowFiscalFields(false);
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao criar Product");
+      setError(err instanceof Error ? err.message : "Falha ao criar Produto");
     }
   }
 
@@ -194,7 +194,7 @@ export default function ProductsPage() {
       await deactivateProduct(id);
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao desativar Product");
+      setError(err instanceof Error ? err.message : "Falha ao desativar Produto");
     }
   }
 
@@ -204,13 +204,13 @@ export default function ProductsPage() {
       await activateProduct(id);
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao reativar Product");
+      setError(err instanceof Error ? err.message : "Falha ao reativar Produto");
     }
   }
 
   return (
     <DashboardShell title="Sales">
-      <PageHeader title="Products" description="Catálogo interno, adaptado do Salesforce Product2." actions={<Button variant="secondary" size="sm" onClick={() => router.push("/quotations")}>Quotations →</Button>} />
+      <PageHeader title="Produtos" description="Catálogo interno, adaptado do Salesforce Product2." actions={<Button variant="secondary" size="sm" onClick={() => router.push("/quotations")}>Orçamentos →</Button>} />
 
       <form onSubmit={handleCreate} className="mb-6 flex flex-col gap-2">
         <div className="flex flex-wrap gap-2">
@@ -218,7 +218,7 @@ export default function ProductsPage() {
           <Input placeholder="SKU (opcional)" value={sku} onChange={(e) => setSku(e.target.value)} />
           <Input placeholder="Preço unitário" type="number" step="0.01" min="0" value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} required />
           <Button type="submit" icon={<Package size={15} />}>
-            Novo Product
+            Novo Produto
           </Button>
           <button
             type="button"
@@ -239,19 +239,19 @@ export default function ProductsPage() {
             <Input placeholder="Larg. (cm)" type="number" step="0.01" min="0" value={fiscalForm.widthCm} onChange={(e) => setFiscalForm((prev) => ({ ...prev, widthCm: e.target.value }))} className="w-[100px]" />
             <Input placeholder="Alt. (cm)" type="number" step="0.01" min="0" value={fiscalForm.heightCm} onChange={(e) => setFiscalForm((prev) => ({ ...prev, heightCm: e.target.value }))} className="w-[100px]" />
             <Input placeholder="Variação (ex: Azul - M)" value={fiscalForm.variantLabel} onChange={(e) => setFiscalForm((prev) => ({ ...prev, variantLabel: e.target.value }))} className="w-[160px]" />
-            <Input placeholder="Product pai (id, se for variação)" value={fiscalForm.parentProductId} onChange={(e) => setFiscalForm((prev) => ({ ...prev, parentProductId: e.target.value }))} className="w-[220px]" />
+            <Input placeholder="Produto pai (id, se for variação)" value={fiscalForm.parentProductId} onChange={(e) => setFiscalForm((prev) => ({ ...prev, parentProductId: e.target.value }))} className="w-[220px]" />
           </div>
         )}
       </form>
 
       {error && <p className="text-[13px] text-nov-danger">{error}</p>}
       {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
-      {!loading && products.length === 0 && <EmptyState message="Nenhum Product ainda." />}
+      {!loading && products.length === 0 && <EmptyState message="Nenhum Produto ainda." />}
 
       {!loading && products.length > 0 && (
         <div className="mb-6 max-w-[380px]">
           <StatusDonut
-            title="Products por status"
+            title="Produtos por status"
             data={[
               { label: "Ativo", value: products.filter((p) => p.active).length, color: "var(--nov-success)" },
               { label: "Inativo", value: products.filter((p) => !p.active).length, color: "var(--nov-s500)" },
@@ -369,7 +369,7 @@ export default function ProductsPage() {
                     className="w-[160px]"
                   />
                   <Input
-                    placeholder="Product pai (id)"
+                    placeholder="Produto pai (id)"
                     value={profileForm.parentProductId}
                     onChange={(e) => setProfileEdits((prev) => ({ ...prev, [product.id]: { ...profileForm, parentProductId: e.target.value } }))}
                     className="w-[220px]"

@@ -80,7 +80,7 @@ export default function ContractsPage() {
       if (action === "terminate") await terminateContract(id);
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao atualizar Contract");
+      setError(err instanceof Error ? err.message : "Falha ao atualizar Contrato");
     }
   }
 
@@ -114,19 +114,19 @@ export default function ContractsPage() {
       setRevenueAmount("");
       router.push("/revenue");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao gerar Revenue");
+      setError(err instanceof Error ? err.message : "Falha ao gerar Receita");
     }
   }
 
   return (
     <DashboardShell title="Sales">
       <PageHeader
-        title="Contracts"
-        description="Gerado exclusivamente a partir de uma Quotation aceita."
+        title="Contratos"
+        description="Gerado exclusivamente a partir de um Orçamento aceito."
         actions={
           <>
-            <Button variant="secondary" size="sm" onClick={() => router.push("/quotations")}>← Quotations</Button>
-            <Button variant="secondary" size="sm" onClick={() => router.push("/revenue")}>Revenue →</Button>
+            <Button variant="secondary" size="sm" onClick={() => router.push("/quotations")}>← Orçamentos</Button>
+            <Button variant="secondary" size="sm" onClick={() => router.push("/revenue")}>Receita →</Button>
           </>
         }
       />
@@ -144,10 +144,10 @@ export default function ContractsPage() {
 
       {!loading && contracts.length === 0 && (
         <EmptyState
-          message="Nenhum Contract ainda — gere um a partir de uma Quotation aceita."
+          message="Nenhum Contrato ainda — gere um a partir de um Orçamento aceito."
           action={
             <Button size="sm" onClick={() => router.push("/quotations")}>
-              Ir para Quotations
+              Ir para Orçamentos
             </Button>
           }
         />
@@ -168,8 +168,8 @@ export default function ContractsPage() {
                     <Reveal key={contract.id} index={i}>
                     <Card padding={16} glow>
                       <div className="flex flex-col gap-1.5">
-                        <div className="text-[11px] text-nov-s500">Opp: {contract.opportunityId.slice(0, 8)}</div>
-                        <div className="text-[11px] text-nov-s500">Quotation: {contract.quotationId.slice(0, 8)}</div>
+                        <div className="text-[11px] text-nov-s500">Oportunidade: {contract.opportunityId.slice(0, 8)}</div>
+                        <div className="text-[11px] text-nov-s500">Orçamento: {contract.quotationId.slice(0, 8)}</div>
                         {contract.fiscalDocumentNumber && (
                           <div className="text-[11px] text-nov-s500">NFe: {contract.fiscalDocumentNumber}</div>
                         )}
@@ -195,7 +195,7 @@ export default function ContractsPage() {
                           <div className="flex flex-col gap-1.5">
                             <div className="flex gap-1.5">
                               <Button size="sm" onClick={() => setRecognizingId(recognizingId === contract.id ? null : contract.id)}>
-                                Reconhecer Revenue
+                                Reconhecer Receita
                               </Button>
                               <Button size="sm" variant="secondary" onClick={() => handleTransition(contract.id, "terminate")}>
                                 Encerrar

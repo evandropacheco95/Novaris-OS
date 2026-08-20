@@ -37,19 +37,19 @@ const METRIC_OPTIONS: Record<WidgetType, Array<{ value: string; label: string }>
   kpi: [
     { value: "opportunities.open", label: "Oportunidades abertas" },
     { value: "leads.qualifying", label: "Leads em qualificação" },
-    { value: "parties.total", label: "Parties cadastradas" },
-    { value: "activities.open", label: "Activities em aberto" },
+    { value: "parties.total", label: "Contatos cadastrados" },
+    { value: "activities.open", label: "Atividades em aberto" },
     { value: "projects.total", label: "Projetos ativos" },
     { value: "invoices.pending", label: "Faturas pendentes" },
   ],
   list: [
     { value: "leads.recent", label: "Leads recentes" },
-    { value: "activities.recent", label: "Activities recentes" },
+    { value: "activities.recent", label: "Atividades recentes" },
   ],
   donut: [
-    { value: "opportunities.byStatus", label: "Opportunities por status" },
-    { value: "activities.byStatus", label: "Activities por status" },
-    { value: "invoices.byStatus", label: "Invoices por status" },
+    { value: "opportunities.byStatus", label: "Oportunidades por status" },
+    { value: "activities.byStatus", label: "Atividades por status" },
+    { value: "invoices.byStatus", label: "Faturas por status" },
   ],
   bar: [{ value: "domains.overview", label: "Visão geral por domínio" }],
 };
@@ -310,12 +310,12 @@ function computeDonut(metricKey: string, m: MetricData): Array<{ label: string; 
 
 function computeBars(m: MetricData): Array<{ label: string; value: number; pct: number }> {
   const counts = [
-    { label: "Opportunities", value: m.opportunities.length },
+    { label: "Oportunidades", value: m.opportunities.length },
     { label: "Leads", value: m.leads.length },
-    { label: "Parties", value: m.parties.length },
-    { label: "Activities", value: m.activities.length },
-    { label: "Projects", value: m.projects.length },
-    { label: "Invoices", value: m.invoices.length },
+    { label: "Contatos", value: m.parties.length },
+    { label: "Atividades", value: m.activities.length },
+    { label: "Projetos", value: m.projects.length },
+    { label: "Faturas", value: m.invoices.length },
   ];
   const max = Math.max(1, ...counts.map((c) => c.value));
   return counts.map((c) => ({ ...c, pct: (c.value / max) * 100 }));

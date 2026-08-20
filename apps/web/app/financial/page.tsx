@@ -67,7 +67,7 @@ export default function FinancialPage() {
       setSubName("");
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao criar Subscription");
+      setError(err instanceof Error ? err.message : "Falha ao criar Assinatura");
     }
   }
 
@@ -79,7 +79,7 @@ export default function FinancialPage() {
       setAmount("");
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao criar Invoice");
+      setError(err instanceof Error ? err.message : "Falha ao criar Fatura");
     }
   }
 
@@ -106,15 +106,15 @@ export default function FinancialPage() {
       {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
 
       <section className="mb-9">
-        <h2 className={SECTION_TITLE_CLASS}>Subscriptions</h2>
+        <h2 className={SECTION_TITLE_CLASS}>Assinaturas</h2>
         <form onSubmit={handleCreateSubscription} className="mb-4 flex gap-2">
           <Input placeholder="Nome do plano" value={subName} onChange={(e) => setSubName(e.target.value)} required className="flex-1" />
           <Button type="submit" icon={<Wallet size={15} />}>
-            Nova Subscription
+            Nova Assinatura
           </Button>
         </form>
 
-        {!loading && subscriptions.length === 0 && <EmptyState message="Nenhuma Subscription ainda." />}
+        {!loading && subscriptions.length === 0 && <EmptyState message="Nenhuma Assinatura ainda." />}
 
         <div className="flex flex-col gap-2.5">
           {subscriptions.map((subscription) => (
@@ -126,12 +126,12 @@ export default function FinancialPage() {
       </section>
 
       <section>
-        <h2 className={SECTION_TITLE_CLASS}>Invoices</h2>
+        <h2 className={SECTION_TITLE_CLASS}>Faturas</h2>
 
         {!loading && invoices.length > 0 && (
           <div className="mb-5 max-w-[380px]">
             <StatusDonut
-              title="Invoices por status"
+              title="Faturas por status"
               data={[
                 { label: "Pendente", value: invoices.filter((i) => i.status === "pending").length, color: "var(--nov-warning)" },
                 { label: "Paga", value: invoices.filter((i) => i.status === "paid").length, color: "var(--nov-success)" },
@@ -144,7 +144,7 @@ export default function FinancialPage() {
           <Input placeholder="Valor" type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} required className="w-[120px]" />
           <Input placeholder="Moeda" value={currency} onChange={(e) => setCurrency(e.target.value)} required className="w-[90px]" />
           <Select value={subscriptionId} onChange={(e) => setSubscriptionId(e.target.value)}>
-            <option value="">Sem Subscription (avulsa)</option>
+            <option value="">Sem Assinatura (avulsa)</option>
             {subscriptions.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name}
@@ -152,11 +152,11 @@ export default function FinancialPage() {
             ))}
           </Select>
           <Button type="submit" icon={<ReceiptText size={15} />}>
-            Nova Invoice
+            Nova Fatura
           </Button>
         </form>
 
-        {!loading && invoices.length === 0 && <EmptyState message="Nenhuma Invoice ainda." />}
+        {!loading && invoices.length === 0 && <EmptyState message="Nenhuma Fatura ainda." />}
 
         <div className="flex flex-col gap-2.5">
           {invoices.map((invoice) => (

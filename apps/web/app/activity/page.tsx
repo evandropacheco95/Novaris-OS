@@ -68,7 +68,7 @@ export default function ActivityPage() {
       setNotes("");
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao criar Activity");
+      setError(err instanceof Error ? err.message : "Falha ao criar Atividade");
     }
   }
 
@@ -78,7 +78,7 @@ export default function ActivityPage() {
       await completeActivity(id);
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao concluir Activity");
+      setError(err instanceof Error ? err.message : "Falha ao concluir Atividade");
     }
   }
 
@@ -89,14 +89,14 @@ export default function ActivityPage() {
   return (
     <DashboardShell title="Activity">
       <PageHeader
-        title="Activity"
-        description="Interações com Parties — ligações, e-mails, reuniões e mais."
+        title="Atividades"
+        description="Interações com Contatos — ligações, e-mails, reuniões e mais."
         actions={
           <>
-            <Button variant="secondary" size="sm" onClick={() => router.push("/cases")}>Cases →</Button>
-            <Button variant="secondary" size="sm" onClick={() => router.push("/comments")}>Comments →</Button>
+            <Button variant="secondary" size="sm" onClick={() => router.push("/cases")}>Chamados →</Button>
+            <Button variant="secondary" size="sm" onClick={() => router.push("/comments")}>Comentários →</Button>
             <Button variant="secondary" size="sm" onClick={() => router.push("/calendar-events")}>Calendário →</Button>
-            <Button variant="secondary" size="sm" onClick={() => router.push("/reminders")}>Reminders →</Button>
+            <Button variant="secondary" size="sm" onClick={() => router.push("/reminders")}>Lembretes →</Button>
             <Button variant="secondary" size="sm" onClick={() => router.push("/checklists")}>Checklists →</Button>
           </>
         }
@@ -108,7 +108,7 @@ export default function ActivityPage() {
       {!loading && activities.length > 0 && (
         <div className="mb-6 max-w-[380px]">
           <StatusDonut
-            title="Activities por status"
+            title="Atividades por status"
             data={[
               { label: "Aberta", value: activities.filter((a) => a.status === "open").length, color: "var(--nov-b500)" },
               { label: "Concluída", value: activities.filter((a) => a.status === "completed").length, color: "var(--nov-success)" },
@@ -119,7 +119,7 @@ export default function ActivityPage() {
 
       <form onSubmit={handleCreate} className="mb-6 flex flex-wrap gap-2">
         <Select value={partyId} onChange={(e) => setPartyId(e.target.value)} required>
-          <option value="">Party</option>
+          <option value="">Contato</option>
           {parties.map((p) => (
             <option key={p.id} value={p.id}>
               {p.name}
@@ -135,12 +135,12 @@ export default function ActivityPage() {
         </Select>
         <Input placeholder="Notas (opcional)" value={notes} onChange={(e) => setNotes(e.target.value)} className="flex-1" />
         <Button type="submit" icon={<PhoneCall size={15} />}>
-          Nova Activity
+          Nova Atividade
         </Button>
       </form>
 
-      {!loading && parties.length === 0 && <p className="mb-4 text-[13px] text-nov-s500">Cadastre uma Party em Relationship antes de criar uma Activity.</p>}
-      {!loading && activities.length === 0 && <EmptyState message="Nenhuma Activity ainda." />}
+      {!loading && parties.length === 0 && <p className="mb-4 text-[13px] text-nov-s500">Cadastre um Contato em Relacionamento antes de criar uma Atividade.</p>}
+      {!loading && activities.length === 0 && <EmptyState message="Nenhuma Atividade ainda." />}
 
       <div className="flex flex-col gap-2.5">
         {activities.map((activity) => (

@@ -101,7 +101,7 @@ export default function QuotationsPage() {
       setOpportunityId("");
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao criar Quotation");
+      setError(err instanceof Error ? err.message : "Falha ao criar Orçamento");
     }
   }
 
@@ -126,7 +126,7 @@ export default function QuotationsPage() {
       if (action === "reject") await rejectQuotation(id);
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao atualizar Quotation");
+      setError(err instanceof Error ? err.message : "Falha ao atualizar Orçamento");
     }
   }
 
@@ -136,27 +136,27 @@ export default function QuotationsPage() {
       await generateContractFromQuotation(quotationId);
       router.push("/contracts");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao gerar Contract");
+      setError(err instanceof Error ? err.message : "Falha ao gerar Contrato");
     }
   }
 
   return (
     <DashboardShell title="Sales">
       <PageHeader
-        title="Quotations"
-        description="Precificação formal vinculada a uma Opportunity, adaptado do Salesforce Quote."
+        title="Orçamentos"
+        description="Precificação formal vinculada a uma Oportunidade, adaptado do Salesforce Quote."
         actions={
           <>
-            <Button variant="secondary" size="sm" onClick={() => router.push("/opportunities")}>← Opportunities</Button>
-            <Button variant="secondary" size="sm" onClick={() => router.push("/products")}>Products →</Button>
-            <Button variant="secondary" size="sm" onClick={() => router.push("/contracts")}>Contracts →</Button>
+            <Button variant="secondary" size="sm" onClick={() => router.push("/opportunities")}>← Oportunidades</Button>
+            <Button variant="secondary" size="sm" onClick={() => router.push("/products")}>Produtos →</Button>
+            <Button variant="secondary" size="sm" onClick={() => router.push("/contracts")}>Contratos →</Button>
           </>
         }
       />
 
       <form onSubmit={handleCreate} className="mb-6 flex gap-2">
         <Select id="quotation-opportunity-select" value={opportunityId} onChange={(e) => setOpportunityId(e.target.value)} required className="flex-1">
-          <option value="">Opportunity</option>
+          <option value="">Oportunidade</option>
           {opportunities.map((o) => (
             <option key={o.id} value={o.id}>
               {o.id}
@@ -164,12 +164,12 @@ export default function QuotationsPage() {
           ))}
         </Select>
         <Button type="submit" icon={<FileText size={15} />}>
-          Nova Quotation
+          Novo Orçamento
         </Button>
       </form>
 
-      {!loading && opportunities.length === 0 && <p className="mb-4 text-[13px] text-nov-s500">Cadastre uma Opportunity antes de criar uma Quotation.</p>}
-      {!loading && products.length === 0 && <p className="mb-4 text-[13px] text-nov-s500">Cadastre um Product antes de adicionar itens a uma Quotation.</p>}
+      {!loading && opportunities.length === 0 && <p className="mb-4 text-[13px] text-nov-s500">Cadastre uma Oportunidade antes de criar um Orçamento.</p>}
+      {!loading && products.length === 0 && <p className="mb-4 text-[13px] text-nov-s500">Cadastre um Produto antes de adicionar itens a um Orçamento.</p>}
 
       {error && <p className="text-[13px] text-nov-danger">{error}</p>}
 
@@ -184,10 +184,10 @@ export default function QuotationsPage() {
 
       {!loading && quotations.length === 0 && (
         <EmptyState
-          message="Nenhuma Quotation ainda."
+          message="Nenhum Orçamento ainda."
           action={
             <Button size="sm" icon={<FileText size={14} />} onClick={() => document.getElementById("quotation-opportunity-select")?.focus()}>
-              Criar a primeira Quotation
+              Criar o primeiro Orçamento
             </Button>
           }
         />
@@ -208,7 +208,7 @@ export default function QuotationsPage() {
                     <Reveal key={quotation.id} index={i}>
                     <Card padding={16} glow>
                       <div className="flex flex-col gap-1.5">
-                        <div className="text-[11px] text-nov-s500">Opp: {quotation.opportunityId.slice(0, 8)}</div>
+                        <div className="text-[11px] text-nov-s500">Oportunidade: {quotation.opportunityId.slice(0, 8)}</div>
                         <div className="text-sm font-semibold text-nov-s100">R$ {quotation.total.toFixed(2)}</div>
 
                         {quotation.lineItems.length > 0 && (
@@ -235,14 +235,14 @@ export default function QuotationsPage() {
                             </>
                           )}
                           {quotation.status === "accepted" && (
-                            <Button size="sm" onClick={() => handleGenerateContract(quotation.id)}>Gerar Contract</Button>
+                            <Button size="sm" onClick={() => handleGenerateContract(quotation.id)}>Gerar Contrato</Button>
                           )}
                         </div>
 
                         {addingToId === quotation.id && (
                           <div className="mt-0.5 flex flex-col gap-1.5 border-t border-nov-border pt-2">
                             <Select value={lineProductId} onChange={(e) => setLineProductId(e.target.value)}>
-                              <option value="">Product</option>
+                              <option value="">Produto</option>
                               {products.map((p) => (
                                 <option key={p.id} value={p.id}>
                                   {p.name} (R$ {p.unitPrice.toFixed(2)})

@@ -60,7 +60,7 @@ export default function MarketingPage() {
       setEndDate("");
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao criar Campaign");
+      setError(err instanceof Error ? err.message : "Falha ao criar Campanha");
     }
   }
 
@@ -85,7 +85,7 @@ export default function MarketingPage() {
       await addAssetToCampaign(campaignId, fileRecord.id);
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao enviar Asset");
+      setError(err instanceof Error ? err.message : "Falha ao enviar Arquivo");
     } finally {
       setUploadingToId(null);
     }
@@ -103,11 +103,11 @@ export default function MarketingPage() {
         <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
         <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
         <Button type="submit" icon={<Megaphone size={15} />}>
-          Nova Campaign
+          Nova Campanha
         </Button>
       </form>
 
-      {!loading && campaigns.length === 0 && <EmptyState message="Nenhuma Campaign ainda." />}
+      {!loading && campaigns.length === 0 && <EmptyState message="Nenhuma Campanha ainda." />}
 
       <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileSelected} />
 
@@ -124,7 +124,7 @@ export default function MarketingPage() {
                 )}
               </div>
               <Button size="sm" variant="secondary" icon={<Paperclip size={14} />} loading={uploadingToId === campaign.id} onClick={() => handlePickFile(campaign.id)}>
-                Adicionar Asset
+                Adicionar Arquivo
               </Button>
             </div>
 
@@ -136,7 +136,7 @@ export default function MarketingPage() {
                     onClick={() => downloadFile(asset.fileRecordId)}
                     className="cursor-pointer border-none bg-transparent p-0 text-left text-xs text-nov-b400"
                   >
-                    Asset {asset.fileRecordId.slice(0, 8)} · adicionado em {formatDate(asset.addedAt)}
+                    Arquivo {asset.fileRecordId.slice(0, 8)} · adicionado em {formatDate(asset.addedAt)}
                   </button>
                 ))}
               </div>

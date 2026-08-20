@@ -68,7 +68,7 @@ export default function ProjectsPage() {
       setName("");
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao criar Project");
+      setError(err instanceof Error ? err.message : "Falha ao criar Projeto");
     }
   }
 
@@ -82,7 +82,7 @@ export default function ProjectsPage() {
       setTaskTitles((prev) => ({ ...prev, [projectId]: "" }));
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao adicionar Task");
+      setError(err instanceof Error ? err.message : "Falha ao adicionar Tarefa");
     }
   }
 
@@ -98,24 +98,24 @@ export default function ProjectsPage() {
 
   return (
     <DashboardShell title="Project">
-      <PageHeader title="Projects" description="Projetos e suas Tasks." />
+      <PageHeader title="Projetos" description="Projetos e suas Tarefas." />
 
       {error && <p className="text-[13px] text-nov-danger">{error}</p>}
       {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
 
       <form onSubmit={handleCreateProject} className="mb-6 flex gap-2">
-        <Input placeholder="Nome do Project" value={name} onChange={(e) => setName(e.target.value)} required className="flex-1" />
+        <Input placeholder="Nome do Projeto" value={name} onChange={(e) => setName(e.target.value)} required className="flex-1" />
         <Button type="submit" icon={<FolderPlus size={15} />}>
-          Novo Project
+          Novo Projeto
         </Button>
       </form>
 
-      {!loading && projects.length === 0 && <EmptyState message="Nenhum Project ainda." />}
+      {!loading && projects.length === 0 && <EmptyState message="Nenhum Projeto ainda." />}
 
       {!loading && projects.some((p) => p.tasks.length > 0) && (
         <div className="mb-6 max-w-[380px]">
           <StatusDonut
-            title="Tasks por status (todos os Projects)"
+            title="Tarefas por status (todos os Projetos)"
             data={STATUS_ORDER.map((status) => ({
               label: STATUS_LABEL[status],
               value: projects.reduce((sum, p) => sum + p.tasks.filter((t) => t.status === status).length, 0),
@@ -150,18 +150,18 @@ export default function ProjectsPage() {
                   </div>
                 </div>
               ))}
-              {project.tasks.length === 0 && <div className="text-xs text-nov-s500">Nenhuma Task ainda.</div>}
+              {project.tasks.length === 0 && <div className="text-xs text-nov-s500">Nenhuma Tarefa ainda.</div>}
             </div>
 
             <form onSubmit={(e) => handleAddTask(project.id, e)} className="flex gap-2">
               <Input
-                placeholder="Nova Task"
+                placeholder="Nova Tarefa"
                 value={taskTitles[project.id] ?? ""}
                 onChange={(e) => setTaskTitles((prev) => ({ ...prev, [project.id]: e.target.value }))}
                 className="flex-1"
               />
               <Button type="submit" size="sm" variant="secondary">
-                Adicionar Task
+                Adicionar Tarefa
               </Button>
             </form>
           </Card>

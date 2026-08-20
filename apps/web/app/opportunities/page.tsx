@@ -123,8 +123,8 @@ export default function OpportunitiesPage() {
   return (
     <DashboardShell title="Sales">
       <PageHeader
-        title="Opportunities"
-        description="Negociações em andamento com suas Parties."
+        title="Oportunidades"
+        description="Negociações em andamento com seus Contatos."
         actions={
           <>
             <Button variant="secondary" size="sm" icon={<GitBranch size={14} />} onClick={() => router.push("/pipelines")}>
@@ -137,7 +137,7 @@ export default function OpportunitiesPage() {
               Leads
             </Button>
             <Button variant="secondary" size="sm" icon={<ArrowUpRight size={14} />} onClick={() => router.push("/quotations")}>
-              Quotations
+              Orçamentos
             </Button>
           </>
         }
@@ -145,7 +145,7 @@ export default function OpportunitiesPage() {
 
       <form onSubmit={handleCreate} className="mb-6 flex gap-2">
         <Select id="opportunity-party-select" value={partyId} onChange={(e) => setPartyId(e.target.value)} required className="flex-1">
-          <option value="">Party</option>
+          <option value="">Contato</option>
           {parties.map((p) => (
             <option key={p.id} value={p.id}>
               {p.name}
@@ -163,11 +163,11 @@ export default function OpportunitiesPage() {
             ))}
         </Select>
         <Button type="submit" icon={<Handshake size={15} />}>
-          Nova Opportunity
+          Nova Oportunidade
         </Button>
       </form>
 
-      {!loading && parties.length === 0 && <p className="mb-4 text-[13px] text-nov-s500">Cadastre uma Party em Relationship antes de criar uma Opportunity.</p>}
+      {!loading && parties.length === 0 && <p className="mb-4 text-[13px] text-nov-s500">Cadastre um Contato em Relacionamento antes de criar uma Oportunidade.</p>}
 
       {error && <p className="text-[13px] text-nov-danger">{error}</p>}
 
@@ -182,10 +182,10 @@ export default function OpportunitiesPage() {
 
       {!loading && opportunities.length === 0 && (
         <EmptyState
-          message="Nenhuma Opportunity ainda."
+          message="Nenhuma Oportunidade ainda."
           action={
             <Button size="sm" icon={<Handshake size={14} />} onClick={() => document.getElementById("opportunity-party-select")?.focus()}>
-              Criar a primeira Opportunity
+              Criar a primeira Oportunidade
             </Button>
           }
         />

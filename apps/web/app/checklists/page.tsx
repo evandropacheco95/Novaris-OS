@@ -56,7 +56,7 @@ export default function ChecklistsPage() {
       setTitle("");
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao criar Checklist");
+      setError(err instanceof Error ? err.message : "Falha ao criar checklist");
     }
   }
 
@@ -85,11 +85,11 @@ export default function ChecklistsPage() {
 
   return (
     <DashboardShell title="Activity">
-      <PageHeader title="Checklists" description="Listas de tarefas vinculadas a Parties." actions={<Button variant="secondary" size="sm" onClick={() => router.push("/activity")}>← Activity</Button>} />
+      <PageHeader title="Checklists" description="Listas de tarefas vinculadas a Contatos." actions={<Button variant="secondary" size="sm" onClick={() => router.push("/activity")}>← Atividades</Button>} />
 
       <form onSubmit={handleCreate} className="mb-6 flex gap-2">
         <Select value={partyId} onChange={(e) => setPartyId(e.target.value)} required>
-          <option value="">Party</option>
+          <option value="">Contato</option>
           {parties.map((p) => (
             <option key={p.id} value={p.id}>
               {p.name}
