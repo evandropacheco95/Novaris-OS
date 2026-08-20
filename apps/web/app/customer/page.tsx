@@ -73,7 +73,7 @@ export default function CustomerPage() {
       setDocument("");
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao criar Party");
+      setError(err instanceof Error ? err.message : "Falha ao criar Contato");
     }
   }
 
@@ -84,7 +84,7 @@ export default function CustomerPage() {
       await createRelationship(partyIdA, partyIdB, relType);
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao criar Relationship");
+      setError(err instanceof Error ? err.message : "Falha ao criar Vínculo");
     }
   }
 
@@ -94,18 +94,18 @@ export default function CustomerPage() {
 
   return (
     <DashboardShell title="Relationship">
-      <PageHeader title="Relationship" description="Parties e vínculos entre elas." />
+      <PageHeader title="Relacionamento" description="Contatos e vínculos entre eles." />
 
       {error && <p className="text-[13px] text-nov-danger">{error}</p>}
       {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
 
       <section className="mb-9">
-        <h2 className={SECTION_TITLE_CLASS}>Parties</h2>
+        <h2 className={SECTION_TITLE_CLASS}>Contatos</h2>
 
         {!loading && parties.length > 0 && (
           <div className="mb-5 max-w-[380px]">
             <StatusDonut
-              title="Parties por tipo"
+              title="Contatos por tipo"
               data={[
                 { label: "Pessoa", value: parties.filter((p) => p.partyType === "person").length, color: "var(--nov-b500)" },
                 { label: "Organização Externa", value: parties.filter((p) => p.partyType === "external_organization").length, color: "var(--nov-s400)" },
@@ -122,11 +122,11 @@ export default function CustomerPage() {
           <Input placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} required className="flex-1" />
           <Input placeholder="Documento (opcional)" value={document} onChange={(e) => setDocument(e.target.value)} />
           <Button type="submit" icon={<UserPlus size={15} />}>
-            Nova Party
+            Novo Contato
           </Button>
         </form>
 
-        {!loading && parties.length === 0 && <EmptyState message="Nenhuma Party ainda." />}
+        {!loading && parties.length === 0 && <EmptyState message="Nenhum Contato ainda." />}
 
         <div className="flex flex-col gap-2.5">
           {parties.map((party) => (
@@ -141,10 +141,10 @@ export default function CustomerPage() {
       </section>
 
       <section>
-        <h2 className={SECTION_TITLE_CLASS}>Relationships</h2>
+        <h2 className={SECTION_TITLE_CLASS}>Vínculos</h2>
         <form onSubmit={handleCreateRelationship} className="mb-4 flex flex-wrap gap-2">
           <Select value={partyIdA} onChange={(e) => setPartyIdA(e.target.value)} required>
-            <option value="">Party A</option>
+            <option value="">Contato A</option>
             {parties.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
@@ -152,7 +152,7 @@ export default function CustomerPage() {
             ))}
           </Select>
           <Select value={partyIdB} onChange={(e) => setPartyIdB(e.target.value)} required>
-            <option value="">Party B</option>
+            <option value="">Contato B</option>
             {parties.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
@@ -167,11 +167,11 @@ export default function CustomerPage() {
             ))}
           </Select>
           <Button type="submit" icon={<Link2 size={15} />}>
-            Novo Relationship
+            Novo Vínculo
           </Button>
         </form>
 
-        {!loading && relationships.length === 0 && <EmptyState message="Nenhum Relationship ainda." />}
+        {!loading && relationships.length === 0 && <EmptyState message="Nenhum Vínculo ainda." />}
 
         <div className="flex flex-col gap-2.5">
           {relationships.map((relationship) => (

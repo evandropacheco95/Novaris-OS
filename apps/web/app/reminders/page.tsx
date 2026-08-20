@@ -58,7 +58,7 @@ export default function RemindersPage() {
       setRemindAt("");
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao criar Reminder");
+      setError(err instanceof Error ? err.message : "Falha ao criar Lembrete");
     }
   }
 
@@ -68,18 +68,18 @@ export default function RemindersPage() {
       await dismissReminder(id);
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao dispensar Reminder");
+      setError(err instanceof Error ? err.message : "Falha ao dispensar Lembrete");
     }
   }
 
   return (
     <DashboardShell title="Activity">
-      <PageHeader title="Reminders" description="Lembretes vinculados a Parties, adaptado do Salesforce Reminder." actions={<Button variant="secondary" size="sm" onClick={() => router.push("/activity")}>← Activity</Button>} />
+      <PageHeader title="Lembretes" description="Lembretes vinculados a Contatos, adaptado do Salesforce Reminder." actions={<Button variant="secondary" size="sm" onClick={() => router.push("/activity")}>← Atividades</Button>} />
 
       {!loading && reminders.length > 0 && (
         <div className="mb-6 max-w-[380px]">
           <StatusDonut
-            title="Reminders por status"
+            title="Lembretes por status"
             data={[
               { label: "Ativo", value: reminders.filter((r) => !r.dismissed).length, color: "var(--nov-b500)" },
               { label: "Dispensado", value: reminders.filter((r) => r.dismissed).length, color: "var(--nov-s500)" },
@@ -90,7 +90,7 @@ export default function RemindersPage() {
 
       <form onSubmit={handleCreate} className="mb-6 flex flex-wrap gap-2">
         <Select value={partyId} onChange={(e) => setPartyId(e.target.value)} required>
-          <option value="">Party</option>
+          <option value="">Contato</option>
           {parties.map((p) => (
             <option key={p.id} value={p.id}>
               {p.name}
@@ -100,13 +100,13 @@ export default function RemindersPage() {
         <Input placeholder="Mensagem" value={message} onChange={(e) => setMessage(e.target.value)} required className="flex-1" />
         <Input type="datetime-local" value={remindAt} onChange={(e) => setRemindAt(e.target.value)} required />
         <Button type="submit" icon={<BellPlus size={15} />}>
-          Novo Reminder
+          Novo Lembrete
         </Button>
       </form>
 
       {error && <p className="text-[13px] text-nov-danger">{error}</p>}
       {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
-      {!loading && reminders.length === 0 && <EmptyState message="Nenhum Reminder ainda." />}
+      {!loading && reminders.length === 0 && <EmptyState message="Nenhum Lembrete ainda." />}
 
       <div className="flex flex-col gap-2.5">
         {reminders.map((reminder) => (

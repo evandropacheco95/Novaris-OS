@@ -59,7 +59,7 @@ export default function CommentsPage() {
       setBody("");
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao criar Comment");
+      setError(err instanceof Error ? err.message : "Falha ao criar Comentário");
     }
   }
 
@@ -76,7 +76,7 @@ export default function CommentsPage() {
       setEditBody("");
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao editar Comment");
+      setError(err instanceof Error ? err.message : "Falha ao editar Comentário");
     }
   }
 
@@ -86,20 +86,20 @@ export default function CommentsPage() {
       await deleteComment(id);
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao excluir Comment");
+      setError(err instanceof Error ? err.message : "Falha ao excluir Comentário");
     }
   }
 
   return (
     <DashboardShell title="Activity">
-      <PageHeader title="Comments" description="Feed polimórfico, adaptado do Salesforce Chatter." actions={<Button variant="secondary" size="sm" onClick={() => router.push("/activity")}>← Activity</Button>} />
+      <PageHeader title="Comentários" description="Feed polimórfico, adaptado do Salesforce Chatter." actions={<Button variant="secondary" size="sm" onClick={() => router.push("/activity")}>← Atividades</Button>} />
 
       <form onSubmit={handleCreate} className="mb-4 flex flex-wrap gap-2">
-        <Input placeholder="Tipo do alvo (ex.: lead, case, opportunity)" value={targetType} onChange={(e) => setTargetType(e.target.value)} required />
+        <Input placeholder="Tipo do alvo (ex.: lead, chamado, oportunidade)" value={targetType} onChange={(e) => setTargetType(e.target.value)} required />
         <Input placeholder="ID do alvo" value={targetId} onChange={(e) => setTargetId(e.target.value)} required />
         <Input placeholder="Comentário" value={body} onChange={(e) => setBody(e.target.value)} required className="flex-1" />
         <Button type="submit" icon={<MessageSquarePlus size={15} />}>
-          Novo Comment
+          Novo Comentário
         </Button>
       </form>
 
@@ -113,7 +113,7 @@ export default function CommentsPage() {
 
       {error && <p className="text-[13px] text-nov-danger">{error}</p>}
       {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
-      {!loading && comments.length === 0 && <EmptyState message="Nenhum Comment ainda." />}
+      {!loading && comments.length === 0 && <EmptyState message="Nenhum Comentário ainda." />}
 
       <div className="flex flex-col gap-2.5">
         {comments.map((comment) => (

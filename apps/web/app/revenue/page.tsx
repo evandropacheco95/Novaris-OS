@@ -54,9 +54,9 @@ export default function RevenuePage() {
   return (
     <DashboardShell title="Sales">
       <PageHeader
-        title="Revenue"
-        description="Valor reconhecido a partir de Contracts ativos — registro pontual, sem criação manual avulsa."
-        actions={<Button variant="secondary" size="sm" onClick={() => router.push("/contracts")}>← Contracts</Button>}
+        title="Receita"
+        description="Valor reconhecido a partir de Contratos ativos — registro pontual, sem criação manual avulsa."
+        actions={<Button variant="secondary" size="sm" onClick={() => router.push("/contracts")}>← Contratos</Button>}
       />
 
       {!loading && revenues.length > 0 && (
@@ -74,7 +74,7 @@ export default function RevenuePage() {
 
       {error && <p className="text-[13px] text-nov-danger">{error}</p>}
       {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
-      {!loading && revenues.length === 0 && <EmptyState message="Nenhum Revenue ainda — reconheça um a partir de um Contract ativo." />}
+      {!loading && revenues.length === 0 && <EmptyState message="Nenhuma Receita ainda — reconheça uma a partir de um Contrato ativo." />}
 
       <div className="flex flex-col gap-2.5">
         {revenues.map((revenue) => (
@@ -84,7 +84,7 @@ export default function RevenuePage() {
                 <div className="text-sm font-semibold text-nov-s100">
                   {revenue.currency} {revenue.amount.toFixed(2)}
                 </div>
-                <div className="text-[11px] text-nov-s500">Contract: {revenue.contractId.slice(0, 8)}</div>
+                <div className="text-[11px] text-nov-s500">Contrato: {revenue.contractId.slice(0, 8)}</div>
               </div>
               <Tag>{formatDate(revenue.recognizedAt)}</Tag>
             </div>

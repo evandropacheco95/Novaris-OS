@@ -32,6 +32,13 @@ const STATUS_TONE: Record<IdentityUser["status"], "accent" | "success" | "neutra
   disabled: "danger",
 };
 
+const STATUS_LABEL: Record<IdentityUser["status"], string> = {
+  created: "Criado",
+  invited: "Convidado",
+  active: "Ativo",
+  disabled: "Desativado",
+};
+
 /**
  * Tela de Equipe — Identity Domain (`ENG-0128`), elevada em `ENG-0147`.
  * Lista/cria Users e Roles da Organization autenticada, ativa/desativa
@@ -78,7 +85,7 @@ export default function TeamPage() {
       setEmail("");
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao criar User");
+      setError(err instanceof Error ? err.message : "Falha ao criar Usuário");
     }
   }
 
@@ -90,7 +97,7 @@ export default function TeamPage() {
       setRoleName("");
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao criar Role");
+      setError(err instanceof Error ? err.message : "Falha ao criar Função");
     }
   }
 
@@ -103,7 +110,7 @@ export default function TeamPage() {
       setPermissionCode("");
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao conceder Permission");
+      setError(err instanceof Error ? err.message : "Falha ao conceder Permissão");
     }
   }
 
@@ -131,13 +138,13 @@ export default function TeamPage() {
       }
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao atualizar Role");
+      setError(err instanceof Error ? err.message : "Falha ao atualizar Função");
     }
   }
 
   return (
     <DashboardShell title="Identity">
-      <PageHeader title="Identity" description="Usuários, Roles e Permissions da sua Organization." />
+      <PageHeader title="Equipe" description="Usuários, Funções e Permissões da sua Organização." />
 
       {error && <p className="text-[13px] text-nov-danger">{error}</p>}
       {loading && <p className="text-[13px] text-nov-s500">Carregando...</p>}
@@ -172,7 +179,7 @@ export default function TeamPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="mb-1.5 text-sm text-nov-s200">{user.email}</div>
-                  <Tag tone={STATUS_TONE[user.status]}>{user.status}</Tag>
+                  <Tag tone={STATUS_TONE[user.status]}>{STATUS_LABEL[user.status]}</Tag>
                 </div>
                 {user.status !== "disabled" && (
                   <Button size="sm" variant="secondary" onClick={() => handleToggleStatus(user)}>
@@ -196,17 +203,17 @@ export default function TeamPage() {
       </section>
 
       <section>
-        <h2 className={SECTION_TITLE_CLASS}>Roles</h2>
+        <h2 className={SECTION_TITLE_CLASS}>Funções</h2>
         <form onSubmit={handleCreateRole} className="mb-2.5 flex gap-2">
-          <Input placeholder="Nome da Role" value={roleName} onChange={(e) => setRoleName(e.target.value)} required className="flex-1" />
+          <Input placeholder="Nome da Função" value={roleName} onChange={(e) => setRoleName(e.target.value)} required className="flex-1" />
           <Button type="submit" icon={<ShieldPlus size={15} />}>
-            Nova Role
+            Nova Função
           </Button>
         </form>
 
         <form onSubmit={handleGrantPermission} className="mb-4 flex gap-2">
           <Select value={permissionRoleId} onChange={(e) => setPermissionRoleId(e.target.value)} required>
-            <option value="">Role</option>
+            <option value="">Função</option>
             {roles.map((role) => (
               <option key={role.id} value={role.id}>
                 {role.name}
@@ -215,7 +222,7 @@ export default function TeamPage() {
           </Select>
           <Input placeholder="dominio.recurso.acao" value={permissionCode} onChange={(e) => setPermissionCode(e.target.value)} required className="flex-1" />
           <Button type="submit" icon={<ShieldCheck size={15} />}>
-            Conceder Permission
+            Conceder Permissão
           </Button>
         </form>
 

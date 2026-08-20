@@ -66,11 +66,11 @@ export default function CalendarEventsPage() {
 
   return (
     <DashboardShell title="Activity">
-      <PageHeader title="Calendário" description="Compromissos com Parties, adaptado do Salesforce Event." actions={<Button variant="secondary" size="sm" onClick={() => router.push("/activity")}>← Activity</Button>} />
+      <PageHeader title="Calendário" description="Compromissos com Contatos, adaptado do Salesforce Event." actions={<Button variant="secondary" size="sm" onClick={() => router.push("/activity")}>← Atividades</Button>} />
 
       <form onSubmit={handleCreate} className="mb-6 flex flex-wrap gap-2">
         <Select value={partyId} onChange={(e) => setPartyId(e.target.value)} required>
-          <option value="">Party</option>
+          <option value="">Contato</option>
           {parties.map((p) => (
             <option key={p.id} value={p.id}>
               {p.name}

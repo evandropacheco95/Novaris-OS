@@ -98,7 +98,7 @@ export default function PipelinesPage() {
       setNewStageName("");
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao adicionar Stage");
+      setError(err instanceof Error ? err.message : "Falha ao adicionar Etapa");
     }
   }
 
@@ -110,7 +110,7 @@ export default function PipelinesPage() {
       setEditingStageId(null);
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao renomear Stage");
+      setError(err instanceof Error ? err.message : "Falha ao renomear Etapa");
     }
   }
 
@@ -135,14 +135,14 @@ export default function PipelinesPage() {
       );
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao reordenar Stages");
+      setError(err instanceof Error ? err.message : "Falha ao reordenar Etapas");
       await refresh();
     }
   }
 
   return (
     <DashboardShell title="Sales">
-      <PageHeader title="Pipelines" description="Fluxos de trabalho configuráveis — cada Pipeline tem sua própria sequência de Stages." />
+      <PageHeader title="Pipelines" description="Fluxos de trabalho configuráveis — cada Pipeline tem sua própria sequência de Etapas." />
 
       <form onSubmit={handleCreatePipeline} className="mb-6 flex gap-2">
         <Input
@@ -220,13 +220,13 @@ export default function PipelinesPage() {
           </div>
 
           <form onSubmit={handleAddStage} className="mb-5 flex gap-2">
-            <Input placeholder="Nome da nova Stage" value={newStageName} onChange={(e) => setNewStageName(e.target.value)} required className="w-[240px]" />
+            <Input placeholder="Nome da nova Etapa" value={newStageName} onChange={(e) => setNewStageName(e.target.value)} required className="w-[240px]" />
             <Button type="submit" size="sm" icon={<Plus size={13} />}>
-              Adicionar Stage
+              Adicionar Etapa
             </Button>
           </form>
 
-          {sortedStages.length === 0 && <p className="text-[13px] text-nov-s500">Nenhuma Stage ainda — adicione a primeira acima.</p>}
+          {sortedStages.length === 0 && <p className="text-[13px] text-nov-s500">Nenhuma Etapa ainda — adicione a primeira acima.</p>}
 
           {sortedStages.length > 0 && (
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>

@@ -89,7 +89,7 @@ export default function CasesPage() {
       setPriority("medium");
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao criar Case");
+      setError(err instanceof Error ? err.message : "Falha ao criar Chamado");
     }
   }
 
@@ -100,17 +100,17 @@ export default function CasesPage() {
       if (action === "close") await closeCase(id);
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao atualizar Case");
+      setError(err instanceof Error ? err.message : "Falha ao atualizar Chamado");
     }
   }
 
   return (
     <DashboardShell title="Activity">
-      <PageHeader title="Cases" description="Atendimento a Parties, adaptado do Salesforce Service Cloud." actions={<Button variant="secondary" size="sm" onClick={() => router.push("/activity")}>← Activity</Button>} />
+      <PageHeader title="Chamados" description="Atendimento a Contatos, adaptado do Salesforce Service Cloud." actions={<Button variant="secondary" size="sm" onClick={() => router.push("/activity")}>← Atividades</Button>} />
 
       <form onSubmit={handleCreate} className="mb-6 flex flex-wrap gap-2">
         <Select value={partyId} onChange={(e) => setPartyId(e.target.value)} required>
-          <option value="">Party</option>
+          <option value="">Contato</option>
           {parties.map((p) => (
             <option key={p.id} value={p.id}>
               {p.name}
@@ -125,11 +125,11 @@ export default function CasesPage() {
           <option value="high">Alta</option>
         </Select>
         <Button type="submit" icon={<LifeBuoy size={15} />}>
-          Novo Case
+          Novo Chamado
         </Button>
       </form>
 
-      {!loading && parties.length === 0 && <p className="mb-4 text-[13px] text-nov-s500">Cadastre uma Party em Relationship antes de criar um Case.</p>}
+      {!loading && parties.length === 0 && <p className="mb-4 text-[13px] text-nov-s500">Cadastre um Contato em Relacionamento antes de criar um Chamado.</p>}
 
       {error && <p className="text-[13px] text-nov-danger">{error}</p>}
 
@@ -144,10 +144,10 @@ export default function CasesPage() {
 
       {!loading && cases.length === 0 && (
         <EmptyState
-          message="Nenhum Case ainda."
+          message="Nenhum Chamado ainda."
           action={
             <Button size="sm" icon={<LifeBuoy size={14} />} onClick={() => document.getElementById("case-subject-input")?.focus()}>
-              Criar o primeiro Case
+              Criar o primeiro Chamado
             </Button>
           }
         />
