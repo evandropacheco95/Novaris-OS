@@ -48,6 +48,18 @@ Depois de criada, o único fluxo real de "entrada" para um usuário é `POST /au
 
 `billingStatus` **não tem cobrança automática** — mesmo padrão estrutural de `integration-hub`/`ai-runtime` (`ADR-0040`/`ADR-0041`): nenhuma credencial de gateway de pagamento existe hoje, então nenhuma cobrança real acontece; o campo só reflete o que um humano define via API.
 
+## Granularidade Abaixo do Domínio — Feature Flags (`ADR-0056`, `ENG-0172`)
+
+`PlanGuard`/`enabledDomains` (`ENG-0164`/`0165` acima) resolvem gating de **domínio inteiro** — nunca uma capability específica dentro de um domínio já habilitado. Esse gap (trazido pelo CTO com o CRM Allbinox como referência) foi fechado dando ao `FeatureFlag` (`services/kernel/feature-flags`, `ADR-0038`) seu primeiro consumidor real: `FeatureGuard` (`apps/api/src/auth/feature.guard.ts`), aplicado **por método**, não por Controller — `@RequireFeature("dominio.capability")` versus `@RequireDomain("Dominio")` em nível de classe.
+
+Piloto: `POST /ai/text-to-sql` (`AIRuntimeController`) exige a feature `ai-runtime.text-to-sql` ligada; `POST /ai/ask`, mesmo Controller, permanece sem gate — prova viva de que o mecanismo é por rota, não por domínio.
+
+**Semântica deliberadamente invertida em relação a `enabledDomains`**: ausência de `FeatureFlag` para `(organizationId, key)` = desabilitado por padrão (opt-in). `enabledDomains` foi um retrofit sobre Organizations que já tinham acesso a tudo (vazio = sem restrição); um gate de feature novo, sobre uma rota opcional sem uso real ainda, começa fechado com segurança.
+
+Mesma disciplina de `ENG-0164`: nenhum catálogo estático `Plan → features` foi criado — uma feature habilitada é configuração por Organization via `FeatureFlag`, nunca implícita pelo nome do plano. `/settings` (Empresa) ganhou o primeiro toggle real de uma `FeatureFlag` (Text-to-SQL), chamando `PUT /feature-flags/:key`, rota que existia desde `ADR-0038` sem nenhum consumidor.
+
+Verificado ao vivo contra Postgres real: `POST /ai/text-to-sql` sem flag → `403 FEATURE_RESTRICTION_ERROR`; `PUT /feature-flags/ai-runtime.text-to-sql` (`enabled: true`) → `200`; `POST /ai/text-to-sql` novamente → `201`; `POST /ai/ask` antes/depois do toggle → sempre `201`, sem gate; flag revertida para `enabled: false` → bloqueio confirmado de novo.
+
 ## Tópicos a Documentar
 
 Restam 2 itens para NOVARIS se tornar um SaaS multi-tenant "completo" no sentido Salesforce (Edições/Licenças) — os outros 2 (plano/limites e o `PlanGuard` de backend) foram fechados em `ENG-0164`/`ENG-0165` acima:

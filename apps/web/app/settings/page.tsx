@@ -8,6 +8,8 @@ import {
   getToken,
   updateMyOrganization,
   updateOrganizationPlan,
+  getFeatureFlag,
+  setFeatureFlag,
   type OrganizationProfile,
   type OrganizationPlan,
   type OrganizationBillingStatus,
@@ -47,6 +49,10 @@ export default function SettingsPage() {
   const [planError, setPlanError] = useState<string | null>(null);
   const [planSuccess, setPlanSuccess] = useState(false);
 
+  /** `ADR-0056` — piloto de `FeatureGuard`, gate por feature (não por domínio inteiro) em `POST /ai/text-to-sql`. */
+  const [textToSqlEnabled, setTextToSqlEnabled] = useState(false);
+  const [featureError, setFeatureError] = useState<string | null>(null);
+
   useEffect(() => {
     if (!getToken()) {
       router.replace("/login");
@@ -70,6 +76,25 @@ export default function SettingsPage() {
       setError(err instanceof Error ? err.message : "Falha ao carregar");
     } finally {
       setLoading(false);
+    }
+
+    try {
+      const flag = await getFeatureFlag("ai-runtime.text-to-sql");
+      setTextToSqlEnabled(flag.enabled);
+    } catch {
+      setTextToSqlEnabled(false);
+    }
+  }
+
+  async function handleToggleTextToSql(checked: boolean): Promise<void> {
+    setFeatureError(null);
+    const previous = textToSqlEnabled;
+    setTextToSqlEnabled(checked);
+    try {
+      await setFeatureFlag("ai-runtime.text-to-sql", checked);
+    } catch (err) {
+      setTextToSqlEnabled(previous);
+      setFeatureError(err instanceof Error ? err.message : "Falha ao atualizar feature");
     }
   }
 
@@ -192,6 +217,28 @@ export default function SettingsPage() {
               Salvar plano
             </Button>
           </form>
+        </Card>
+      )}
+
+      {organization && (
+        <Card padding={28} className="mt-6 max-w-[460px]">
+          <h2 className="mb-1 text-[15px] font-semibold text-nov-s50">Features</h2>
+          <p className="mb-4 text-xs text-nov-s500">Capabilities avançadas, ligadas/desligadas individualmente por Organization.</p>
+
+          {featureError && <p className="mb-3 text-[13px] text-nov-danger">{featureError}</p>}
+
+          <label className="flex items-center justify-between gap-4">
+            <span className="text-[13px] text-nov-s200">
+              Text-to-SQL (IA)
+              <span className="block text-xs text-nov-s500">Consultar dados em linguagem natural via IA.</span>
+            </span>
+            <input
+              type="checkbox"
+              checked={textToSqlEnabled}
+              onChange={(e) => void handleToggleTextToSql(e.target.checked)}
+              className="h-5 w-5 accent-nov-b500"
+            />
+          </label>
         </Card>
       )}
     </DashboardShell>

@@ -373,6 +373,23 @@ export async function updateOrganizationPlan(patch: {
   return parseOrThrow<OrganizationProfile>(response, "Falha ao atualizar plano da Organization");
 }
 
+/** `ADR-0038`/`ADR-0056` — par chave/booleano por Organization, sem catálogo fechado de chaves. */
+export interface FeatureFlag {
+  key: string;
+  enabled: boolean;
+  updatedAt?: string;
+}
+
+export async function getFeatureFlag(key: string): Promise<FeatureFlag> {
+  const response = await authenticatedFetch(`/feature-flags/${key}`);
+  return parseOrThrow<FeatureFlag>(response, "Falha ao buscar feature flag");
+}
+
+export async function setFeatureFlag(key: string, enabled: boolean): Promise<FeatureFlag> {
+  const response = await authenticatedFetch(`/feature-flags/${key}`, { method: "PUT", body: JSON.stringify({ enabled }) });
+  return parseOrThrow<FeatureFlag>(response, "Falha ao atualizar feature flag");
+}
+
 // Project Domain (`ENG-0129`)
 
 export interface ProjectTask {
