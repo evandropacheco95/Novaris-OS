@@ -390,6 +390,22 @@ export async function setFeatureFlag(key: string, enabled: boolean): Promise<Fea
   return parseOrThrow<FeatureFlag>(response, "Falha ao atualizar feature flag");
 }
 
+/**
+ * `ADR-0054`/`ADR-0056` — `POST /ai/text-to-sql`, gateado pela feature
+ * `ai-runtime.text-to-sql`. `sql: null`/`loggedOnly: true` até um adapter de
+ * IA real existir (`ConsoleTextToSqlRuntime`) — a resposta já avisa isso.
+ */
+export interface TextToSqlResult {
+  answer: string;
+  sql: string | null;
+  loggedOnly: boolean;
+}
+
+export async function askTextToSql(question: string): Promise<TextToSqlResult> {
+  const response = await authenticatedFetch("/ai/text-to-sql", { method: "POST", body: JSON.stringify({ question }) });
+  return parseOrThrow<TextToSqlResult>(response, "Falha ao consultar o assistente");
+}
+
 // Project Domain (`ENG-0129`)
 
 export interface ProjectTask {
