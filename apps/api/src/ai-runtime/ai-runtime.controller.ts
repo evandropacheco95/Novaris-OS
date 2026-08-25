@@ -1,6 +1,8 @@
 import { Body, Controller, Inject, Post, Req, UseGuards } from "@nestjs/common";
 import type { Request } from "express";
 import type { AIRuntime, AIResponse, TextToSqlPort, TextToSqlResult } from "@novaris/ai-runtime";
+import { FeatureGuard } from "../auth/feature.guard.js";
+import { RequireFeature } from "../auth/require-feature.decorator.js";
 import { JwtAuthGuard, type AuthenticatedUser } from "../auth/jwt-auth.guard.js";
 import { PermissionGuard } from "../auth/permission.guard.js";
 import { RequirePermission } from "../auth/require-permission.decorator.js";
@@ -27,8 +29,13 @@ export class AIRuntimeController {
     return this.aiRuntime.ask(body.prompt, body.context);
   }
 
-  /** Text-to-SQL (`ADR-0054`) — pergunta em linguagem natural, `sql: null` até um adapter real existir (nenhuma credencial de IA hoje). */
+  /**
+   * Text-to-SQL (`ADR-0054`) — pergunta em linguagem natural, `sql: null` até um adapter real existir (nenhuma credencial de IA hoje).
+   * Gateado por feature (`ADR-0056`) — primeiro piloto de `FeatureGuard`, method-level, diferente de `ask` (mesma Controller, sem gate).
+   */
   @Post("text-to-sql")
+  @UseGuards(FeatureGuard)
+  @RequireFeature("ai-runtime.text-to-sql")
   async textToSqlAsk(@Body() body: { question: string }, @Req() req: AuthenticatedRequest): Promise<TextToSqlResult> {
     return this.textToSql.ask(body.question, { organizationId: req.user.organizationId });
   }

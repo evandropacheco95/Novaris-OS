@@ -18,6 +18,7 @@ import {
 import { clearSession, useCurrentUser, useEnabledDomains } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { Tag } from "./tag";
+import { AiAssistant } from "./ai-assistant";
 
 /**
  * 10 Business Domains confirmados em `knowledge/core/DOMAIN_MODEL.md`
@@ -121,6 +122,8 @@ export function DashboardShell({ title, children }: { title: string; children: R
       </aside>
 
       <main className="nov-animate-in max-w-[1280px] flex-1 px-11 py-9">{children}</main>
+
+      <AiAssistant />
     </div>
   );
 }
