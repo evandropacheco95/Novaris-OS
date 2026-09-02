@@ -1,4 +1,4 @@
-import { Body, Controller, ForbiddenException, Get, HttpException, HttpStatus, Inject, Patch, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, ForbiddenException, Get, HttpException, HttpStatus, Inject, Patch, Post, Req, UseGuards } from "@nestjs/common";
 import type { Request } from "express";
 import { UniqueEntityId } from "@novaris/shared-kernel";
 import {
@@ -15,6 +15,7 @@ import { JwtAuthGuard, type AuthenticatedUser } from "../auth/jwt-auth.guard.js"
 import { PermissionGuard } from "../auth/permission.guard.js";
 import { RequirePermission } from "../auth/require-permission.decorator.js";
 import { throwHttpExceptionForDomainError } from "../shared/http-error-mapper.js";
+import { ExportOrganizationDataHandler } from "./export-organization-data.js";
 
 type AuthenticatedRequest = Request & { user: AuthenticatedUser };
 
@@ -33,6 +34,11 @@ export interface OrganizationResponse {
   enabledDomains?: string[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ExportOrganizationDataResponse {
+  fileId: string;
+  filename: string;
 }
 
 /**
@@ -57,6 +63,7 @@ export class OrganizationController {
   constructor(
     private readonly updateHandler: UpdateOrganizationProfileHandler,
     private readonly updatePlanHandler: UpdateOrganizationPlanHandler,
+    private readonly exportDataHandler: ExportOrganizationDataHandler,
     @Inject("OrganizationRepository") private readonly repository: OrganizationRepository,
   ) {}
 
@@ -121,6 +128,25 @@ export class OrganizationController {
       throwHttpExceptionForDomainError(result.getError()!);
     }
     return toResponse(result.getValue()!);
+  }
+
+  /**
+   * `ADR-0057` — exportação completa dos dados da própria Organization,
+   * empacotada como `FileRecord` (`@novaris/files`, `ADR-0039`) e baixável
+   * via `GET /files/:id` já existente (sem rota de download nova). Permission
+   * distinta de `workspace.profile.manage` (mesma granularidade de método já
+   * usada por `workspace.plan.manage` acima) — exportar 100% dos dados é
+   * mais sensível que editar o próprio perfil.
+   */
+  @Post("export")
+  @RequirePermission("workspace.data-export.manage")
+  async exportData(@Req() req: AuthenticatedRequest): Promise<ExportOrganizationDataResponse> {
+    const result = await this.exportDataHandler.execute(req.user.organizationId);
+    if (result.isFailure) {
+      throwHttpExceptionForDomainError(result.getError()!);
+    }
+    const record = result.getValue()!;
+    return { fileId: record.id.toString(), filename: record.filename };
   }
 
   private async loadOwnOrganization(user: AuthenticatedUser) {

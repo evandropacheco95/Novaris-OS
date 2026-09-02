@@ -19,6 +19,9 @@ const STORAGE_BASE_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "..
 
 /**
  * FilesModule — Composition Root de `files` (`ADR-0039`, `ENG-0140`).
+ * Exporta `UploadFileHandler`/`DownloadFileHandler` (`ADR-0057`) — primeiro
+ * consumidor externo do módulo, o export de dados de tenant reaproveita o
+ * mesmo pipeline de armazenamento já usado por upload multipart/`CampaignAsset`.
  */
 @Module({
   imports: [AuthModule],
@@ -37,5 +40,6 @@ const STORAGE_BASE_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "..
       inject: [FILE_RECORD_REPOSITORY, FILE_STORAGE],
     },
   ],
+  exports: [UploadFileHandler, DownloadFileHandler],
 })
 export class FilesModule {}

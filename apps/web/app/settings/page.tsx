@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Save } from "lucide-react";
+import { Save, Download } from "lucide-react";
 import {
   getMyOrganization,
   getToken,
@@ -10,6 +10,8 @@ import {
   updateOrganizationPlan,
   getFeatureFlag,
   setFeatureFlag,
+  exportOrganizationData,
+  downloadFile,
   type OrganizationProfile,
   type OrganizationPlan,
   type OrganizationBillingStatus,
@@ -53,6 +55,10 @@ export default function SettingsPage() {
   const [textToSqlEnabled, setTextToSqlEnabled] = useState(false);
   const [featureError, setFeatureError] = useState<string | null>(null);
 
+  /** `ADR-0057` — export completo dos dados da própria Organization. */
+  const [exportLoading, setExportLoading] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+
   useEffect(() => {
     if (!getToken()) {
       router.replace("/login");
@@ -95,6 +101,19 @@ export default function SettingsPage() {
     } catch (err) {
       setTextToSqlEnabled(previous);
       setFeatureError(err instanceof Error ? err.message : "Falha ao atualizar feature");
+    }
+  }
+
+  async function handleExportData(): Promise<void> {
+    setExportError(null);
+    setExportLoading(true);
+    try {
+      const { fileId } = await exportOrganizationData();
+      await downloadFile(fileId);
+    } catch (err) {
+      setExportError(err instanceof Error ? err.message : "Falha ao exportar dados");
+    } finally {
+      setExportLoading(false);
     }
   }
 
@@ -239,6 +258,21 @@ export default function SettingsPage() {
               className="h-5 w-5 accent-nov-b500"
             />
           </label>
+        </Card>
+      )}
+
+      {organization && (
+        <Card padding={28} className="mt-6 max-w-[460px]">
+          <h2 className="mb-1 text-[15px] font-semibold text-nov-s50">Exportar dados</h2>
+          <p className="mb-4 text-xs text-nov-s500">
+            Baixe um arquivo .json com todos os dados de negócio desta Organization (sem credenciais).
+          </p>
+
+          {exportError && <p className="mb-3 text-[13px] text-nov-danger">{exportError}</p>}
+
+          <Button type="button" icon={<Download size={15} />} onClick={() => void handleExportData()} loading={exportLoading} className="self-start">
+            Exportar todos os dados
+          </Button>
         </Card>
       )}
     </DashboardShell>

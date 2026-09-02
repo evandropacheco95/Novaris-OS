@@ -62,11 +62,12 @@ Verificado ao vivo contra Postgres real: `POST /ai/text-to-sql` sem flag → `40
 
 ## Tópicos a Documentar
 
-Restam 2 itens para NOVARIS se tornar um SaaS multi-tenant "completo" no sentido Salesforce (Edições/Licenças) — os outros 2 (plano/limites e o `PlanGuard` de backend) foram fechados em `ENG-0164`/`ENG-0165` acima:
+Resta 1 item para NOVARIS se tornar um SaaS multi-tenant "completo" no sentido Salesforce (Edições/Licenças) — os outros 3 (plano/limites, o `PlanGuard` de backend e a exportação de dados) foram fechados em `ENG-0164`/`ENG-0165`/`ENG-0173` acima:
 
 - **Cobrança real (gateway de pagamento)** — ver [docs/12-negocio/billing-e-assinaturas.md](../docs/12-negocio/billing-e-assinaturas.md). `services/domains/financial` (`Invoice`/`Subscription`) existe como Domain Layer per-cliente-do-cliente (a própria Organization vende para os *seus* clientes via CRM/Financial) — não é o mesmo conceito de "NOVARIS cobra a Organization pelo uso da plataforma", que segue sem gateway real (`billingStatus` é manual, ver acima).
-- **Migração/exportação de dados de um tenant** — nenhum endpoint ou processo existe hoje para exportar/portar os dados de uma Organization.
 
 ## Status
 
-🟢 Isolamento entre Organizations e enforcement de plano/domínio reais em toda camada (`ENG-0162`/`ENG-0164`/`ENG-0165`) — `loadAndAssertOwnership` para dado entre Organizations, `PlanGuard`+sidebar para domínio habilitado por plano (com `Workspace` deliberadamente isento, evita lockout); `maxUsers`/`enabledDomains` configuráveis por Organization, sem número/mapeamento inventado; RLS como defesa em profundidade inerte; provisionamento só por seed. Os 2 itens pendentes acima permanecem sem decisão de produto ou de infraestrutura — não inventados aqui.
+🟢 Isolamento entre Organizations e enforcement de plano/domínio reais em toda camada (`ENG-0162`/`ENG-0164`/`ENG-0165`) — `loadAndAssertOwnership` para dado entre Organizations, `PlanGuard`+sidebar para domínio habilitado por plano (com `Workspace` deliberadamente isento, evita lockout); `maxUsers`/`enabledDomains` configuráveis por Organization, sem número/mapeamento inventado; RLS como defesa em profundidade inerte; provisionamento só por seed. O item pendente acima permanece sem decisão de produto — não inventado aqui.
+
+🟢 Exportação/portabilidade de dados de um tenant fechada em `ADR-0057`/`ENG-0173`: `POST /organizations/export` (permissão dedicada `workspace.data-export.manage`) gera um dump JSON completo de todas as tabelas `organizationId`-scoped da própria Organization (exclui `Credential`), reaproveitando 100% o `FileRecord`/`FileStorage`/`UploadFileHandler` já existentes (`ADR-0039`) e o `GET /files/:id` já existente para download — zero infraestrutura nova de storage. Botão "Exportar todos os dados" em `/settings`.

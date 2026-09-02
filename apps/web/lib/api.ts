@@ -373,6 +373,21 @@ export async function updateOrganizationPlan(patch: {
   return parseOrThrow<OrganizationProfile>(response, "Falha ao atualizar plano da Organization");
 }
 
+/**
+ * `ADR-0057` — export completo dos dados da própria Organization. Retorna o
+ * `fileId` do `FileRecord` gerado; o download em si reaproveita `downloadFile`
+ * (mesma função já usada por Marketing/`CampaignAsset`).
+ */
+export interface ExportOrganizationDataResult {
+  fileId: string;
+  filename: string;
+}
+
+export async function exportOrganizationData(): Promise<ExportOrganizationDataResult> {
+  const response = await authenticatedFetch("/organizations/export", { method: "POST" });
+  return parseOrThrow<ExportOrganizationDataResult>(response, "Falha ao exportar dados da Organization");
+}
+
 /** `ADR-0038`/`ADR-0056` — par chave/booleano por Organization, sem catálogo fechado de chaves. */
 export interface FeatureFlag {
   key: string;
