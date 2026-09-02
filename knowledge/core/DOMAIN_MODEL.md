@@ -613,6 +613,36 @@ FIM
 
 ---
 
+ADVERTISING DOMAIN
+
+*(Seção adicionada por [ADR-0059](../../adr/ADR-0059-advertising-domain-and-advertising-account-object.md), fora do texto original recebido — 11º Business Domain ativo, não fazia parte da lista original de 13 seções.)*
+
+Responsável por:
+
+Conexão com plataformas de mídia paga
+
+Contas de anúncio
+
+Campanhas/grupos/palavras-chave/termos de busca sincronizados de plataforma externa
+
+Execuções de sincronização
+
+Objetos
+
+Advertising Account — implementado (`ADR-0059`, Object Specification em [objects/AdvertisingAccount.md](objects/AdvertisingAccount.md))
+
+Ad Campaign (sincronizada — distinta de `Campaign`/`Marketing Domain`, `ADR-0033`) — proposto, sem Object Specification, bloqueado por `NOVARIS_CONSTITUTION.md Article V`
+
+Ad Group — proposto, mesma condição
+
+Keyword — proposto, mesma condição
+
+Search Term — proposto, mesma condição
+
+Sync Run — proposto, mesma condição
+
+---
+
 ## Relação com Outros Módulos
 
 *(Seção adicionada na integração ao repositório. Não faz parte do texto original recebido — o conteúdo acima permanece exatamente como fornecido.)*
@@ -637,6 +667,8 @@ FIM
 
 **Reconciliação de Arquitetura II (Missão ENG-0026)**: das 11 seções de domínio então ativas, **10 permanecem Business Domains ativos** — `Identity`, `Workspace` (Organization), `Relationship` (Customer), `Sales`, `Activity`, `Project`, `Marketing`, `Financial`, `Analytics`, `System`. `KNOWLEDGE DOMAIN` foi formalmente removido da lista ativa, texto original preservado como histórico na própria seção acima — absorvido pela AI Transversal Intelligence Layer (`ADR-0015`). A cadeia de `DEPENDÊNCIAS` recebeu uma segunda atualização, removendo também o nó `Knowledge`. Nenhum Entity, Aggregate, Value Object, Domain Event, Service ou Contract foi criado por esta reconciliação.
 
+**Adição de Domínio (`ADR-0059`)**: ao implementar a Fase 01 de `NOVARIS Performance Intelligence` (produto em `PRODUCTS.md`/`specifications/performance-intelligence/`, `ADR-0058`), constatou-se que os objetos necessários (Advertising Account, Ad Campaign sincronizada, Ad Group, Keyword, Search Term, Sync Run) não pertencem a nenhum dos 10 domínios ativos — `Campaign` (`Marketing`) tem campos mínimos congelados por `ADR-0033`, incompatíveis com dado sincronizado de plataforma externa. Aplicando o próprio teste de `ADR-0007` ("um novo produto só ganha domínio próprio se tiver objetos de dados únicos"), **`ADVERTISING DOMAIN` foi criado como 11º Business Domain ativo** (seção acima). Diferente das reconciliações anteriores, esta *adiciona* um domínio à lista ativa, não remove. Apenas `Advertising Account` tem Object Specification e implementação até agora (`Article V` da `NOVARIS_CONSTITUTION.md` bloqueia os outros 5 objetos até cada um ganhar a sua).
+
 ## Status
 
-🟢 Oficial (v1.3, reconciliado por ENG-0024, ENG-0026 e ENG-0028). **Zero duplicações de objeto entre domínios ativos** — as duas violações internas originais (`Queue` em `Automation`/`System`, `Task` em `Activity`/`Project`) foram ambas resolvidas (`ADR-0013` via remoção de seção; `ADR-0016`/ENG-0028 via remoção de objeto único). Divergência de catálogo com `BOM.md` segue registrada, não resolvida (fora de escopo). **10 de 13 seções de domínio originais são Business Domains ativos** (`AI`, `Automation` e `Knowledge` removidos da lista ativa, `ADR-0014`/`ADR-0013`/`ADR-0015`; texto histórico preservado nas 3 seções). `ACTIVITY DOMAIN` e `PROJECT DOMAIN` permanecem ativos, sem alteração de status — apenas `Task` foi desduplicado entre eles (`ADR-0016`). `BACKLOG.md`'s hierarquia `Epic→Feature→Story→Task→Subtask` e a pergunta Entity-vs-Aggregate-Root de `Task` permanecem não resolvidas, documentadas como preocupação futura. 6 dos 10 domínios ativos têm bounded context em `services/domains/` (Missão ENG-0000.2).
+🟢 Oficial (v1.4, reconciliado por ENG-0024, ENG-0026, ENG-0028 e `ADR-0059`). **Zero duplicações de objeto entre domínios ativos** — as duas violações internas originais (`Queue` em `Automation`/`System`, `Task` em `Activity`/`Project`) foram ambas resolvidas (`ADR-0013` via remoção de seção; `ADR-0016`/ENG-0028 via remoção de objeto único). Divergência de catálogo com `BOM.md` segue registrada, não resolvida (fora de escopo). **11 Business Domains ativos**: os 10 remanescentes da reconciliação `ENG-0024`/`ENG-0026` (`AI`, `Automation` e `Knowledge` removidos da lista ativa, `ADR-0014`/`ADR-0013`/`ADR-0015`; texto histórico preservado nas 3 seções) + `Advertising` (`ADR-0059`, novo). `ACTIVITY DOMAIN` e `PROJECT DOMAIN` permanecem ativos, sem alteração de status — apenas `Task` foi desduplicado entre eles (`ADR-0016`). `BACKLOG.md`'s hierarquia `Epic→Feature→Story→Task→Subtask` e a pergunta Entity-vs-Aggregate-Root de `Task` permanecem não resolvidas, documentadas como preocupação futura. 7 dos 11 domínios ativos têm bounded context em `services/domains/` (Missão ENG-0000.2 + `ADR-0059`).

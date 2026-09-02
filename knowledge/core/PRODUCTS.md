@@ -283,6 +283,40 @@ O que falta para este produto ser considerado "completo", com base no que o `MAS
 
 ---
 
+## NOVARIS Performance Intelligence
+
+> ⚠️ **10º produto, ampliando a lista de 9 fixada por [ADR-0024](../../adr/ADR-0024-domain-and-product-count-consolidation.md).** Registrado por [ADR-0058](../../adr/ADR-0058-novaris-performance-intelligence-product.md). Nada implementado ainda — nem Domain, nem Application, nem `apps/api`, nem `apps/web`. Especificação completa em [specifications/performance-intelligence/](../../specifications/performance-intelligence/README.md).
+
+### Objetivo
+
+Plataforma de análise, gestão e otimização de mídia paga com suporte a decisão — não um dashboard. Vai além de "quanto foi gasto" para responder o que mudou, por que, se é relevante, onde há perda ou oportunidade, o que fazer e com que evidência/confiança/risco. Plataforma inicial: Google Ads. Empresas iniciais: Winnet Metais e Allbinox Metais.
+
+### Escopo
+
+**Dentro do escopo (proposto):** conexão e sincronização de conta Google Ads; análise em 5 níveis (conta, campanha, grupo de anúncios, palavra-chave/termo de busca, mercado); comparação de período; detecção de sinal (regra + estatística); diagnóstico por IA (hipótese, evidência, confiança); pesquisa externa disparada por sinal; recomendações estruturadas com aprovação humana obrigatória nas fases iniciais; central de ações com ciclo de vida completo e audit trail; medição de resultado e aprendizado histórico.
+
+**Fora do escopo (por enquanto):** execução autônoma sem aprovação humana (Nível 3+); plataformas de mídia paga além de Google Ads (Meta Ads etc.); qualquer machine learning além de regra/estatística antes de haver histórico de decisões suficiente.
+
+### Funcionalidades
+
+Nenhuma implementada. Ver [specifications/performance-intelligence/features.md](../../specifications/performance-intelligence/features.md) para a lista completa proposta.
+
+### Integrações
+
+- `services/kernel/integration-hub` já tem um `GoogleAdsProvider` (port) + `ConsoleGoogleAdsProvider` (adapter estrutural, `ADR-0040`), mas hoje só cobre `createCampaign(name, budget)` — precisa de extensão grande para leitura de relatórios (Fase 02).
+- `services/kernel/ai-runtime` tem Port pronto (`ADR-0041`) mas nenhuma chamada real a modelo de IA hoje — Performance Intelligence seria o primeiro consumidor real.
+- Existe um protótipo funcional fora do monorepo (`Desktop/Winnet/google-ads-analyzer`, Python/Streamlit/Gemini) com developer token real da Winnet (nível "Conta de Teste"), aposentado por este produto — suas queries GAQL servem de referência para a Fase 02, seu fallback de dado simulado não deve ser replicado.
+
+### KPIs
+
+Nenhum medido ou implementado. Candidatos propostos (não implementados): CPA, ROAS, taxa de conversão, CTR, CPC, taxa de aprovação de recomendação, tempo entre detecção e ação, precisão de diagnóstico (medida a posteriori pelo resultado real da ação).
+
+### Roadmap
+
+14 fases (00 Constitution → 14 Testing/Quality Gate), detalhadas em [specifications/performance-intelligence/roadmap.md](../../specifications/performance-intelligence/roadmap.md). Fase 00 concluída nesta sessão. Nenhuma fase de código iniciada.
+
+---
+
 ## NOVARIS Financial
 
 ### Objetivo

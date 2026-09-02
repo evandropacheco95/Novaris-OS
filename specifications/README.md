@@ -13,8 +13,9 @@ Especificação funcional de cada domínio/produto da plataforma NOVARIS. Enquan
 - [financial/](financial/README.md)
 - [marketplace/](marketplace/README.md)
 - [projects/](projects/README.md)
+- [performance-intelligence/](performance-intelligence/README.md) — 10º produto, registrado por [ADR-0058](../adr/ADR-0058-novaris-performance-intelligence-product.md), ampliando a lista de 9 fixada por [ADR-0024](../adr/ADR-0024-domain-and-product-count-consolidation.md). Diferente dos demais, já tem os 9 arquivos preenchidos com o rascunho de especificação (não `**TODO**`) — nenhum código ainda.
 
-Esta lista de 9 domínios segue os 9 produtos já oficiais em [knowledge/core/PRODUCTS.md](../knowledge/core/PRODUCTS.md). Ela reforça, mas não resolve sozinha, o conflito já registrado entre `PRODUCTS.md` (9 produtos) e `NOVARIS_OS.md § 7` (6 produtos) — ver [ADR-0002](../adr/ADR-0002-reestruturar-arvore-do-repositorio.md).
+Esta lista de 9 domínios segue os 9 produtos já oficiais em [knowledge/core/PRODUCTS.md](../knowledge/core/PRODUCTS.md). Ela reforça, mas não resolve sozinha, o conflito já registrado entre `PRODUCTS.md` (9 produtos) e `NOVARIS_OS.md § 7` (6 produtos) — ver [ADR-0002](../adr/ADR-0002-reestruturar-arvore-do-repositorio.md). `performance-intelligence` é o 10º, acrescentado por ADR-0058.
 
 ## Estrutura de cada domínio
 

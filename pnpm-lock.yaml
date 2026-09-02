@@ -50,6 +50,9 @@ importers:
       '@novaris/activity':
         specifier: workspace:^
         version: link:../../services/domains/activity
+      '@novaris/advertising':
+        specifier: workspace:^
+        version: link:../../services/domains/advertising
       '@novaris/ai-runtime':
         specifier: workspace:*
         version: link:../../services/kernel/ai-runtime
@@ -251,6 +254,31 @@ importers:
       '@novaris/database':
         specifier: workspace:*
         version: link:../../../packages/database
+      '@novaris/shared-kernel':
+        specifier: workspace:*
+        version: link:../../../packages/shared-kernel
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.43
+      eslint:
+        specifier: ^8.57.0
+        version: 8.57.1
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
+  services/domains/advertising:
+    dependencies:
+      '@novaris/audit':
+        specifier: workspace:^
+        version: link:../../kernel/audit
+      '@novaris/database':
+        specifier: workspace:*
+        version: link:../../../packages/database
+      '@novaris/integration-hub':
+        specifier: workspace:^
+        version: link:../../kernel/integration-hub
       '@novaris/shared-kernel':
         specifier: workspace:*
         version: link:../../../packages/shared-kernel

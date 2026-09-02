@@ -437,6 +437,8 @@ Assinatura.
 Campanha.
 
 > **Nota de Extensão (`ADR-0033`)**: campos mínimos — `name` (obrigatório), `startDate`/`endDate` (opcionais). `Asset` não resolvido por esta ADR — posse (Marketing vs. transversal) permanece em aberto.
+>
+> **Nota de Extensão (`ADR-0059`)**: confirmado que estes campos mínimos **não** representam uma campanha sincronizada de plataforma de mídia paga externa (Google Ads) — esse conceito é `Ad Campaign`, objeto próprio do `Advertising Domain` (abaixo), não uma extensão deste `Campaign`.
 
 ---
 
@@ -481,6 +483,58 @@ Fluxo automatizado.
 ## Automation
 
 Automação executável.
+
+---
+
+# 5B. ADVERTISING OBJECTS
+
+*(Seção adicionada por [ADR-0059](../../adr/ADR-0059-advertising-domain-and-advertising-account-object.md) — objetos do `Advertising Domain`, 11º Business Domain ativo. Não fazia parte do catálogo original.)*
+
+## Advertising Account
+
+Conta de anúncio conectada de uma plataforma de mídia paga (Google Ads inicialmente), pertencente a uma `Organization`.
+
+> **Nota de Extensão (`ADR-0059`)**: único objeto desta seção com Object Specification completa ([objects/AdvertisingAccount.md](objects/AdvertisingAccount.md)) e implementação (`Fase 01`). Campos e comportamento: ver especificação.
+
+---
+
+## Ad Campaign
+
+Campanha sincronizada de uma plataforma de mídia paga externa — distinta de `Campaign` (Marketing Domain, `ADR-0033`), que é uma campanha interna de marketing sem sincronização externa.
+
+> **Implementado (`ADR-0060`, Fase 02)** — Object Specification completa: [objects/AdCampaign.md](objects/AdCampaign.md).
+
+---
+
+## Ad Group
+
+Grupo de anúncios dentro de uma `Ad Campaign` sincronizada.
+
+> **Implementado (`ADR-0060`, Fase 02)** — Object Specification completa: [objects/AdGroup.md](objects/AdGroup.md).
+
+---
+
+## Keyword
+
+Palavra-chave configurada em um `Ad Group` sincronizado.
+
+> **Implementado (`ADR-0060`, Fase 02)** — Object Specification completa: [objects/Keyword.md](objects/Keyword.md).
+
+---
+
+## Search Term
+
+Termo de busca real que disparou um anúncio (dado de performance, não de configuração) — distinto de `Keyword`.
+
+> **Implementado (`ADR-0060`, Fase 02)** — Object Specification completa: [objects/SearchTerm.md](objects/SearchTerm.md).
+
+---
+
+## Sync Run
+
+Execução de sincronização entre uma `Advertising Account` e a API da plataforma externa — rastreia sucesso/falha/idempotência.
+
+> **Implementado (`ADR-0060`, Fase 02)** — Object Specification completa: [objects/SyncRun.md](objects/SyncRun.md).
 
 ---
 

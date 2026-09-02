@@ -17,6 +17,7 @@
     "@nestjs/platform-ws": "^10.4.0",
     "@nestjs/websockets": "^10.4.0",
     "@novaris/activity": "workspace:^",
+    "@novaris/advertising": "workspace:^",
     "@novaris/ai-runtime": "workspace:*",
     "@novaris/analytics": "workspace:^",
     "@novaris/audit": "workspace:^",

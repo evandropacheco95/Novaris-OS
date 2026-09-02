@@ -20,8 +20,14 @@ Detalhamento completo de cada objeto: atributos, ciclo de vida, eventos, permiss
 | [Pipeline.md](Pipeline.md) | Sales (Business Domain) | 🟢 Official (v1.0.0) — idem |
 | [Stage.md](Stage.md) | Sales (Business Domain) | 🟢 Official (v1.0.0) — idem |
 | [Proposal.md](Proposal.md) | Sales (Business Domain) | 🟢 Official (v1.0.0) — idem |
+| [AdvertisingAccount.md](AdvertisingAccount.md) | Advertising (Business Domain, `ADR-0059`) | 🚧 Parcial (v0.1.0) — capítulos 14-16 (IA/Automações/Dashboards) `TODO`, sem fonte real |
+| [AdCampaign.md](AdCampaign.md) | Advertising (Business Domain, `ADR-0060`) | 🚧 Parcial (v0.1.0) — idem |
+| [AdGroup.md](AdGroup.md) | Advertising (Business Domain, `ADR-0060`) | 🚧 Parcial (v0.1.0) — idem |
+| [Keyword.md](Keyword.md) | Advertising (Business Domain, `ADR-0060`) | 🚧 Parcial (v0.1.0) — idem |
+| [SearchTerm.md](SearchTerm.md) | Advertising (Business Domain, `ADR-0060`) | 🚧 Parcial (v0.1.0) — idem |
+| [SyncRun.md](SyncRun.md) | Advertising (Business Domain, `ADR-0060`) | 🚧 Parcial (v0.1.0) — idem |
 
-`BOM.md` cataloga cerca de 65 objetos ao todo (Core, Business, Intelligence, Analytics, System Objects); 8 têm especificação individual escrita até aqui, sendo `Organization`, `Opportunity`, `Pipeline`, `Stage` e `Proposal` completas.
+`BOM.md` cataloga cerca de 65 objetos ao todo (Core, Business, Intelligence, Analytics, System Objects), mais os 6 objetos do Advertising Domain (`ADR-0059`/`ADR-0060`); 14 têm especificação individual escrita até aqui, sendo `Organization`, `Opportunity`, `Pipeline`, `Stage` e `Proposal` completas e os 6 do Advertising Domain parciais (IA/Automações/Dashboards `TODO`).
 
 ## Relação com Outros Módulos
 
@@ -31,4 +37,4 @@ Detalhamento completo de cada objeto: atributos, ciclo de vida, eventos, permiss
 
 ## Status
 
-🚧 4 de ~65 objetos do BOM especificado individualmente; 1 completo, 3 parciais.
+🚧 14 de ~65 objetos do BOM especificado individualmente; 5 completos, 9 parciais.

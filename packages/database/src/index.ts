@@ -72,4 +72,10 @@ export type {
   Reminder,
   Checklist,
   ChecklistItem,
+  AdvertisingAccount,
+  AdCampaign,
+  AdGroup,
+  Keyword,
+  SearchTerm,
+  SyncRun,
 } from "@prisma/client";

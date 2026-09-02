@@ -30,5 +30,6 @@ import { IntegrationHubController } from "./integration-hub.controller.js";
     { provide: "GoogleSheetsProvider", useFactory: () => new ConsoleGoogleSheetsProvider(new ConsoleLogger()) },
     { provide: "GoogleAdsProvider", useFactory: () => new ConsoleGoogleAdsProvider(new ConsoleLogger()) },
   ],
+  exports: ["GoogleAdsProvider"],
 })
 export class IntegrationHubModule {}

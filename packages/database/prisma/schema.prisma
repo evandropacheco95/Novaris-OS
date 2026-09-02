@@ -373,6 +373,144 @@ model CampaignAsset {
   @@index([campaignId])
 }
 
+/// AdvertisingAccount — Aggregate Root do Advertising Domain (`ADR-0059`).
+/// Fonte: services/domains/advertising/domain/aggregates/advertising-account/advertising-account.ts
+/// `create()` sempre parte de `NOT_CONNECTED` — `externalAccountId`/`connectedAt`/
+/// `lastSyncAt` só são preenchidos por uma operação de conexão real (Fase 02),
+/// não implementada ainda.
+model AdvertisingAccount {
+  id                     String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId         String    @map("organization_id") @db.Uuid
+  provider               String    @db.VarChar(50)
+  externalAccountId      String?   @map("external_account_id") @db.VarChar(255)
+  name                   String    @db.VarChar(255)
+  connectionStatus       String    @default("NOT_CONNECTED") @map("connection_status") @db.VarChar(20)
+  connectedAt            DateTime? @map("connected_at") @db.Timestamptz
+  lastSyncAt             DateTime? @map("last_sync_at") @db.Timestamptz
+  /// Refresh token OAuth cifrado (`AES-256-GCM`, `token-cipher.ts`) — nunca em claro. `ADR-0060`.
+  encryptedRefreshToken  String?   @map("encrypted_refresh_token") @db.Text
+  createdAt              DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt              DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("advertising_accounts")
+  @@index([organizationId])
+}
+
+/// AdCampaign — Aggregate Root do Advertising Domain (`ADR-0060`, Fase 02).
+/// Fonte: services/domains/advertising/domain/aggregates/ad-campaign/ad-campaign.ts
+/// Espelha o estado atual de uma campanha do Google Ads — sem histórico (`PerformanceSnapshot`, Fase 03).
+model AdCampaign {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId      String   @map("organization_id") @db.Uuid
+  advertisingAccountId String  @map("advertising_account_id") @db.Uuid
+  externalCampaignId  String   @map("external_campaign_id") @db.VarChar(255)
+  name                String   @db.VarChar(255)
+  status              String   @db.VarChar(50)
+  channelType         String   @map("channel_type") @db.VarChar(50)
+  lastCostMicros      BigInt   @default(0) @map("last_cost_micros")
+  lastClicks          Int      @default(0) @map("last_clicks")
+  lastImpressions      Int      @default(0) @map("last_impressions")
+  lastConversions     Int      @default(0) @map("last_conversions")
+  lastSyncedAt        DateTime @map("last_synced_at") @db.Timestamptz
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("advertising_ad_campaigns")
+  @@unique([advertisingAccountId, externalCampaignId])
+  @@index([organizationId])
+}
+
+/// AdGroup — Aggregate Root do Advertising Domain (`ADR-0060`, Fase 02).
+/// Fonte: services/domains/advertising/domain/aggregates/ad-group/ad-group.ts
+model AdGroup {
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId       String   @map("organization_id") @db.Uuid
+  advertisingAccountId String   @map("advertising_account_id") @db.Uuid
+  adCampaignId         String   @map("ad_campaign_id") @db.Uuid
+  externalAdGroupId    String   @map("external_ad_group_id") @db.VarChar(255)
+  name                 String   @db.VarChar(255)
+  status               String   @db.VarChar(50)
+  lastSyncedAt         DateTime @map("last_synced_at") @db.Timestamptz
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("advertising_ad_groups")
+  @@unique([advertisingAccountId, externalAdGroupId])
+  @@index([organizationId])
+}
+
+/// Keyword — Aggregate Root do Advertising Domain (`ADR-0060`, Fase 02).
+/// Fonte: services/domains/advertising/domain/aggregates/keyword/keyword.ts
+/// Distinto de `SearchTerm` — configuração, não dado de performance por janela.
+model Keyword {
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId       String   @map("organization_id") @db.Uuid
+  advertisingAccountId String   @map("advertising_account_id") @db.Uuid
+  adGroupId            String   @map("ad_group_id") @db.Uuid
+  externalCriterionId  String   @map("external_criterion_id") @db.VarChar(255)
+  text                 String   @db.VarChar(255)
+  matchType            String   @map("match_type") @db.VarChar(50)
+  status               String   @db.VarChar(50)
+  qualityScore         Int?     @map("quality_score")
+  lastCostMicros       BigInt   @default(0) @map("last_cost_micros")
+  lastClicks           Int      @default(0) @map("last_clicks")
+  lastImpressions      Int      @default(0) @map("last_impressions")
+  lastSyncedAt         DateTime @map("last_synced_at") @db.Timestamptz
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("advertising_keywords")
+  @@unique([advertisingAccountId, externalCriterionId])
+  @@index([organizationId])
+}
+
+/// SearchTerm — Aggregate Root do Advertising Domain (`ADR-0060`, Fase 02).
+/// Fonte: services/domains/advertising/domain/aggregates/search-term/search-term.ts
+/// Dado de performance por janela sincronizada (`BOM.md § 5B`) — resync da mesma janela substitui a linha, nunca soma.
+model SearchTerm {
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId       String   @map("organization_id") @db.Uuid
+  advertisingAccountId String   @map("advertising_account_id") @db.Uuid
+  adGroupId            String   @map("ad_group_id") @db.Uuid
+  syncRunId            String   @map("sync_run_id") @db.Uuid
+  searchTerm           String   @map("search_term") @db.VarChar(500)
+  dateRangeStart       DateTime @map("date_range_start") @db.Date
+  dateRangeEnd         DateTime @map("date_range_end") @db.Date
+  clicks               Int      @default(0)
+  impressions          Int      @default(0)
+  conversions          Int      @default(0)
+  costMicros           BigInt   @default(0) @map("cost_micros")
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("advertising_search_terms")
+  @@unique([advertisingAccountId, adGroupId, searchTerm, dateRangeStart, dateRangeEnd])
+  @@index([organizationId])
+}
+
+/// SyncRun — Aggregate Root do Advertising Domain (`ADR-0060`, Fase 02).
+/// Fonte: services/domains/advertising/domain/aggregates/sync-run/sync-run.ts
+/// Sempre INSERT — uma linha por execução de sincronização, nunca upsert.
+model SyncRun {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId       String    @map("organization_id") @db.Uuid
+  advertisingAccountId String    @map("advertising_account_id") @db.Uuid
+  status               String    @default("RUNNING") @db.VarChar(20)
+  startedAt            DateTime  @map("started_at") @db.Timestamptz
+  finishedAt           DateTime? @map("finished_at") @db.Timestamptz
+  errorMessage         String?   @map("error_message") @db.Text
+  campaignsSynced      Int       @default(0) @map("campaigns_synced")
+  adGroupsSynced       Int       @default(0) @map("ad_groups_synced")
+  keywordsSynced       Int       @default(0) @map("keywords_synced")
+  searchTermsSynced    Int       @default(0) @map("search_terms_synced")
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("advertising_sync_runs")
+  @@index([organizationId])
+  @@index([advertisingAccountId])
+}
+
 /// Dashboard — Aggregate Root do Analytics Domain.
 /// Fonte: services/domains/analytics/domain/aggregates/dashboard/dashboard.ts
 /// `Widget` (Internal Entity, `ADR-0034`) não tem tabela própria — bloqueado

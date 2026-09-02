@@ -22,5 +22,13 @@ export { ConsoleGmailProvider } from "./infrastructure/console-gmail-provider.js
 export type { GoogleSheetsProvider } from "./domain/ports/google-sheets-provider.js";
 export { ConsoleGoogleSheetsProvider } from "./infrastructure/console-google-sheets-provider.js";
 
-export type { GoogleAdsProvider } from "./domain/ports/google-ads-provider.js";
+export type {
+  GoogleAdsProvider,
+  GoogleAdsDateRange,
+  GoogleAdsCampaignRow,
+  GoogleAdsAdGroupRef,
+  GoogleAdsKeywordRow,
+  GoogleAdsSearchTermRow,
+} from "./domain/ports/google-ads-provider.js";
 export { ConsoleGoogleAdsProvider } from "./infrastructure/console-google-ads-provider.js";
+export { HttpGoogleAdsProvider, type HttpGoogleAdsProviderConfig } from "./infrastructure/http-google-ads-provider.js";

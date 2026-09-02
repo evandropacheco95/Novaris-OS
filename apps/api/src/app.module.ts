@@ -18,6 +18,7 @@ import { RealtimeModule } from "./realtime/realtime.module.js";
 import { IntegrationHubModule } from "./integration-hub/integration-hub.module.js";
 import { AutomationRuntimeModule } from "./automation-runtime/automation-runtime.module.js";
 import { AIRuntimeModule } from "./ai-runtime/ai-runtime.module.js";
+import { AdvertisingModule } from "./advertising/advertising.module.js";
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { AIRuntimeModule } from "./ai-runtime/ai-runtime.module.js";
     IntegrationHubModule,
     AutomationRuntimeModule,
     AIRuntimeModule,
+    AdvertisingModule,
   ],
 })
 export class AppModule {}
