@@ -1,6 +1,6 @@
 import { UniqueEntityId } from "@novaris/shared-kernel";
 import type { SyncRun as PrismaSyncRun } from "@novaris/database";
-import { SyncRun, type SyncRunProps, type SyncRunStatus } from "../../domain/aggregates/sync-run/sync-run.js";
+import { SyncRun, type SyncRunProps, type SyncRunStatus, type SyncRunSource } from "../../domain/aggregates/sync-run/sync-run.js";
 
 /** PrismaSyncRunMapper — tradução pura Aggregate ↔ linha do Postgres, sem I/O próprio. */
 export class PrismaSyncRunMapper {
@@ -10,6 +10,8 @@ export class PrismaSyncRunMapper {
       organizationId: syncRun.organizationId.toString(),
       advertisingAccountId: syncRun.advertisingAccountId.toString(),
       status: syncRun.status,
+      source: syncRun.source,
+      sourceFileRecordId: syncRun.sourceFileRecordId?.toString() ?? null,
       startedAt: syncRun.startedAt,
       finishedAt: syncRun.finishedAt ?? null,
       errorMessage: syncRun.errorMessage ?? null,
@@ -25,6 +27,8 @@ export class PrismaSyncRunMapper {
       organizationId: new UniqueEntityId(record.organizationId),
       advertisingAccountId: new UniqueEntityId(record.advertisingAccountId),
       status: record.status as SyncRunStatus,
+      source: record.source as SyncRunSource,
+      sourceFileRecordId: record.sourceFileRecordId ? new UniqueEntityId(record.sourceFileRecordId) : undefined,
       startedAt: record.startedAt,
       finishedAt: record.finishedAt ?? undefined,
       errorMessage: record.errorMessage ?? undefined,

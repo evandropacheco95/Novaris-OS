@@ -47,6 +47,20 @@ export class PrismaAdGroupRepository implements AdGroupRepository {
     }
   }
 
+  async findByName(advertisingAccountId: UniqueEntityId, name: string): Promise<Result<Option<AdGroup>, InfrastructureError>> {
+    try {
+      const record = await this.client.adGroup.findFirst({
+        where: { advertisingAccountId: advertisingAccountId.toString(), name },
+      });
+      if (!record) {
+        return Result.ok(Option.none<AdGroup>());
+      }
+      return Result.ok(Option.some(PrismaAdGroupMapper.toDomain(record)));
+    } catch (error) {
+      return Result.fail(new InfrastructureError(`Falha ao buscar AdGroup por nome "${name}"`, { cause: error }));
+    }
+  }
+
   async exists(id: UniqueEntityId): Promise<Result<boolean, InfrastructureError>> {
     try {
       const count = await this.client.adGroup.count({ where: { id: id.toString() } });

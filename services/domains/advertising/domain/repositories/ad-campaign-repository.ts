@@ -11,4 +11,7 @@ export interface AdCampaignRepository extends ReadRepository<AdCampaign>, WriteR
     advertisingAccountId: UniqueEntityId,
     externalCampaignId: string,
   ): Promise<Result<Option<AdCampaign>, InfrastructureError>>;
+
+  /** Join por nome — usado pelo import de CSV, cujos relatórios exportados pelo Google Ads não trazem `externalCampaignId`. */
+  findByName(advertisingAccountId: UniqueEntityId, name: string): Promise<Result<Option<AdCampaign>, InfrastructureError>>;
 }

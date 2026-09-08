@@ -1185,3 +1185,63 @@ export async function toggleChecklistItem(checklistId: string, itemId: string): 
   const response = await authenticatedFetch(`/checklists/${checklistId}/items/${itemId}/toggle`, { method: "POST" });
   return parseOrThrow<Checklist>(response, "Falha ao alternar item do Checklist");
 }
+
+// Advertising Domain (`ADR-0059`/`ADR-0060`) — primeira tela publicada antes da Fase 12 (só acessível por URL direta, não está no sidebar).
+
+export type AdvertisingConnectionStatus = "NOT_CONNECTED" | "CONNECTED" | "SYNC_REQUIRED" | "SYNCING" | "SYNC_FAILED";
+
+export interface AdvertisingAccount {
+  id: string;
+  organizationId: string;
+  provider: "google_ads";
+  externalAccountId?: string;
+  name: string;
+  connectionStatus: AdvertisingConnectionStatus;
+  connectedAt?: string;
+  lastSyncAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type AdvertisingCsvReportType = "campaigns" | "ad_groups" | "keywords";
+
+export interface ImportAdvertisingReportResult {
+  reportType: AdvertisingCsvReportType;
+  campaignsSynced: number;
+  adGroupsSynced: number;
+  keywordsSynced: number;
+  skipped: number;
+}
+
+export async function listAdvertisingAccounts(): Promise<AdvertisingAccount[]> {
+  const response = await authenticatedFetch("/performance-intelligence/ad-accounts");
+  if (!response.ok) throw new Error("Falha ao listar Contas de Anúncios");
+  return (await response.json()) as AdvertisingAccount[];
+}
+
+export async function createAdvertisingAccount(name: string): Promise<AdvertisingAccount> {
+  const response = await authenticatedFetch("/performance-intelligence/ad-accounts", {
+    method: "POST",
+    body: JSON.stringify({ provider: "google_ads", name }),
+  });
+  return parseOrThrow<AdvertisingAccount>(response, "Falha ao criar Conta de Anúncios");
+}
+
+export async function syncAdvertisingAccount(accountId: string): Promise<AdvertisingAccount> {
+  const response = await authenticatedFetch(`/performance-intelligence/ad-accounts/${accountId}/sync`, { method: "POST" });
+  return parseOrThrow<AdvertisingAccount>(response, "Falha ao sincronizar Conta de Anúncios");
+}
+
+/** Import manual de CSV (caminho alternativo ao OAuth, enquanto o developer token do Google Ads estiver preso em nível "Test Account") — multipart, mesmo padrão de `uploadFile`. */
+export async function importAdvertisingCsv(accountId: string, reportType: AdvertisingCsvReportType, file: File): Promise<ImportAdvertisingReportResult> {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("reportType", reportType);
+  const token = getToken();
+  const response = await fetch(`${API_URL}/performance-intelligence/ad-accounts/${accountId}/import-csv`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  return parseOrThrow<ImportAdvertisingReportResult>(response, "Falha ao importar CSV");
+}

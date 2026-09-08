@@ -496,6 +496,8 @@ model SyncRun {
   organizationId       String    @map("organization_id") @db.Uuid
   advertisingAccountId String    @map("advertising_account_id") @db.Uuid
   status               String    @default("RUNNING") @db.VarChar(20)
+  source               String    @default("API") @db.VarChar(20)
+  sourceFileRecordId   String?   @map("source_file_record_id") @db.Uuid
   startedAt            DateTime  @map("started_at") @db.Timestamptz
   finishedAt           DateTime? @map("finished_at") @db.Timestamptz
   errorMessage         String?   @map("error_message") @db.Text

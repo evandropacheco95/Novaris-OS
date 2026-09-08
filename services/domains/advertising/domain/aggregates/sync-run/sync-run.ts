@@ -3,10 +3,15 @@ import type { UniqueEntityId, DomainError, Timestamped } from "@novaris/shared-k
 
 export type SyncRunStatus = "RUNNING" | "SUCCEEDED" | "FAILED";
 
+/** `"API"` — sync ao vivo via `GoogleAdsProvider`. `"CSV_IMPORT"` — import manual de relatório exportado do Google Ads. */
+export type SyncRunSource = "API" | "CSV_IMPORT";
+
 export interface SyncRunProps {
   organizationId: UniqueEntityId;
   advertisingAccountId: UniqueEntityId;
   status: SyncRunStatus;
+  source: SyncRunSource;
+  sourceFileRecordId?: UniqueEntityId;
   startedAt: Date;
   finishedAt?: Date;
   errorMessage?: string;
@@ -21,6 +26,9 @@ export interface SyncRunProps {
 export interface CreateSyncRunInput {
   organizationId: UniqueEntityId;
   advertisingAccountId: UniqueEntityId;
+  /** @default "API" */
+  source?: SyncRunSource;
+  sourceFileRecordId?: UniqueEntityId;
 }
 
 export interface CompleteSyncRunInput {
@@ -48,6 +56,8 @@ export class SyncRun extends AggregateRoot<SyncRunProps> implements Timestamped 
       organizationId: input.organizationId,
       advertisingAccountId: input.advertisingAccountId,
       status: "RUNNING",
+      source: input.source ?? "API",
+      sourceFileRecordId: input.sourceFileRecordId,
       startedAt: now,
       campaignsSynced: 0,
       adGroupsSynced: 0,
@@ -101,6 +111,14 @@ export class SyncRun extends AggregateRoot<SyncRunProps> implements Timestamped 
 
   get status(): SyncRunStatus {
     return this.props.status;
+  }
+
+  get source(): SyncRunSource {
+    return this.props.source;
+  }
+
+  get sourceFileRecordId(): UniqueEntityId | undefined {
+    return this.props.sourceFileRecordId;
   }
 
   get startedAt(): Date {

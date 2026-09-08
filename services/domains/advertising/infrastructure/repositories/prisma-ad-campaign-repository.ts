@@ -47,6 +47,20 @@ export class PrismaAdCampaignRepository implements AdCampaignRepository {
     }
   }
 
+  async findByName(advertisingAccountId: UniqueEntityId, name: string): Promise<Result<Option<AdCampaign>, InfrastructureError>> {
+    try {
+      const record = await this.client.adCampaign.findFirst({
+        where: { advertisingAccountId: advertisingAccountId.toString(), name },
+      });
+      if (!record) {
+        return Result.ok(Option.none<AdCampaign>());
+      }
+      return Result.ok(Option.some(PrismaAdCampaignMapper.toDomain(record)));
+    } catch (error) {
+      return Result.fail(new InfrastructureError(`Falha ao buscar AdCampaign por nome "${name}"`, { cause: error }));
+    }
+  }
+
   async exists(id: UniqueEntityId): Promise<Result<boolean, InfrastructureError>> {
     try {
       const count = await this.client.adCampaign.count({ where: { id: id.toString() } });

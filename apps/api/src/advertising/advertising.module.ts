@@ -1,4 +1,6 @@
 import { Module } from "@nestjs/common";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 import { prisma } from "@novaris/database";
 import {
   createAdvertisingAccountRepository,
@@ -10,11 +12,13 @@ import {
   CreateAdvertisingAccountHandler,
   ConnectAdvertisingAccountHandler,
   SyncAdvertisingAccountHandler,
+  ImportAdvertisingReportHandler,
   HttpGoogleOAuthClient,
   type GoogleOAuthClient,
 } from "@novaris/advertising";
 import type { GoogleAdsProvider } from "@novaris/integration-hub";
 import { CreateAuditEntryHandler } from "@novaris/audit";
+import { createFileRecordRepository, LocalFileStorage, UploadFileHandler } from "@novaris/files";
 import { AuthModule } from "../auth/auth.module.js";
 import { AuditModule } from "../audit/audit.module.js";
 import { IntegrationHubModule } from "../integration-hub/integration-hub.module.js";
@@ -27,6 +31,11 @@ const KEYWORD_REPOSITORY = "KEYWORD_REPOSITORY";
 const SEARCH_TERM_REPOSITORY = "SEARCH_TERM_REPOSITORY";
 const SYNC_RUN_REPOSITORY = "SYNC_RUN_REPOSITORY";
 const GOOGLE_OAUTH_CLIENT = "GOOGLE_OAUTH_CLIENT";
+const FILE_RECORD_REPOSITORY = "ADVERTISING_FILE_RECORD_REPOSITORY";
+const FILE_STORAGE = "ADVERTISING_FILE_STORAGE";
+
+/** Mesmo diretório físico de `FilesModule` (`apps/api/storage-data/`) — instância própria de `LocalFileStorage`, mesmo padrão de `MarketingModule` para `FILE_RECORD_REPOSITORY`. */
+const STORAGE_BASE_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "storage-data");
 
 /**
  * AdvertisingModule — Composition Root do Advertising Domain (`ADR-0059`,
@@ -46,6 +55,13 @@ const GOOGLE_OAUTH_CLIENT = "GOOGLE_OAUTH_CLIENT";
     { provide: KEYWORD_REPOSITORY, useFactory: () => createKeywordRepository(prisma) },
     { provide: SEARCH_TERM_REPOSITORY, useFactory: () => createSearchTermRepository(prisma) },
     { provide: SYNC_RUN_REPOSITORY, useFactory: () => createSyncRunRepository(prisma) },
+    { provide: FILE_RECORD_REPOSITORY, useFactory: () => createFileRecordRepository(prisma) },
+    { provide: FILE_STORAGE, useFactory: () => new LocalFileStorage(STORAGE_BASE_DIR) },
+    {
+      provide: UploadFileHandler,
+      useFactory: (repository: ReturnType<typeof createFileRecordRepository>, storage: LocalFileStorage) => new UploadFileHandler(repository, storage),
+      inject: [FILE_RECORD_REPOSITORY, FILE_STORAGE],
+    },
     {
       provide: GOOGLE_OAUTH_CLIENT,
       useFactory: (): GoogleOAuthClient =>
@@ -97,6 +113,26 @@ const GOOGLE_OAUTH_CLIENT = "GOOGLE_OAUTH_CLIENT";
         SYNC_RUN_REPOSITORY,
         "GoogleAdsProvider",
       ],
+    },
+    {
+      provide: ImportAdvertisingReportHandler,
+      useFactory: (
+        advertisingAccountRepository: ReturnType<typeof createAdvertisingAccountRepository>,
+        adCampaignRepository: ReturnType<typeof createAdCampaignRepository>,
+        adGroupRepository: ReturnType<typeof createAdGroupRepository>,
+        keywordRepository: ReturnType<typeof createKeywordRepository>,
+        syncRunRepository: ReturnType<typeof createSyncRunRepository>,
+        uploadFileHandler: UploadFileHandler,
+      ) =>
+        new ImportAdvertisingReportHandler(
+          advertisingAccountRepository,
+          adCampaignRepository,
+          adGroupRepository,
+          keywordRepository,
+          syncRunRepository,
+          uploadFileHandler,
+        ),
+      inject: [ADVERTISING_ACCOUNT_REPOSITORY, AD_CAMPAIGN_REPOSITORY, AD_GROUP_REPOSITORY, KEYWORD_REPOSITORY, SYNC_RUN_REPOSITORY, UploadFileHandler],
     },
     { provide: "AdvertisingAccountRepository", useExisting: ADVERTISING_ACCOUNT_REPOSITORY },
   ],

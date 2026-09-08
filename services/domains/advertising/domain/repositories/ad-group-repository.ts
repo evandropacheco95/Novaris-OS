@@ -7,4 +7,7 @@ export interface AdGroupRepository extends ReadRepository<AdGroup>, WriteReposit
     advertisingAccountId: UniqueEntityId,
     externalAdGroupId: string,
   ): Promise<Result<Option<AdGroup>, InfrastructureError>>;
+
+  /** Join por nome — usado pelo import de CSV, cujos relatórios exportados pelo Google Ads não trazem `externalAdGroupId`. */
+  findByName(advertisingAccountId: UniqueEntityId, name: string): Promise<Result<Option<AdGroup>, InfrastructureError>>;
 }

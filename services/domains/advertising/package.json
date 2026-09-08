@@ -14,7 +14,8 @@
     "@novaris/shared-kernel": "workspace:*",
     "@novaris/database": "workspace:*",
     "@novaris/audit": "workspace:^",
-    "@novaris/integration-hub": "workspace:^"
+    "@novaris/integration-hub": "workspace:^",
+    "@novaris/files": "workspace:^"
   },
   "devDependencies": {
     "typescript": "^5.5.0",

@@ -51,3 +51,6 @@ ruvector.db
 
 # TypeScript build info
 apps/web/*.tsbuildinfo
+
+# Claude Code (overrides pessoais, não compartilhados com o time)
+.claude/settings.local.json

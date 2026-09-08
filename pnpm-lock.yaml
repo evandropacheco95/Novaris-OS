@@ -276,6 +276,9 @@ importers:
       '@novaris/database':
         specifier: workspace:*
         version: link:../../../packages/database
+      '@novaris/files':
+        specifier: workspace:^
+        version: link:../../kernel/files
       '@novaris/integration-hub':
         specifier: workspace:^
         version: link:../../kernel/integration-hub

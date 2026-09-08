@@ -1,4 +1,5 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Inject, Param, Post, Query, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpException, HttpStatus, Inject, Param, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
 import type { Request } from "express";
 import {
   CreateAdvertisingAccountCommand,
@@ -7,8 +8,11 @@ import {
   ConnectAdvertisingAccountHandler,
   SyncAdvertisingAccountCommand,
   SyncAdvertisingAccountHandler,
+  ImportAdvertisingReportCommand,
+  ImportAdvertisingReportHandler,
   type AdvertisingAccountRepository,
   type AdvertisingProvider,
+  type AdvertisingCsvReportType,
 } from "@novaris/advertising";
 import { JwtAuthGuard, type AuthenticatedUser } from "../auth/jwt-auth.guard.js";
 import { PermissionGuard } from "../auth/permission.guard.js";
@@ -31,6 +35,14 @@ export interface AdvertisingAccountResponse {
   lastSyncAt?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ImportAdvertisingReportResponse {
+  reportType: AdvertisingCsvReportType;
+  campaignsSynced: number;
+  adGroupsSynced: number;
+  keywordsSynced: number;
+  skipped: number;
 }
 
 /**
@@ -57,6 +69,7 @@ export class AdvertisingAccountController {
     private readonly createHandler: CreateAdvertisingAccountHandler,
     private readonly connectHandler: ConnectAdvertisingAccountHandler,
     private readonly syncHandler: SyncAdvertisingAccountHandler,
+    private readonly importReportHandler: ImportAdvertisingReportHandler,
     @Inject("AdvertisingAccountRepository") private readonly repository: AdvertisingAccountRepository,
   ) {}
 
@@ -138,6 +151,34 @@ export class AdvertisingAccountController {
       throwHttpExceptionForDomainError(result.getError()!);
     }
     return toResponse(result.getValue()!);
+  }
+
+  @Post(":id/import-csv")
+  @UseInterceptors(FileInterceptor("file"))
+  async importCsv(
+    @Param("id") id: string,
+    @Body() body: { reportType: AdvertisingCsvReportType },
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<ImportAdvertisingReportResponse> {
+    if (!file) {
+      throw new HttpException({ code: "VALIDATION_ERROR", message: 'Campo "file" (multipart) é obrigatório' }, HttpStatus.BAD_REQUEST);
+    }
+    if (!body.reportType) {
+      throw new HttpException({ code: "VALIDATION_ERROR", message: '"reportType" é obrigatório' }, HttpStatus.BAD_REQUEST);
+    }
+    const command = new ImportAdvertisingReportCommand({
+      organizationId: req.user.organizationId,
+      advertisingAccountId: id,
+      reportType: body.reportType,
+      filename: file.originalname,
+      fileContent: file.buffer,
+    });
+    const result = await this.importReportHandler.execute(command);
+    if (result.isFailure) {
+      throwHttpExceptionForDomainError(result.getError()!);
+    }
+    return result.getValue()!;
   }
 }
 

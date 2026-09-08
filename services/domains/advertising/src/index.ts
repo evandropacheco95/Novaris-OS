@@ -33,6 +33,15 @@ export { ConnectAdvertisingAccountCommand } from "../application/commands/connec
 export { ConnectAdvertisingAccountHandler } from "../application/handlers/connect-advertising-account/connect-advertising-account.handler.js";
 export { SyncAdvertisingAccountCommand } from "../application/commands/sync-advertising-account/sync-advertising-account.command.js";
 export { SyncAdvertisingAccountHandler } from "../application/handlers/sync-advertising-account/sync-advertising-account.handler.js";
+export {
+  ImportAdvertisingReportCommand,
+  type ImportAdvertisingReportCommandInput,
+  type AdvertisingCsvReportType,
+} from "../application/commands/import-advertising-report/import-advertising-report.command.js";
+export {
+  ImportAdvertisingReportHandler,
+  type ImportAdvertisingReportResult,
+} from "../application/handlers/import-advertising-report/import-advertising-report.handler.js";
 
 // Infrastructure — segurança
 export { encryptRefreshToken, decryptRefreshToken } from "../infrastructure/security/token-cipher.js";
